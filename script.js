@@ -514,25 +514,14 @@ function initChessBoard() {
 async function ensureChess() {
 	if (chess) return true;
 	try {
-		const urls = [
-			'https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.1/dist/esm/chess.js',
-			'https://unpkg.com/chess.js@1.0.0-beta.1/dist/esm/chess.js'
-		];
-		let mod = null;
-		for (const url of urls) {
-			try {
-				mod = await import(url);
-				if (mod && mod.Chess) break;
-			} catch (e) {
-				mod = null;
-			}
+		if (window.Chess) {
+			ChessLib = window.Chess;
+			chess = new ChessLib();
+			initChessBoard();
+			renderChessBoard();
+			return true;
 		}
-		if (!mod || !mod.Chess) throw new Error('chess.js load failed');
-		ChessLib = mod.Chess;
-		chess = new ChessLib();
-		initChessBoard();
-		renderChessBoard();
-		return true;
+		throw new Error('chess.js load failed');
 	} catch (e) {
 		console.error(e);
 		setChessStatus('Chess failed to load');
