@@ -5,13 +5,13 @@ import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, 
 let ua = true;
 const T = {
 	ua: {
-		status: "??????",
-		online: "? ??????",
-		time: "???",
-		quote: "??????",
-		q: "?????. ????????. ??????.",
-		about: "??? ????",
-		a: "???????? ? ??????? ?? ????????????? ????????.<br>???????? ???????? ?? ??????????????? ??-???????."
+		status: "\u0421\u0442\u0430\u0442\u0443\u0441",
+		online: "\u0423 \u043c\u0435\u0440\u0435\u0436\u0456",
+		time: "\u0427\u0430\u0441",
+		quote: "\u0426\u0438\u0442\u0430\u0442\u0430",
+		q: "\u0424\u043e\u043a\u0443\u0441. \u0420\u043e\u0437\u0432\u0438\u0442\u043e\u043a. \u041f\u043e\u0432\u0442\u043e\u0440.",
+		about: "\u041f\u0440\u043e \u043c\u0435\u043d\u0435",
+		a: "\u041d\u0430\u0432\u0447\u0430\u044e\u0441\u044c \u0443 \u043a\u043e\u043b\u0435\u0434\u0436\u0456 \u043d\u0430 \u043a\u043e\u043c\u043f\u2019\u044e\u0442\u0435\u0440\u043d\u043e\u0433\u043e \u0456\u043d\u0436\u0435\u043d\u0435\u0440\u0430.<br>\u0417\u0430\u0439\u043c\u0430\u044e\u0441\u044c \u0440\u0435\u043c\u043e\u043d\u0442\u043e\u043c \u0442\u0430 \u043e\u0431\u0441\u043b\u0443\u0433\u043e\u0432\u0443\u0432\u0430\u043d\u043d\u044f\u043c \u041f\u041a-\u0442\u0435\u0445\u043d\u0456\u043a\u0438."
 	},
 	en: {
 		status: "Status",
@@ -53,7 +53,7 @@ b.onclick = () => {
 
 window.setInterval(() => {
 	const d = new Date();
-	tm.textContent = d.toLocaleTimeString() + " ? " + d.toLocaleDateString();
+	tm.textContent = d.toLocaleTimeString() + " \u2022 " + d.toLocaleDateString();
 }, 1000);
 
 // Firebase config
@@ -157,7 +157,7 @@ async function signup() {
 	const email = emailInput.value.trim();
 	const pass = passInput.value.trim();
 	const nick = nickInput.value.trim();
-	if (!email || !pass) return alert('????? email ? ??????');
+	if (!email || !pass) return alert('\u0412\u0432\u0435\u0434\u0438 email \u0456 \u043f\u0430\u0440\u043e\u043b\u044c');
 	try {
 		const cred = await createUserWithEmailAndPassword(auth, email, pass);
 		if (nick) {
@@ -167,21 +167,21 @@ async function signup() {
 		openLobby();
 	} catch (e) {
 		console.error(e);
-		alert('??????? ??????????');
+		alert('\u041f\u043e\u043c\u0438\u043b\u043a\u0430 \u0440\u0435\u0454\u0441\u0442\u0440\u0430\u0446\u0456\u0457');
 	}
 }
 
 async function login() {
 	const email = emailInput.value.trim();
 	const pass = passInput.value.trim();
-	if (!email || !pass) return alert('????? email ? ??????');
+	if (!email || !pass) return alert('\u0412\u0432\u0435\u0434\u0438 email \u0456 \u043f\u0430\u0440\u043e\u043b\u044c');
 	try {
 		const cred = await signInWithEmailAndPassword(auth, email, pass);
 		currentUser = cred.user;
 		openLobby();
 	} catch (e) {
 		console.error(e);
-		alert('??????? ?????');
+		alert('\u041f\u043e\u043c\u0438\u043b\u043a\u0430 \u0432\u0445\u043e\u0434\u0443');
 	}
 }
 
@@ -237,24 +237,24 @@ async function renderLeaderboards() {
 				div.appendChild(ol);
 			} else {
 				const p = document.createElement('p');
-				p.textContent = '????????';
+				p.textContent = '\u041f\u043e\u0440\u043e\u0436\u043d\u044c\u043e';
 				div.appendChild(p);
 			}
 			leaderboardContent.appendChild(div);
 		}
 
-		renderSection('??? ?????????', overall, (row) => `${row.name} ? ${Math.round(row.totalTime / 60)}m`);
-		renderSection('??? Calculator', calc, (row) => {
+		renderSection('\u0422\u041e\u041f \u0417\u0430\u0433\u0430\u043b\u044c\u043d\u0438\u0439', overall, (row) => `${row.name} \u2014 ${Math.round(row.totalTime / 60)}m`);
+		renderSection('\u0422\u041e\u041f Calculator', calc, (row) => {
 			const ops = row.ops || {};
-			return `${row.name} ? ${Math.round(row.calcTime / 60)}m | +:${ops['+']||0} -:${ops['-']||0} ?:${ops['*']||0} ?:${ops['/']||0}`;
+			return `${row.name} \u2014 ${Math.round(row.calcTime / 60)}m | +:${ops['+']||0} -:${ops['-']||0} \u00d7:${ops['*']||0} \u00f7:${ops['/']||0}`;
 		});
-		renderSection('??? Paint', paint, (row) => {
+		renderSection('\u0422\u041e\u041f Paint', paint, (row) => {
 			const tools = row.tools || {};
-			return `${row.name} ? ${Math.round(row.paintTime / 60)}m | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
+			return `${row.name} \u2014 ${Math.round(row.paintTime / 60)}m | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
 		});
 	} catch (e) {
 		console.error(e);
-		leaderboardContent.innerHTML = '<p>?? ??????? ??????????? ???????.</p>';
+		leaderboardContent.innerHTML = '<p>\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u0440\u0435\u0439\u0442\u0438\u043d\u0433.</p>';
 	}
 }
 
