@@ -72,9 +72,13 @@ const gameTitle = document.getElementById('game-title');
 
 const emailInput = document.getElementById('email-input');
 const passInput = document.getElementById('pass-input');
+const passConfirm = document.getElementById('pass-confirm');
 const nickInput = document.getElementById('nick-input');
-const signupBtn = document.getElementById('signup-btn');
-const loginBtn = document.getElementById('login-btn');
+const submitAuth = document.getElementById('submit-auth');
+const toggleAuth = document.getElementById('toggle-auth');
+const logoutBtn = document.getElementById('logout-btn');
+const authStatus = document.getElementById('auth-status');
+const authMsg = document.getElementById('auth-msg');
 const calcBtn = document.getElementById('calc-btn');
 const paintBtn = document.getElementById('paint-btn');
 const exitCalcBtn = document.getElementById('exit-calc-btn');
@@ -98,8 +102,11 @@ const leaderboardContent = document.getElementById('leaderboard-content');
 const chatList = document.getElementById('chat-list');
 const chatInput = document.getElementById('chat-message');
 const chatSend = document.getElementById('chat-send');
+const chatImageInput = document.getElementById('chat-image');
+let pendingImageData = null;
 
 let currentUser = null;
+let authMode = 'signup';
 
 function show(el) { el.classList.remove('hidden'); }
 function hide(el) { el.classList.add('hidden'); }
@@ -128,42 +135,104 @@ paintBtn.addEventListener('click', () => openModal('Paint', paintPanel));
 
 onAuthStateChanged(auth, (user) => {
 	currentUser = user || null;
+	updateAuthUI();
 	setChatState();
 	renderLeaderboards();
 });
+
+function setAuthMessage(text, isError = false) {
+	if (!authMsg) return;
+	authMsg.textContent = text || '';
+	authMsg.style.color = isError ? '#f87171' : 'var(--muted)';
+}
+
+function updateAuthUI() {
+	const loggedIn = !!currentUser;
+	if (authStatus) {
+		authStatus.textContent = loggedIn
+			? `Logged in as ${currentUser.displayName || currentUser.email}`
+			: 'Not logged in.';
+	}
+	if (logoutBtn) logoutBtn.disabled = !loggedIn;
+	if (passConfirm) passConfirm.style.display = authMode === 'signup' ? '' : 'none';
+	if (submitAuth) submitAuth.textContent = authMode === 'signup' ? 'Sign up' : 'Log in';
+	if (toggleAuth) toggleAuth.textContent = authMode === 'signup' ? 'Switch to Login' : 'Switch to Sign up';
+}
+updateAuthUI();
+
+function validateEmail(email) {
+	return /^[^@]+@[^@]+\.[^@]+$/.test(email);
+}
+
+function getAuthErrorMessage(code) {
+	switch (code) {
+		case 'auth/invalid-email': return 'Invalid email format.';
+		case 'auth/user-not-found': return 'User not found.';
+		case 'auth/wrong-password': return 'Wrong password.';
+		case 'auth/email-already-in-use': return 'Email already in use.';
+		case 'auth/weak-password': return 'Password too weak (min 6).';
+		default: return 'Auth error. Try again.';
+	}
+}
 
 async function signup() {
 	const email = emailInput.value.trim();
 	const pass = passInput.value.trim();
 	const nick = nickInput.value.trim();
-	if (!email || !pass) return alert('\u0412\u0432\u0435\u0434\u0438 email \u0456 \u043f\u0430\u0440\u043e\u043b\u044c');
+	const confirm = passConfirm ? passConfirm.value.trim() : '';
+	if (!validateEmail(email)) return setAuthMessage('Enter a valid email.', true);
+	if (pass.length < 6) return setAuthMessage('Password must be at least 6 chars.', true);
+	if (passConfirm && pass !== confirm) return setAuthMessage('Passwords do not match.', true);
 	try {
 		const cred = await createUserWithEmailAndPassword(auth, email, pass);
 		if (nick) await updateProfile(cred.user, { displayName: nick });
 		currentUser = cred.user;
+		setAuthMessage('Account created.', false);
 		renderLeaderboards();
 	} catch (e) {
 		console.error(e);
-		alert('\u041f\u043e\u043c\u0438\u043b\u043a\u0430 \u0440\u0435\u0454\u0441\u0442\u0440\u0430\u0446\u0456\u0457');
+		setAuthMessage(getAuthErrorMessage(e.code), true);
 	}
 }
 
 async function login() {
 	const email = emailInput.value.trim();
 	const pass = passInput.value.trim();
-	if (!email || !pass) return alert('\u0412\u0432\u0435\u0434\u0438 email \u0456 \u043f\u0430\u0440\u043e\u043b\u044c');
+	if (!validateEmail(email)) return setAuthMessage('Enter a valid email.', true);
+	if (!pass) return setAuthMessage('Enter your password.', true);
 	try {
 		const cred = await signInWithEmailAndPassword(auth, email, pass);
 		currentUser = cred.user;
+		setAuthMessage('Logged in.', false);
 		renderLeaderboards();
 	} catch (e) {
 		console.error(e);
-		alert('\u041f\u043e\u043c\u0438\u043b\u043a\u0430 \u0432\u0445\u043e\u0434\u0443');
+		setAuthMessage(getAuthErrorMessage(e.code), true);
 	}
 }
 
-signupBtn.addEventListener('click', signup);
-loginBtn.addEventListener('click', login);
+async function logout() {
+	await auth.signOut();
+	currentUser = null;
+	setAuthMessage('Logged out.', false);
+	updateAuthUI();
+}
+
+if (submitAuth) {
+	submitAuth.addEventListener('click', () => {
+		setAuthMessage('');
+		if (authMode === 'signup') signup();
+		else login();
+	});
+}
+if (toggleAuth) {
+	toggleAuth.addEventListener('click', () => {
+		authMode = authMode === 'signup' ? 'login' : 'signup';
+		setAuthMessage('');
+		updateAuthUI();
+	});
+}
+if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
 function normalizeEntries(map) {
 	const out = [];
@@ -277,7 +346,13 @@ function renderChatItem(data) {
 	text.className = 'chat-text';
 	text.textContent = data.text || '';
 	wrap.appendChild(meta);
-	wrap.appendChild(text);
+	if (data.image) {
+		const img = document.createElement('img');
+		img.src = data.image;
+		img.alt = 'chat image';
+		wrap.appendChild(img);
+	}
+	if (data.text) wrap.appendChild(text);
 	return wrap;
 }
 
@@ -296,23 +371,43 @@ startChatListener();
 async function sendChat() {
 	if (!currentUser) return;
 	const text = chatInput.value.trim();
-	if (!text) return;
+	if (!text && !pendingImageData) return;
 	const name = currentUser.displayName || currentUser.email || 'Player';
 	const now = new Date();
 	const time = now.toLocaleTimeString();
 	await addDoc(collection(db, 'chat'), {
 		name,
 		text,
+		image: pendingImageData || null,
 		time,
 		createdAt: serverTimestamp()
 	});
 	chatInput.value = '';
+	pendingImageData = null;
+	if (chatImageInput) chatImageInput.value = '';
 }
 
 chatSend.addEventListener('click', sendChat);
 chatInput.addEventListener('keydown', (e) => {
 	if (e.key === 'Enter') sendChat();
 });
+
+if (chatImageInput) {
+	chatImageInput.addEventListener('change', () => {
+		const file = chatImageInput.files && chatImageInput.files[0];
+		if (!file) return;
+		if (file.size > 200 * 1024) {
+			alert('Image too large. Max 200KB.');
+			chatImageInput.value = '';
+			return;
+		}
+		const reader = new FileReader();
+		reader.onload = () => {
+			pendingImageData = String(reader.result || '');
+		};
+		reader.readAsDataURL(file);
+	});
+}
 
 // --- Calculator ---
 let calcState = null;
@@ -345,8 +440,19 @@ function updateCalcDisplay() {
 function appendValue(v) {
 	if (!calcState) return;
 	if (calcState.expr.length > 32) return;
-	const last = calcState.expr.split(/[-+*/]/).pop();
+	const parts = calcState.expr.split(/[-+*/]/);
+	const last = parts[parts.length - 1] || '';
 	if (v === '.' && last.includes('.')) return;
+	if (v === '.' && last === '') {
+		calcState.expr += '0.';
+		updateCalcDisplay();
+		return;
+	}
+	if (last === '0' && v !== '.' && !last.includes('.')) {
+		calcState.expr = calcState.expr.slice(0, -1) + v;
+		updateCalcDisplay();
+		return;
+	}
 	calcState.expr += v;
 	updateCalcDisplay();
 }

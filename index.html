@@ -77,17 +77,20 @@
 
 				<section class="panel auth">
 					<h3>Account</h3>
-					<p>Sign up or login to save your stats globally.</p>
+					<p id="auth-status">Not logged in.</p>
 					<div class="auth-grid">
 						<input id="email-input" type="email" placeholder="Email" autocomplete="email">
 						<input id="pass-input" type="password" placeholder="Password" autocomplete="current-password">
+						<input id="pass-confirm" type="password" placeholder="Confirm password" autocomplete="new-password">
 						<input id="nick-input" type="text" placeholder="Nickname" maxlength="20">
 					</div>
 					<div class="btn-row">
-						<button id="signup-btn" class="btn btn-primary">Sign up</button>
-						<button id="login-btn" class="btn btn-ghost">Log in</button>
+						<button id="submit-auth" class="btn btn-primary">Sign up</button>
+						<button id="toggle-auth" class="btn btn-ghost">Switch to Login</button>
+						<button id="logout-btn" class="btn btn-ghost">Log out</button>
 					</div>
-					<p class="hint">GitHub Pages has no backend. Firebase Auth handles login and global stats.</p>
+					<p id="auth-msg" class="hint"></p>
+					<p class="hint">Firebase Auth handles login and global stats.</p>
 				</section>
 
 				<section class="panel leaderboard">
@@ -100,9 +103,13 @@
 					<div id="chat-list" class="chat-list"></div>
 					<div class="chat-input">
 						<input id="chat-message" type="text" placeholder="Type a message...">
+						<label class="chat-attach">
+							<input id="chat-image" type="file" accept="image/*">
+							<span>Image</span>
+						</label>
 						<button id="chat-send" class="btn btn-primary">Send</button>
 					</div>
-					<p class="hint">Chat is available after login.</p>
+					<p class="hint">Chat is available after login. Images up to 200KB.</p>
 				</section>
 
 				<section class="panel ideas">

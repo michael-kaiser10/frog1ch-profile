@@ -129,6 +129,9 @@ body{
 .btn:hover{transform:translateY(-2px);box-shadow:var(--glow)}
 
 .auth-grid{display:grid;gap:8px}
+
+#auth-status{color:var(--muted);font-size:13px}
+#auth-msg{min-height:16px}
 input[type="text"],input[type="password"],input[type="email"],input[type="color"],input[type="range"]{font-family:var(--font-body)}
 input[type="text"],input[type="password"],input[type="email"]{
   width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);
@@ -145,7 +148,7 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
 .board-section p{color:var(--muted);font-size:12px}
 
 .chat-list{
-  height:220px;
+  height:320px;
   overflow:auto;
   border:1px solid var(--border);
   border-radius:14px;
@@ -166,7 +169,10 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
 }
 .chat-meta{font-size:11px;color:var(--muted)}
 .chat-text{font-size:13px;color:var(--text)}
-.chat-input{display:flex;gap:8px}
+.chat-input{display:flex;gap:8px;align-items:center}
+.chat-attach{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);font-size:12px;font-weight:700;color:var(--text);cursor:pointer}
+.chat-attach input{display:none}
+.chat-item img{max-width:100%;border-radius:12px;border:1px solid var(--border)}
 
 .hidden{display:none!important}
 .game-modal{
