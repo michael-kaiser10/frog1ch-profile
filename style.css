@@ -1,25 +1,25 @@
 ﻿*{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#0c1117;
-  --bg-2:#111926;
+  --bg-2:#101828;
   --panel:#151f2d;
-  --panel-2:#101825;
+  --panel-2:#0f1824;
   --ink:#eaf2f9;
   --muted:#9bb0c6;
   --accent:#ff7a40;
   --accent-2:#36c5b7;
   --accent-3:#7a89ff;
   --border:rgba(255,255,255,.08);
-  --shadow:0 28px 70px rgba(4,8,12,.6);
+  --shadow:0 26px 70px rgba(4,8,12,.6);
   --glow:0 0 26px rgba(255,122,64,.3);
-  --radius:24px;
+  --radius:22px;
   --font-head:'Unbounded','Segoe UI',sans-serif;
   --font-body:'Rubik','Segoe UI',sans-serif;
 }
 
 body{
   min-height:100vh;
-  background:radial-gradient(1000px 650px at 8% -10%, rgba(122,137,255,.24), transparent 60%),
+  background:radial-gradient(1000px 650px at 8% -10%, rgba(122,137,255,.26), transparent 60%),
              radial-gradient(900px 600px at 95% 8%, rgba(54,197,183,.22), transparent 60%),
              linear-gradient(160deg,var(--bg),var(--bg-2));
   color:var(--ink);
@@ -34,7 +34,7 @@ body{
   background:
     radial-gradient(650px 450px at 15% 18%, rgba(255,122,64,.22), transparent 60%),
     radial-gradient(700px 520px at 84% 10%, rgba(54,197,183,.2), transparent 60%),
-    radial-gradient(700px 520px at 50% 90%, rgba(122,137,255,.2), transparent 60%);
+    radial-gradient(700px 520px at 50% 90%, rgba(122,137,255,.22), transparent 60%);
   filter:blur(12px);
   pointer-events:none;
   z-index:-1;
@@ -90,31 +90,17 @@ body{
 .hero-actions{display:flex;gap:10px;flex-wrap:wrap}
 
 .hero-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.metric{
-  background:rgba(10,16,24,.7);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:12px;
-  display:grid;
-  gap:4px;
-}
+.metric{background:rgba(10,16,24,.7);border:1px solid var(--border);border-radius:16px;padding:12px;display:grid;gap:4px}
 .metric .label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em}
 .metric .value{font-weight:700;font-family:var(--font-head)}
 
 .hero-right{display:grid;gap:16px}
 .hero-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.hero-card{
-  background:linear-gradient(150deg,rgba(20,30,44,.98),rgba(14,22,33,.98));
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:16px;
-  box-shadow:var(--shadow);
-  display:grid;
-  gap:10px;
-}
+.hero-card{background:linear-gradient(150deg,rgba(20,30,44,.98),rgba(14,22,33,.98));border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:var(--shadow);display:grid;gap:10px}
 .hero-card.highlight{border:1px solid rgba(255,122,64,.4)}
 .hero-card h3{font-family:var(--font-head);font-size:16px}
 .hero-card p{color:var(--muted);font-size:12px}
+.hero-card.surprise{grid-column:span 2}
 .accent{color:var(--accent-2);font-size:12px;font-weight:700}
 
 .chip-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -137,15 +123,7 @@ body{
 .lounge{grid-area:lounge}
 .feedback{grid-area:feedback}
 
-.tile{
-  background:linear-gradient(150deg,rgba(21,31,45,.98),rgba(15,24,36,.98));
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:20px;
-  box-shadow:var(--shadow);
-  display:grid;
-  gap:12px;
-}
+.tile{background:linear-gradient(150deg,rgba(21,31,45,.98),rgba(15,24,36,.98));border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);display:grid;gap:12px}
 
 .tile-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .tile-head h2{font-family:var(--font-head);font-size:18px}
@@ -154,19 +132,7 @@ body{
 
 .game-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
 
-.btn{
-  padding:10px 16px;
-  border-radius:14px;
-  border:1px solid transparent;
-  font-weight:700;
-  font-family:var(--font-head);
-  cursor:pointer;
-  transition:all .2s ease;
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
+.btn{padding:10px 16px;border-radius:14px;border:1px solid transparent;font-weight:700;font-family:var(--font-head);cursor:pointer;transition:all .2s ease;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .btn-primary{background:linear-gradient(135deg,var(--accent),#ff9b6a);color:#21110a}
 .btn-ghost{background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--border)}
 .btn-game{background:linear-gradient(135deg,#49d5c3,#3a7bd5);color:#071518}
@@ -179,16 +145,7 @@ body{
 #auth-msg{min-height:16px}
 
 input[type="text"],input[type="password"],input[type="email"],input[type="color"],input[type="range"]{font-family:var(--font-body)}
-input[type="text"],input[type="password"],input[type="email"]{
-  width:100%;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:rgba(8,14,20,.6);
-  color:var(--ink);
-  outline:none;
-  transition:border .2s;
-}
+input[type="text"],input[type="password"],input[type="email"]{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(8,14,20,.6);color:var(--ink);outline:none;transition:border .2s}
 input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{border-color:var(--accent)}
 
 .btn-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -199,24 +156,22 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
 .board-section li{margin:3px 0}
 .board-section p{color:var(--muted);font-size:12px}
 
-.chat-list{
-  height:360px;
-  overflow:auto;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:12px;
-  background:rgba(12,18,26,.65);
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.chat-item{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:rgba(20,30,40,.9);border:1px solid rgba(255,255,255,.06)}
+.chat-list{height:360px;overflow:auto;border:1px solid var(--border);border-radius:16px;padding:16px;background:rgba(12,18,26,.6);display:flex;flex-direction:column;gap:10px}
+.chat-item{display:flex;flex-direction:column;gap:6px;max-width:78%}
+.chat-item.self{align-self:flex-end}
+.chat-bubble{background:rgba(20,30,40,.95);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:10px 12px}
+.chat-item.self .chat-bubble{background:linear-gradient(135deg,rgba(54,197,183,.22),rgba(122,137,255,.18));border-color:rgba(54,197,183,.35)}
 .chat-meta{font-size:11px;color:var(--muted)}
+.chat-item.self .chat-meta{text-align:right}
 .chat-text{font-size:13px;color:var(--ink)}
 .chat-input{display:flex;gap:8px;align-items:center}
+.chat-input input{border-radius:999px}
 .chat-attach{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.06);font-size:12px;font-weight:700;color:var(--ink);cursor:pointer}
 .chat-attach input{display:none}
 .chat-item img{max-width:100%;border-radius:12px;border:1px solid var(--border)}
+
+.emoji-panel{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;padding:10px;border:1px solid var(--border);border-radius:14px;background:rgba(12,18,26,.7);margin-top:8px}
+.emoji-panel button{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:6px;cursor:pointer;font-size:16px}
 
 .chat-preview{display:flex;gap:12px;align-items:center;padding:10px;border:1px dashed var(--border);border-radius:12px;background:rgba(255,255,255,.04)}
 .chat-preview img{width:120px;height:80px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
@@ -267,16 +222,8 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
 
 @media (max-width:1080px){
   .hero{grid-template-columns:1fr}
-  .layout{
-    grid-template-columns:1fr;
-    grid-template-areas:
-      "arena"
-      "ranking"
-      "account"
-      "lounge"
-      "feedback";
-  }
   .hero-grid{grid-template-columns:1fr}
+  .layout{grid-template-columns:1fr;grid-template-areas:"arena" "ranking" "account" "lounge" "feedback";}
   .chess-top{grid-template-columns:1fr}
 }
 @media (max-width:720px){
@@ -285,4 +232,5 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
   .paint-layout{grid-template-columns:1fr}
   #paint-canvas{height:260px}
   .chat-input{flex-direction:column;align-items:stretch}
+  .emoji-panel{grid-template-columns:repeat(6,1fr)}
 }

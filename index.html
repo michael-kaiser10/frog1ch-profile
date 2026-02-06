@@ -32,8 +32,8 @@
 			<section class="hero">
 				<div class="hero-left">
 					<div class="hero-badge">Community Arcade</div>
-					<h1>Arcade hub for games, chat, and ranked battles.</h1>
-					<p>Everything lives in one flow: pick a game, jump into chat, and grind your position on the ladder.</p>
+					<h1>Games, chat, and ranked battles — all in one flow.</h1>
+					<p>Jump into quick sessions, climb ELO, and talk with players. Built to expand with new mini‑games.</p>
 					<div class="hero-actions">
 						<button id="play-btn" class="btn btn-primary">Play now</button>
 						<button id="chess-btn" class="btn btn-ghost">Open Chess</button>
@@ -73,6 +73,11 @@
 								<span class="chip">Paint</span>
 								<span class="chip">Calculator</span>
 							</div>
+						</div>
+						<div class="hero-card surprise">
+							<h3>Arcade drop</h3>
+							<p id="drop-text">Win 3 games in a row today.</p>
+							<button id="drop-btn" class="btn btn-soft">New challenge</button>
 						</div>
 					</div>
 				</div>
@@ -129,6 +134,7 @@
 					</div>
 					<div id="chat-list" class="chat-list"></div>
 					<div class="chat-input">
+						<button id="chat-emoji-btn" class="btn btn-ghost" type="button">😊</button>
 						<input id="chat-message" type="text" placeholder="Type a message...">
 						<label class="chat-attach">
 							<input id="chat-image" type="file" accept="image/*">
@@ -136,11 +142,12 @@
 						</label>
 						<button id="chat-send" class="btn btn-primary">Send</button>
 					</div>
+					<div id="chat-emoji-panel" class="emoji-panel hidden"></div>
 					<div id="chat-preview" class="chat-preview hidden">
 						<img id="chat-preview-img" alt="preview">
 						<button id="chat-cancel" class="btn btn-ghost">Remove</button>
 					</div>
-					<p class="hint">Chat is available after login. Images up to 200KB.</p>
+					<p class="hint">Chat auto‑resets daily. Images up to 200KB.</p>
 				</section>
 
 				<section class="tile feedback" id="feedback">

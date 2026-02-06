@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, orderBy, limit, getDocs, addDoc, onSnapshot, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, orderBy, limit, getDocs, addDoc, onSnapshot, updateDoc, where, deleteDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 let ua = true;
 const T = {
@@ -106,6 +106,8 @@ const chatImageInput = document.getElementById('chat-image');
 const chatPreview = document.getElementById('chat-preview');
 const chatPreviewImg = document.getElementById('chat-preview-img');
 const chatCancel = document.getElementById('chat-cancel');
+const chatEmojiBtn = document.getElementById('chat-emoji-btn');
+const chatEmojiPanel = document.getElementById('chat-emoji-panel');
 let pendingImageData = null;
 
 // Chess
@@ -122,6 +124,8 @@ const chessBoardEl = document.getElementById('chess-board');
 const onlineList = document.getElementById('online-list');
 const inviteList = document.getElementById('invite-list');
 const exitChessBtn = document.getElementById('exit-chess-btn');
+const dropBtn = document.getElementById('drop-btn');
+const dropText = document.getElementById('drop-text');
 
 let currentUser = null;
 let authMode = 'signup';
@@ -165,6 +169,7 @@ onAuthStateChanged(auth, (user) => {
 	currentUser = user || null;
 	updateAuthUI();
 	setChatState();
+	cleanupChatIfNeeded();
 	renderLeaderboards();
 	if (currentUser) resumeActiveGame();
 });
@@ -375,24 +380,54 @@ function setChatState() {
 	chatInput.placeholder = enabled ? 'Type a message...' : 'Login to chat...';
 }
 
+function getDayKey(date = new Date()) {
+	const y = date.getFullYear();
+	const m = String(date.getMonth() + 1).padStart(2, '0');
+	const d = String(date.getDate()).padStart(2, '0');
+	return `${y}-${m}-${d}`;
+}
+
 function renderChatItem(data) {
 	const wrap = document.createElement('div');
-	wrap.className = 'chat-item';
+	const isSelf = currentUser && data.uid && currentUser.uid === data.uid;
+	wrap.className = isSelf ? 'chat-item self' : 'chat-item';
 	const meta = document.createElement('div');
 	meta.className = 'chat-meta';
 	meta.textContent = `${data.name || 'Anon'} \u2022 ${data.time || ''}`;
-	const text = document.createElement('div');
-	text.className = 'chat-text';
-	text.textContent = data.text || '';
-	wrap.appendChild(meta);
+	const bubble = document.createElement('div');
+	bubble.className = 'chat-bubble';
 	if (data.image) {
 		const img = document.createElement('img');
 		img.src = data.image;
 		img.alt = 'chat image';
-		wrap.appendChild(img);
+		bubble.appendChild(img);
 	}
-	if (data.text) wrap.appendChild(text);
+	if (data.text) {
+		const text = document.createElement('div');
+		text.className = 'chat-text';
+		text.textContent = data.text || '';
+		bubble.appendChild(text);
+	}
+	wrap.appendChild(bubble);
+	wrap.appendChild(meta);
 	return wrap;
+}
+
+async function cleanupChatIfNeeded() {
+	if (!currentUser) return;
+	const today = getDayKey();
+	const lastCleanup = localStorage.getItem('chatCleanup') || '';
+	if (lastCleanup === today) return;
+	try {
+		const oldQ = query(collection(db, 'chat'), where('dayKey', '<', today));
+		const oldSnap = await getDocs(oldQ);
+		const deletions = [];
+		oldSnap.forEach(docSnap => deletions.push(deleteDoc(docSnap.ref)));
+		await Promise.all(deletions);
+		localStorage.setItem('chatCleanup', today);
+	} catch (err) {
+		console.warn('Chat cleanup failed:', err);
+	}
 }
 
 function startChatListener() {
@@ -400,7 +435,16 @@ function startChatListener() {
 	onSnapshot(q, (snap) => {
 		chatList.innerHTML = '';
 		const items = [];
-		snap.forEach(docSnap => items.push(docSnap.data()));
+		const today = getDayKey();
+		snap.forEach(docSnap => {
+			const data = docSnap.data();
+			if (data.dayKey && data.dayKey !== today) return;
+			if (!data.dayKey && data.createdAt && typeof data.createdAt.toDate === 'function') {
+				const createdKey = getDayKey(data.createdAt.toDate());
+				if (createdKey !== today) return;
+			}
+			items.push(data);
+		});
 		items.reverse().forEach(item => chatList.appendChild(renderChatItem(item)));
 		chatList.scrollTop = chatList.scrollHeight;
 	});
@@ -415,10 +459,12 @@ async function sendChat() {
 	const now = new Date();
 	const time = now.toLocaleTimeString();
 	await addDoc(collection(db, 'chat'), {
+		uid: currentUser.uid,
 		name,
 		text,
 		image: pendingImageData || null,
 		time,
+		dayKey: getDayKey(now),
 		createdAt: serverTimestamp()
 	});
 	chatInput.value = '';
@@ -457,6 +503,47 @@ if (chatCancel) {
 		if (chatImageInput) chatImageInput.value = '';
 		if (chatPreview) chatPreview.classList.add('hidden');
 	});
+}
+
+if (chatEmojiBtn && chatEmojiPanel) {
+	const emojis = ['😀','😅','😂','🤣','😊','😍','😎','😤','😭','😱','🤯','🤔','😴','😡','👍','🔥','🎯','💯','✨','⚡','🎮','🕹️','🏆','🚀','💬','📌','📸','🧩','🛡️','🧠'];
+	chatEmojiPanel.innerHTML = '';
+	emojis.forEach(e => {
+		const btn = document.createElement('button');
+		btn.type = 'button';
+		btn.textContent = e;
+		btn.addEventListener('click', () => {
+			const start = chatInput.selectionStart ?? chatInput.value.length;
+			const end = chatInput.selectionEnd ?? chatInput.value.length;
+			const value = chatInput.value;
+			chatInput.value = value.slice(0, start) + e + value.slice(end);
+			chatInput.focus();
+			chatInput.selectionStart = chatInput.selectionEnd = start + e.length;
+		});
+		chatEmojiPanel.appendChild(btn);
+	});
+	chatEmojiBtn.addEventListener('click', () => {
+		chatEmojiPanel.classList.toggle('hidden');
+	});
+}
+
+if (dropBtn && dropText) {
+	const drops = [
+		'Win 3 games in a row today.',
+		'Send a screenshot in chat.',
+		'Beat the bot without losing a piece.',
+		'Get 5 wins before midnight.',
+		'Teach a new player a trick.',
+		'Try a new game mode.',
+		'Post your best score in chat.',
+		'Find a rival and play a rematch.'
+	];
+	const setDrop = () => {
+		const pick = drops[Math.floor(Math.random() * drops.length)];
+		dropText.textContent = pick;
+	};
+	setDrop();
+	dropBtn.addEventListener('click', setDrop);
 }
 
 // --- Presence (Firestore heartbeat) ---
