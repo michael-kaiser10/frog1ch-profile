@@ -1,18 +1,18 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0a0f14;
-  --bg-2:#0f1620;
-  --panel:#111a24;
-  --panel-2:#0e151d;
-  --card:#141f2a;
-  --text:#ecf2f8;
-  --muted:#9cb1c9;
+  --bg:#10161d;
+  --bg-2:#151d26;
+  --panel:#1a2430;
+  --panel-2:#141d27;
+  --card:#1f2a36;
+  --text:#eef3f9;
+  --muted:#b2c2d6;
   --accent:#f59e0b;
-  --accent-2:#22d3ee;
-  --accent-3:#34d399;
-  --border:rgba(148,163,184,.18);
-  --shadow:0 30px 90px rgba(3,6,10,.55);
-  --glow:0 0 32px rgba(245,158,11,.25);
+  --accent-2:#63d2ff;
+  --accent-3:#7de2b5;
+  --border:rgba(170,190,210,.2);
+  --shadow:0 22px 70px rgba(6,10,14,.45);
+  --glow:0 0 30px rgba(245,158,11,.2);
   --radius:22px;
   --font-head:'Space Grotesk','Segoe UI',sans-serif;
   --font-body:'Archivo','Segoe UI',sans-serif;
@@ -20,8 +20,8 @@
 
 body{
   min-height:100vh;
-  background:radial-gradient(1200px 600px at 70% -10%, rgba(34,211,238,.16), transparent 60%),
-             radial-gradient(900px 500px at 10% 10%, rgba(245,158,11,.18), transparent 65%),
+  background:radial-gradient(1200px 600px at 70% -10%, rgba(99,210,255,.18), transparent 60%),
+             radial-gradient(900px 500px at 10% 10%, rgba(245,158,11,.16), transparent 65%),
              linear-gradient(130deg,var(--bg),var(--bg-2));
   color:var(--text);
   font-family:var(--font-body);
@@ -51,7 +51,7 @@ body{
 }
 
 .hero-left{
-  background:linear-gradient(160deg,rgba(17,26,36,.96),rgba(12,18,26,.96));
+  background:linear-gradient(160deg,rgba(26,36,48,.96),rgba(20,29,39,.96));
   border:1px solid var(--border);
   border-radius:28px;
   padding:28px;
@@ -75,7 +75,7 @@ body{
 .hero-stats .value{font-weight:700}
 
 .hero-card{
-  background:linear-gradient(180deg,rgba(17,26,36,.96),rgba(12,18,26,.96));
+  background:linear-gradient(180deg,rgba(26,36,48,.96),rgba(20,29,39,.96));
   border:1px solid var(--border);
   border-radius:28px;
   padding:22px;
@@ -108,7 +108,7 @@ body{
 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
 .panel{
-  background:linear-gradient(160deg,rgba(17,26,36,.96),rgba(12,18,26,.96));
+  background:linear-gradient(160deg,rgba(26,36,48,.96),rgba(20,29,39,.96));
   border:1px solid var(--border);
   border-radius:20px;
   padding:18px;
@@ -141,7 +141,7 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
 
 .btn-row{display:flex;gap:8px;flex-wrap:wrap}
 
-.leaderboard .board-section{border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px;background:rgba(12,18,26,.7)}
+.leaderboard .board-section{border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px;background:rgba(20,29,39,.7)}
 .board-section strong{display:block;font-family:var(--font-head);font-size:13px;color:var(--accent-2);margin-bottom:6px}
 .board-section ol{margin-left:18px;color:var(--text);font-size:12px}
 .board-section li{margin:3px 0}
@@ -153,7 +153,7 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
   border:1px solid var(--border);
   border-radius:14px;
   padding:12px;
-  background:rgba(12,18,26,.7);
+  background:rgba(20,29,39,.7);
   display:flex;
   flex-direction:column;
   gap:10px;
@@ -164,8 +164,8 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
   gap:6px;
   padding:10px 12px;
   border-radius:12px;
-  background:rgba(18,26,36,.6);
-  border:1px solid rgba(148,163,184,.12);
+  background:rgba(26,36,48,.6);
+  border:1px solid rgba(170,190,210,.18);
 }
 .chat-meta{font-size:11px;color:var(--muted)}
 .chat-text{font-size:13px;color:var(--text)}
@@ -173,6 +173,9 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
 .chat-attach{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);font-size:12px;font-weight:700;color:var(--text);cursor:pointer}
 .chat-attach input{display:none}
 .chat-item img{max-width:100%;border-radius:12px;border:1px solid var(--border)}
+
+.chat-preview{display:flex;gap:12px;align-items:center;padding:10px;border:1px dashed var(--border);border-radius:12px;background:rgba(255,255,255,.03)}
+.chat-preview img{width:120px;height:80px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
 
 .hidden{display:none!important}
 .game-modal{

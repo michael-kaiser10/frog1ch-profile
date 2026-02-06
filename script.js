@@ -103,6 +103,9 @@ const chatList = document.getElementById('chat-list');
 const chatInput = document.getElementById('chat-message');
 const chatSend = document.getElementById('chat-send');
 const chatImageInput = document.getElementById('chat-image');
+const chatPreview = document.getElementById('chat-preview');
+const chatPreviewImg = document.getElementById('chat-preview-img');
+const chatCancel = document.getElementById('chat-cancel');
 let pendingImageData = null;
 
 let currentUser = null;
@@ -333,6 +336,8 @@ function setChatState() {
 	const enabled = !!currentUser;
 	chatInput.disabled = !enabled;
 	chatSend.disabled = !enabled;
+	if (chatImageInput) chatImageInput.disabled = !enabled;
+	if (chatCancel) chatCancel.disabled = !enabled;
 	chatInput.placeholder = enabled ? 'Type a message...' : 'Login to chat...';
 }
 
@@ -385,6 +390,7 @@ async function sendChat() {
 	chatInput.value = '';
 	pendingImageData = null;
 	if (chatImageInput) chatImageInput.value = '';
+	if (chatPreview) chatPreview.classList.add('hidden');
 }
 
 chatSend.addEventListener('click', sendChat);
@@ -404,8 +410,18 @@ if (chatImageInput) {
 		const reader = new FileReader();
 		reader.onload = () => {
 			pendingImageData = String(reader.result || '');
+			if (chatPreviewImg) chatPreviewImg.src = pendingImageData;
+			if (chatPreview) chatPreview.classList.remove('hidden');
 		};
 		reader.readAsDataURL(file);
+	});
+}
+
+if (chatCancel) {
+	chatCancel.addEventListener('click', () => {
+		pendingImageData = null;
+		if (chatImageInput) chatImageInput.value = '';
+		if (chatPreview) chatPreview.classList.add('hidden');
 	});
 }
 
