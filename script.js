@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, orderBy, limit, getDocs, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 let ua = true;
 const T = {
@@ -19,29 +19,23 @@ const T = {
 		time: "Time",
 		quote: "Quote",
 		q: "Focus. Improve. Repeat.",
-		about: "About me",
+		about: "About",
 		a: "College student in computer engineering.<br>PC repair and maintenance."
 	}
 };
-const hs = document.getElementById("h-status");
 const ts = document.getElementById("t-status");
-const ht = document.getElementById("h-time");
-const hq = document.getElementById("h-quote");
 const tq = document.getElementById("t-quote");
-const ha = document.getElementById("h-about");
 const ta = document.getElementById("t-about");
 const b = document.getElementById("lang");
 const tm = document.getElementById("time");
+const aboutLabel = document.getElementById("h-about");
 
 function apply() {
 	const l = ua ? T.ua : T.en;
-	hs.textContent = l.status;
 	ts.textContent = l.online;
-	ht.textContent = l.time;
-	hq.textContent = l.quote;
 	tq.textContent = l.q;
-	ha.textContent = l.about;
 	ta.innerHTML = l.a;
+	if (aboutLabel) aboutLabel.textContent = l.about;
 	b.textContent = ua ? "EN" : "UA";
 }
 apply();
@@ -71,27 +65,23 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- Game Logic ---
-const gameModal = document.getElementById('game-modal');
 const playBtn = document.getElementById('play-btn');
-const regPanel = document.getElementById('reg-panel');
-const lobbyPanel = document.getElementById('lobby-panel');
-const calcPanel = document.getElementById('calc-panel');
-const paintPanel = document.getElementById('paint-panel');
-const boardPanel = document.getElementById('board-panel');
+const gameModal = document.getElementById('game-modal');
+const closeModal = document.getElementById('close-modal');
+const gameTitle = document.getElementById('game-title');
 
 const emailInput = document.getElementById('email-input');
 const passInput = document.getElementById('pass-input');
 const nickInput = document.getElementById('nick-input');
 const signupBtn = document.getElementById('signup-btn');
 const loginBtn = document.getElementById('login-btn');
-const closeBtn = document.getElementById('close-btn');
-const backBtn = document.getElementById('back-btn');
 const calcBtn = document.getElementById('calc-btn');
 const paintBtn = document.getElementById('paint-btn');
 const exitCalcBtn = document.getElementById('exit-calc-btn');
 const exitPaintBtn = document.getElementById('exit-paint-btn');
-const playerName = document.getElementById('player-name');
+
+const calcPanel = document.getElementById('calc-panel');
+const paintPanel = document.getElementById('paint-panel');
 
 const calcDisplay = document.getElementById('calc-display');
 const calcEq = document.getElementById('calc-eq');
@@ -103,54 +93,35 @@ const paintClearBtn = document.getElementById('paint-clear');
 const pencilBtn = document.getElementById('pencil-btn');
 const eraserBtn = document.getElementById('eraser-btn');
 const fillBtn = document.getElementById('fill-btn');
+
 const leaderboardContent = document.getElementById('leaderboard-content');
+const chatList = document.getElementById('chat-list');
+const chatInput = document.getElementById('chat-message');
+const chatSend = document.getElementById('chat-send');
 
 let currentUser = null;
 
 function show(el) { el.classList.remove('hidden'); }
 function hide(el) { el.classList.add('hidden'); }
 
-function openLobby() {
-	hide(regPanel);
-	playerName.textContent = currentUser?.displayName || currentUser?.email || 'Player';
-	show(lobbyPanel);
-	renderLeaderboards();
-	show(boardPanel);
-}
-
-playBtn.addEventListener('click', () => {
+function openModal(title, panel) {
+	gameTitle.textContent = title;
 	show(gameModal);
-	if (currentUser) {
-		openLobby();
-	} else {
-		show(regPanel);
-		hide(lobbyPanel);
-		hide(calcPanel);
-		hide(paintPanel);
-		hide(boardPanel);
-	}
-});
-
-closeBtn.addEventListener('click', () => {
-	hide(gameModal);
-	emailInput.value = '';
-	passInput.value = '';
-	nickInput.value = '';
-});
-
-backBtn.addEventListener('click', () => {
-	hide(lobbyPanel);
 	hide(calcPanel);
 	hide(paintPanel);
-	hide(boardPanel);
-	show(regPanel);
-});
+	show(panel);
+}
+
+playBtn.addEventListener('click', () => openModal('Games', calcPanel));
+closeModal.addEventListener('click', () => hide(gameModal));
+
+calcBtn.addEventListener('click', () => openModal('Calculator', calcPanel));
+paintBtn.addEventListener('click', () => openModal('Paint', paintPanel));
 
 onAuthStateChanged(auth, (user) => {
 	currentUser = user || null;
-	if (currentUser) {
-		openLobby();
-	}
+	setChatState();
+	renderLeaderboards();
 });
 
 async function signup() {
@@ -160,11 +131,9 @@ async function signup() {
 	if (!email || !pass) return alert('\u0412\u0432\u0435\u0434\u0438 email \u0456 \u043f\u0430\u0440\u043e\u043b\u044c');
 	try {
 		const cred = await createUserWithEmailAndPassword(auth, email, pass);
-		if (nick) {
-			await updateProfile(cred.user, { displayName: nick });
-		}
+		if (nick) await updateProfile(cred.user, { displayName: nick });
 		currentUser = cred.user;
-		openLobby();
+		renderLeaderboards();
 	} catch (e) {
 		console.error(e);
 		alert('\u041f\u043e\u043c\u0438\u043b\u043a\u0430 \u0440\u0435\u0454\u0441\u0442\u0440\u0430\u0446\u0456\u0457');
@@ -178,7 +147,7 @@ async function login() {
 	try {
 		const cred = await signInWithEmailAndPassword(auth, email, pass);
 		currentUser = cred.user;
-		openLobby();
+		renderLeaderboards();
 	} catch (e) {
 		console.error(e);
 		alert('\u041f\u043e\u043c\u0438\u043b\u043a\u0430 \u0432\u0445\u043e\u0434\u0443');
@@ -217,6 +186,7 @@ async function fetchLeaders(field) {
 }
 
 async function renderLeaderboards() {
+	if (!leaderboardContent) return;
 	leaderboardContent.innerHTML = '';
 	try {
 		const overall = await fetchLeaders('totalTime');
@@ -266,9 +236,7 @@ async function updateLeaderboard(update) {
 	const name = currentUser.displayName || currentUser.email || 'Player';
 	const sumMap = (a = {}, b = {}) => {
 		const out = { ...a };
-		Object.keys(b).forEach((k) => {
-			out[k] = (out[k] || 0) + (b[k] || 0);
-		});
+		Object.keys(b || {}).forEach((k) => { out[k] = (out[k] || 0) + (b[k] || 0); });
 		return out;
 	};
 	const next = {
@@ -282,6 +250,61 @@ async function updateLeaderboard(update) {
 	};
 	await setDoc(ref, next, { merge: true });
 }
+
+// --- Chat ---
+function setChatState() {
+	const enabled = !!currentUser;
+	chatInput.disabled = !enabled;
+	chatSend.disabled = !enabled;
+	chatInput.placeholder = enabled ? 'Type a message...' : 'Login to chat...';
+}
+
+function renderChatItem(data) {
+	const wrap = document.createElement('div');
+	wrap.className = 'chat-item';
+	const meta = document.createElement('div');
+	meta.className = 'chat-meta';
+	meta.textContent = `${data.name || 'Anon'} ? ${data.time || ''}`;
+	const text = document.createElement('div');
+	text.className = 'chat-text';
+	text.textContent = data.text || '';
+	wrap.appendChild(meta);
+	wrap.appendChild(text);
+	return wrap;
+}
+
+function startChatListener() {
+	const q = query(collection(db, 'chat'), orderBy('createdAt', 'desc'), limit(30));
+	onSnapshot(q, (snap) => {
+		chatList.innerHTML = '';
+		const items = [];
+		snap.forEach(docSnap => items.push(docSnap.data()));
+		items.reverse().forEach(item => chatList.appendChild(renderChatItem(item)));
+		chatList.scrollTop = chatList.scrollHeight;
+	});
+}
+startChatListener();
+
+async function sendChat() {
+	if (!currentUser) return;
+	const text = chatInput.value.trim();
+	if (!text) return;
+	const name = currentUser.displayName || currentUser.email || 'Player';
+	const now = new Date();
+	const time = now.toLocaleTimeString();
+	await addDoc(collection(db, 'chat'), {
+		name,
+		text,
+		time,
+		createdAt: serverTimestamp()
+	});
+	chatInput.value = '';
+}
+
+chatSend.addEventListener('click', sendChat);
+chatInput.addEventListener('keydown', (e) => {
+	if (e.key === 'Enter') sendChat();
+});
 
 // --- Calculator ---
 let calcState = null;
@@ -373,7 +396,7 @@ calcEq.addEventListener('click', () => {
 exitCalcBtn.addEventListener('click', async () => {
 	await endCalcSession();
 	hide(calcPanel);
-	openLobby();
+	hide(gameModal);
 });
 
 // --- Paint ---
@@ -515,20 +538,5 @@ window.addEventListener('resize', () => {
 exitPaintBtn.addEventListener('click', async () => {
 	await endPaintSession();
 	hide(paintPanel);
-	openLobby();
-});
-
-// Game selection
-calcBtn.addEventListener('click', () => {
-	hide(lobbyPanel);
-	hide(boardPanel);
-	show(calcPanel);
-	startCalcSession();
-});
-
-paintBtn.addEventListener('click', () => {
-	hide(lobbyPanel);
-	hide(boardPanel);
-	show(paintPanel);
-	startPaintSession();
+	hide(gameModal);
 });
