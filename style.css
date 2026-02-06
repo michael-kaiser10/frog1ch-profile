@@ -239,3 +239,6 @@ input[type="color"]{
   .btns{grid-template-columns:1fr}
   .play{grid-column:span 1}
 }
+
+.auth-grid{display:grid;gap:8px;margin:10px 0}
+.auth-grid input{width:100%}

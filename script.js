@@ -1,3 +1,7 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
 let ua = true;
 const T = {
 	ua: {
@@ -52,6 +56,21 @@ window.setInterval(() => {
 	tm.textContent = d.toLocaleTimeString() + " ? " + d.toLocaleDateString();
 }, 1000);
 
+// Firebase config
+const firebaseConfig = {
+	apiKey: "AIzaSyDqvImySFSGTUMWDkWFDYVrzvLZTulWmJg",
+	authDomain: "discordwebsitebase.firebaseapp.com",
+	projectId: "discordwebsitebase",
+	storageBucket: "discordwebsitebase.firebasestorage.app",
+	messagingSenderId: "717030253541",
+	appId: "1:717030253541:web:6dcfc566cfff4dc61b450c",
+	measurementId: "G-S7KL9BGQCY"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 // --- Game Logic ---
 const gameModal = document.getElementById('game-modal');
 const playBtn = document.getElementById('play-btn');
@@ -61,17 +80,18 @@ const calcPanel = document.getElementById('calc-panel');
 const paintPanel = document.getElementById('paint-panel');
 const boardPanel = document.getElementById('board-panel');
 
-const nickInput = document.getElementById('nick-input');
+const emailInput = document.getElementById('email-input');
 const passInput = document.getElementById('pass-input');
-const playerName = document.getElementById('player-name');
-const regBtn = document.getElementById('reg-btn');
+const nickInput = document.getElementById('nick-input');
+const signupBtn = document.getElementById('signup-btn');
+const loginBtn = document.getElementById('login-btn');
 const closeBtn = document.getElementById('close-btn');
 const backBtn = document.getElementById('back-btn');
 const calcBtn = document.getElementById('calc-btn');
 const paintBtn = document.getElementById('paint-btn');
 const exitCalcBtn = document.getElementById('exit-calc-btn');
 const exitPaintBtn = document.getElementById('exit-paint-btn');
-const discordLoginBtn = document.getElementById('discord-login');
+const playerName = document.getElementById('player-name');
 
 const calcDisplay = document.getElementById('calc-display');
 const calcEq = document.getElementById('calc-eq');
@@ -85,164 +105,14 @@ const eraserBtn = document.getElementById('eraser-btn');
 const fillBtn = document.getElementById('fill-btn');
 const leaderboardContent = document.getElementById('leaderboard-content');
 
-// Optional: backend OAuth config (not available on GitHub Pages without server)
-const DISCORD_CLIENT_ID = '';
-const DISCORD_OAUTH_PROXY = '';
-const DISCORD_REDIRECT_URI = window.location.origin + window.location.pathname;
-
-let discordUser = JSON.parse(localStorage.getItem('discord_user') || 'null');
-let player = localStorage.getItem('game_nick') || '';
-let boards = JSON.parse(localStorage.getItem('game_leaderboards_v2') || '{}');
-let users = JSON.parse(localStorage.getItem('game_users_v1') || '{}');
+let currentUser = null;
 
 function show(el) { el.classList.remove('hidden'); }
 function hide(el) { el.classList.add('hidden'); }
 
-function saveBoards() {
-	localStorage.setItem('game_leaderboards_v2', JSON.stringify(boards));
-}
-
-function saveUsers() {
-	localStorage.setItem('game_users_v1', JSON.stringify(users));
-}
-
-function setDiscordUser(user) {
-	discordUser = user;
-	localStorage.setItem('discord_user', JSON.stringify(user));
-	player = user.username;
-	localStorage.setItem('game_nick', player);
-	updateAuthUI();
-}
-
-function updateAuthUI() {
-	if (discordUser) {
-		nickInput.value = discordUser.username;
-		nickInput.disabled = true;
-		passInput.disabled = true;
-		discordLoginBtn.textContent = 'Discord Connected';
-		discordLoginBtn.disabled = true;
-	} else {
-		nickInput.disabled = false;
-		passInput.disabled = false;
-		discordLoginBtn.textContent = 'Discord Login';
-		discordLoginBtn.disabled = false;
-	}
-}
-updateAuthUI();
-
-async function handleDiscordCallback() {
-	const url = new URL(window.location.href);
-	const code = url.searchParams.get('code');
-	if (!code || !DISCORD_OAUTH_PROXY) return;
-	try {
-		const res = await fetch(`${DISCORD_OAUTH_PROXY}/discord/exchange`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ code, redirectUri: DISCORD_REDIRECT_URI })
-		});
-		if (!res.ok) throw new Error('OAuth failed');
-		const data = await res.json();
-		if (data && data.user) setDiscordUser(data.user);
-	} catch (e) {
-		console.error(e);
-		alert('Discord login error.');
-	} finally {
-		url.searchParams.delete('code');
-		window.history.replaceState({}, document.title, url.toString());
-	}
-}
-handleDiscordCallback();
-
-function startDiscordLogin() {
-	if (!DISCORD_CLIENT_ID || !DISCORD_OAUTH_PROXY) {
-		alert('Discord OAuth ???????? ??????. ????? DISCORD_CLIENT_ID ?? DISCORD_OAUTH_PROXY ? script.js');
-		return;
-	}
-	const params = new URLSearchParams({
-		client_id: DISCORD_CLIENT_ID,
-		redirect_uri: DISCORD_REDIRECT_URI,
-		response_type: 'code',
-		scope: 'identify'
-	});
-	window.location.href = `https://discord.com/api/oauth2/authorize?${params.toString()}`;
-}
-
-discordLoginBtn.addEventListener('click', startDiscordLogin);
-
-async function hashPassword(value) {
-	if (window.crypto && window.crypto.subtle) {
-		const enc = new TextEncoder().encode(value);
-		const digest = await window.crypto.subtle.digest('SHA-256', enc);
-		return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-	}
-	return btoa(unescape(encodeURIComponent(value)));
-}
-
-function normalizeEntries(map) {
-	const out = [];
-	Object.entries(map || {}).forEach(([key, val]) => {
-		if (!val) return;
-		if (typeof val.time !== 'number') return;
-		out.push({
-			key,
-			name: val.name || key,
-			time: val.time || 0,
-			ops: val.ops || {},
-			tools: val.tools || {}
-		});
-	});
-	return out;
-}
-
-function renderLeaderboards() {
-	leaderboardContent.innerHTML = '';
-	const calc = normalizeEntries(boards.calc).sort((a, b) => b.time - a.time);
-	const paint = normalizeEntries(boards.paint).sort((a, b) => b.time - a.time);
-
-	const topAll = {};
-	calc.forEach(row => {
-		topAll[row.key] = { name: row.name, time: (topAll[row.key]?.time || 0) + row.time };
-	});
-	paint.forEach(row => {
-		topAll[row.key] = { name: row.name, time: (topAll[row.key]?.time || 0) + row.time };
-	});
-	const overall = Object.entries(topAll).map(([key, v]) => ({ key, name: v.name, time: v.time }));
-	overall.sort((a, b) => b.time - a.time);
-
-	function renderSection(title, rows, formatter) {
-		const div = document.createElement('div');
-		div.className = 'board-section';
-		div.innerHTML = `<strong>${title}</strong>`;
-		if (rows.length) {
-			const ol = document.createElement('ol');
-			rows.forEach(row => {
-				const li = document.createElement('li');
-				li.textContent = formatter(row);
-				ol.appendChild(li);
-			});
-			div.appendChild(ol);
-		} else {
-			const p = document.createElement('p');
-			p.textContent = '????????';
-			div.appendChild(p);
-		}
-		leaderboardContent.appendChild(div);
-	}
-
-	renderSection('??? ?????????', overall, (row) => `${row.name} ? ${Math.round(row.time / 60)}m`);
-	renderSection('??? Calculator', calc, (row) => {
-		const ops = row.ops || {};
-		return `${row.name} ? ${Math.round(row.time / 60)}m | +:${ops['+']||0} -:${ops['-']||0} ?:${ops['*']||0} ?:${ops['/']||0}`;
-	});
-	renderSection('??? Paint', paint, (row) => {
-		const tools = row.tools || {};
-		return `${row.name} ? ${Math.round(row.time / 60)}m | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
-	});
-}
-
 function openLobby() {
 	hide(regPanel);
-	playerName.textContent = player;
+	playerName.textContent = currentUser?.displayName || currentUser?.email || 'Player';
 	show(lobbyPanel);
 	renderLeaderboards();
 	show(boardPanel);
@@ -250,7 +120,7 @@ function openLobby() {
 
 playBtn.addEventListener('click', () => {
 	show(gameModal);
-	if (player) {
+	if (currentUser) {
 		openLobby();
 	} else {
 		show(regPanel);
@@ -261,33 +131,11 @@ playBtn.addEventListener('click', () => {
 	}
 });
 
-regBtn.addEventListener('click', async () => {
-	if (discordUser) {
-		player = discordUser.username;
-		openLobby();
-		return;
-	}
-	const nick = nickInput.value.trim();
-	const pass = passInput.value.trim();
-	if (!nick || !pass) return alert('????? ??? ? ??????');
-	const passHash = await hashPassword(pass);
-	if (users[nick]) {
-		if (users[nick].passHash !== passHash) {
-			return alert('???????? ??????');
-		}
-	} else {
-		users[nick] = { name: nick, passHash };
-		saveUsers();
-	}
-	player = nick;
-	localStorage.setItem('game_nick', player);
-	openLobby();
-});
-
 closeBtn.addEventListener('click', () => {
 	hide(gameModal);
-	nickInput.value = '';
+	emailInput.value = '';
 	passInput.value = '';
+	nickInput.value = '';
 });
 
 backBtn.addEventListener('click', () => {
@@ -298,8 +146,140 @@ backBtn.addEventListener('click', () => {
 	show(regPanel);
 });
 
-function getPlayerKey() {
-	return discordUser?.id || player;
+onAuthStateChanged(auth, (user) => {
+	currentUser = user || null;
+	if (currentUser) {
+		openLobby();
+	}
+});
+
+async function signup() {
+	const email = emailInput.value.trim();
+	const pass = passInput.value.trim();
+	const nick = nickInput.value.trim();
+	if (!email || !pass) return alert('????? email ? ??????');
+	try {
+		const cred = await createUserWithEmailAndPassword(auth, email, pass);
+		if (nick) {
+			await updateProfile(cred.user, { displayName: nick });
+		}
+		currentUser = cred.user;
+		openLobby();
+	} catch (e) {
+		console.error(e);
+		alert('??????? ??????????');
+	}
+}
+
+async function login() {
+	const email = emailInput.value.trim();
+	const pass = passInput.value.trim();
+	if (!email || !pass) return alert('????? email ? ??????');
+	try {
+		const cred = await signInWithEmailAndPassword(auth, email, pass);
+		currentUser = cred.user;
+		openLobby();
+	} catch (e) {
+		console.error(e);
+		alert('??????? ?????');
+	}
+}
+
+signupBtn.addEventListener('click', signup);
+loginBtn.addEventListener('click', login);
+
+function normalizeEntries(map) {
+	const out = [];
+	Object.entries(map || {}).forEach(([key, val]) => {
+		if (!val) return;
+		if (typeof val.totalTime !== 'number') return;
+		out.push({
+			key,
+			name: val.name || key,
+			totalTime: val.totalTime || 0,
+			calcTime: val.calcTime || 0,
+			paintTime: val.paintTime || 0,
+			ops: val.ops || {},
+			tools: val.tools || {}
+		});
+	});
+	return out;
+}
+
+async function fetchLeaders(field) {
+	const q = query(collection(db, 'leaderboards'), orderBy(field, 'desc'), limit(20));
+	const snap = await getDocs(q);
+	const data = {};
+	snap.forEach(docSnap => {
+		data[docSnap.id] = docSnap.data();
+	});
+	return normalizeEntries(data);
+}
+
+async function renderLeaderboards() {
+	leaderboardContent.innerHTML = '';
+	try {
+		const overall = await fetchLeaders('totalTime');
+		const calc = await fetchLeaders('calcTime');
+		const paint = await fetchLeaders('paintTime');
+
+		function renderSection(title, rows, formatter) {
+			const div = document.createElement('div');
+			div.className = 'board-section';
+			div.innerHTML = `<strong>${title}</strong>`;
+			if (rows.length) {
+				const ol = document.createElement('ol');
+				rows.forEach(row => {
+					const li = document.createElement('li');
+					li.textContent = formatter(row);
+					ol.appendChild(li);
+				});
+				div.appendChild(ol);
+			} else {
+				const p = document.createElement('p');
+				p.textContent = '????????';
+				div.appendChild(p);
+			}
+			leaderboardContent.appendChild(div);
+		}
+
+		renderSection('??? ?????????', overall, (row) => `${row.name} ? ${Math.round(row.totalTime / 60)}m`);
+		renderSection('??? Calculator', calc, (row) => {
+			const ops = row.ops || {};
+			return `${row.name} ? ${Math.round(row.calcTime / 60)}m | +:${ops['+']||0} -:${ops['-']||0} ?:${ops['*']||0} ?:${ops['/']||0}`;
+		});
+		renderSection('??? Paint', paint, (row) => {
+			const tools = row.tools || {};
+			return `${row.name} ? ${Math.round(row.paintTime / 60)}m | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
+		});
+	} catch (e) {
+		console.error(e);
+		leaderboardContent.innerHTML = '<p>?? ??????? ??????????? ???????.</p>';
+	}
+}
+
+async function updateLeaderboard(update) {
+	if (!currentUser) return;
+	const ref = doc(db, 'leaderboards', currentUser.uid);
+	const snap = await getDoc(ref);
+	const existing = snap.exists() ? snap.data() : {};
+	const name = currentUser.displayName || currentUser.email || 'Player';
+	const next = {
+		name,
+		totalTime: (existing.totalTime || 0) + (update.totalTime || 0),
+		calcTime: (existing.calcTime || 0) + (update.calcTime || 0),
+		paintTime: (existing.paintTime || 0) + (update.paintTime || 0),
+		ops: {
+			...(existing.ops || {}),
+			...(update.ops || {})
+		},
+		tools: {
+			...(existing.tools || {}),
+			...(update.tools || {})
+		},
+		updatedAt: serverTimestamp()
+	};
+	await setDoc(ref, next, { merge: true });
 }
 
 // --- Calculator ---
@@ -314,20 +294,15 @@ function startCalcSession() {
 	calcDisplay.value = '';
 }
 
-function endCalcSession() {
+async function endCalcSession() {
 	if (!calcState) return;
 	const secs = Math.floor((Date.now() - calcState.sessionStart) / 1000);
-	boards.calc = boards.calc || {};
-	const key = getPlayerKey();
-	const name = discordUser?.username || player;
-	const p = boards.calc[key] = boards.calc[key] || { name, time:0, ops:{'+':0,'-':0,'*':0,'/':0} };
-	p.name = name;
-	p.time += secs;
-	Object.keys(calcState.opsCount).forEach(k => {
-		p.ops[k] = (p.ops[k] || 0) + (calcState.opsCount[k] || 0);
+	await updateLeaderboard({
+		totalTime: secs,
+		calcTime: secs,
+		ops: calcState.opsCount
 	});
-	saveBoards();
-	renderLeaderboards();
+	await renderLeaderboards();
 	calcState = null;
 }
 
@@ -394,8 +369,8 @@ calcEq.addEventListener('click', () => {
 	}
 });
 
-exitCalcBtn.addEventListener('click', () => {
-	endCalcSession();
+exitCalcBtn.addEventListener('click', async () => {
+	await endCalcSession();
 	hide(calcPanel);
 	openLobby();
 });
@@ -435,20 +410,15 @@ function startPaintSession() {
 	setActiveTool('pencil');
 }
 
-function endPaintSession() {
+async function endPaintSession() {
 	if (!paintState) return;
 	const secs = Math.floor((Date.now() - paintState.sessionStart) / 1000);
-	boards.paint = boards.paint || {};
-	const key = getPlayerKey();
-	const name = discordUser?.username || player;
-	const p = boards.paint[key] = boards.paint[key] || { name, time:0, tools:{pencil:0,eraser:0,fill:0} };
-	p.name = name;
-	p.time += secs;
-	p.tools.pencil = (p.tools.pencil || 0) + (paintState.toolCounts.pencil || 0);
-	p.tools.eraser = (p.tools.eraser || 0) + (paintState.toolCounts.eraser || 0);
-	p.tools.fill = (p.tools.fill || 0) + (paintState.toolCounts.fill || 0);
-	saveBoards();
-	renderLeaderboards();
+	await updateLeaderboard({
+		totalTime: secs,
+		paintTime: secs,
+		tools: paintState.toolCounts
+	});
+	await renderLeaderboards();
 	paintState = null;
 }
 
@@ -541,8 +511,8 @@ window.addEventListener('resize', () => {
 	if (paintState) resizeCanvas();
 });
 
-exitPaintBtn.addEventListener('click', () => {
-	endPaintSession();
+exitPaintBtn.addEventListener('click', async () => {
+	await endPaintSession();
 	hide(paintPanel);
 	openLobby();
 });
