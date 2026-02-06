@@ -514,7 +514,20 @@ function initChessBoard() {
 async function ensureChess() {
 	if (chess) return true;
 	try {
-		const mod = await import('https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.1/dist/esm/chess.js');
+		const urls = [
+			'https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.1/dist/esm/chess.js',
+			'https://unpkg.com/chess.js@1.0.0-beta.1/dist/esm/chess.js'
+		];
+		let mod = null;
+		for (const url of urls) {
+			try {
+				mod = await import(url);
+				if (mod && mod.Chess) break;
+			} catch (e) {
+				mod = null;
+			}
+		}
+		if (!mod || !mod.Chess) throw new Error('chess.js load failed');
 		ChessLib = mod.Chess;
 		chess = new ChessLib();
 		initChessBoard();
