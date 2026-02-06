@@ -1,1 +1,129 @@
-<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>frog1ch</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body><div class="card"><button id="lang">EN</button><div class="avatar"><img src="https://cdn.discordapp.com/avatars/1014193550935732266/141cd3e14cc7c029870fcb6458840696.webp?size=512"></div><h1>frog1ch</h1><p class="nick">@xx_silent_xx</p><div class="sec"><h2 id="h-status">Статус</h2><p><span class="on"></span><span id="t-status">У мережі</span></p></div><div class="sec"><h2 id="h-time">Час</h2><p id="time"></p></div><div class="sec"><h2 id="h-quote">Цитата</h2><p id="t-quote">Фокус. Розвиток. Повтор.</p></div><div class="sec"><h2>CS2</h2><p>⭐ Big Star (Wingman)</p></div><div class="sec"><h2 id="h-about">Про мене</h2><p id="t-about">Навчаюсь у коледжі на комп’ютерного інженера.<br>Займаюсь ремонтом та обслуговуванням ПК-техніки.</p></div><div class="btns"><a class="tg" href="https://t.me/frog1ch_twink" target="_blank">Telegram</a><a class="st" href="https://steamcommunity.com/profiles/76561199403262244/" target="_blank">Steam</a><a class="mu" href="https://music.youtube.com/@cuatro_4_espada" target="_blank">Music</a></div></div><script src="script.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="uk">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<title>frog1ch</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div class="card">
+			<button id="lang">EN</button>
+			<div class="avatar">
+				<img src="https://cdn.discordapp.com/avatars/1014193550935732266/141cd3e14cc7c029870fcb6458840696.webp?size=512">
+			</div>
+			<h1>frog1ch</h1>
+			<p class="nick">@xx_silent_xx</p>
+
+			<div class="sec">
+				<h2 id="h-status">Статус</h2>
+				<p><span class="on"></span><span id="t-status">У мережі</span></p>
+			</div>
+
+			<div class="sec">
+				<h2 id="h-time">Час</h2>
+				<p id="time"></p>
+			</div>
+
+			<div class="sec">
+				<h2 id="h-quote">Цитата</h2>
+				<p id="t-quote">Фокус. Розвиток. Повтор.</p>
+			</div>
+
+			<div class="sec">
+				<h2>CS2</h2>
+				<p>⭐ Big Star (Wingman)</p>
+			</div>
+
+			<div class="sec">
+				<h2 id="h-about">Про мене</h2>
+				<p id="t-about">Навчаюсь у коледжі на комп’ютерного інженера.<br>Займаюсь ремонтом та обслуговуванням ПК-техніки.</p>
+			</div>
+
+			<div class="btns">
+				<a class="tg" href="https://t.me/frog1ch_twink" target="_blank">Telegram</a>
+				<a class="st" href="https://steamcommunity.com/profiles/76561199403262244/" target="_blank">Steam</a>
+				<a class="mu" href="https://music.youtube.com/@cuatro_4_espada" target="_blank">Music</a>
+				<button id="play-btn" class="play">Play</button>
+			</div>
+		</div>
+
+		<!-- Game Modal -->
+		<div id="game-modal" class="game-modal hidden">
+			<div class="game-container">
+				<!-- Registration -->
+				<div id="reg-panel" class="game-panel">
+					<h2>Реєстрація</h2>
+					<input id="nick-input" type="text" placeholder="Введи нік" maxlength="20">
+					<div class="btn-row">
+						<button id="reg-btn" class="btn-primary">Почати</button>
+						<button id="close-btn" class="btn-secondary">Закрити</button>
+					</div>
+				</div>
+
+				<!-- Lobby -->
+				<div id="lobby-panel" class="game-panel hidden">
+					<h2>Привіт, <span id="player-name"></span></h2>
+					<p>Обери гру:</p>
+					<div class="btn-row">
+						<button id="calc-btn" class="btn-game">Calculator</button>
+						<button id="paint-btn" class="btn-game">Paint</button>
+					</div>
+					<button id="back-btn" class="btn-secondary">Назад</button>
+				</div>
+
+				<!-- Calculator -->
+				<div id="calc-panel" class="game-panel hidden">
+					<h2>Calculator</h2>
+					<input id="calc-display" type="text" readonly placeholder="0">
+					<div class="calc-toolbar">
+						<button id="calc-clear" class="btn-secondary">Clear</button>
+					</div>
+					<div class="calc-grid">
+						<button class="calc-btn" data-val="7">7</button>
+						<button class="calc-btn" data-val="8">8</button>
+						<button class="calc-btn" data-val="9">9</button>
+						<button class="calc-btn" data-op="/">÷</button>
+						<button class="calc-btn" data-val="4">4</button>
+						<button class="calc-btn" data-val="5">5</button>
+						<button class="calc-btn" data-val="6">6</button>
+						<button class="calc-btn" data-op="*">×</button>
+						<button class="calc-btn" data-val="1">1</button>
+						<button class="calc-btn" data-val="2">2</button>
+						<button class="calc-btn" data-val="3">3</button>
+						<button class="calc-btn" data-op="-">−</button>
+						<button class="calc-btn" data-val="0">0</button>
+						<button class="calc-btn" data-val=".">.</button>
+						<button class="calc-btn" id="calc-eq">=</button>
+						<button class="calc-btn" data-op="+">+</button>
+					</div>
+					<button id="exit-calc-btn" class="btn-primary">Вийти</button>
+				</div>
+
+				<!-- Paint -->
+				<div id="paint-panel" class="game-panel hidden">
+					<h2>Paint</h2>
+					<div class="paint-toolbar">
+						<button id="pencil-btn" class="tool-btn" data-tool="pencil">✏️ Pencil</button>
+						<button id="eraser-btn" class="tool-btn" data-tool="eraser">🧹 Eraser</button>
+						<button id="fill-btn" class="tool-btn" data-tool="fill">🪣 Fill</button>
+						<input id="color-picker" type="color" value="#000000">
+					</div>
+					<canvas id="paint-canvas" width="400" height="300"></canvas>
+					<button id="exit-paint-btn" class="btn-primary">Вийти</button>
+				</div>
+
+				<!-- Leaderboards -->
+				<div id="board-panel" class="game-panel hidden">
+					<h2>Лідерборд</h2>
+					<div id="leaderboard-content"></div>
+				</div>
+			</div>
+		</div>
+
+		<script src="script.js"></script>
+	</body>
+</html>
