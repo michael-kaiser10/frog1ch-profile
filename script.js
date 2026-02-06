@@ -264,19 +264,20 @@ async function updateLeaderboard(update) {
 	const snap = await getDoc(ref);
 	const existing = snap.exists() ? snap.data() : {};
 	const name = currentUser.displayName || currentUser.email || 'Player';
+	const sumMap = (a = {}, b = {}) => {
+		const out = { ...a };
+		Object.keys(b).forEach((k) => {
+			out[k] = (out[k] || 0) + (b[k] || 0);
+		});
+		return out;
+	};
 	const next = {
 		name,
 		totalTime: (existing.totalTime || 0) + (update.totalTime || 0),
 		calcTime: (existing.calcTime || 0) + (update.calcTime || 0),
 		paintTime: (existing.paintTime || 0) + (update.paintTime || 0),
-		ops: {
-			...(existing.ops || {}),
-			...(update.ops || {})
-		},
-		tools: {
-			...(existing.tools || {}),
-			...(update.tools || {})
-		},
+		ops: sumMap(existing.ops, update.ops),
+		tools: sumMap(existing.tools, update.tools),
 		updatedAt: serverTimestamp()
 	};
 	await setDoc(ref, next, { merge: true });
