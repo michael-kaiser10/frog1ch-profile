@@ -137,7 +137,13 @@ function openModal(title, panel) {
 	show(panel);
 	if (panel === calcPanel) startCalcSession();
 	if (panel === paintPanel) startPaintSession();
-	if (panel === chessPanel) ensureChess();
+	if (panel === chessPanel) {
+		setChessStatus('Loading chess...');
+		ensureChess().then((ok) => {
+			if (!ok) setChessStatus('Chess failed to load');
+			else setChessStatus('Idle');
+		});
+	}
 }
 
 function closeGameModal() {
@@ -519,26 +525,14 @@ function initChessBoard() {
 async function ensureChess() {
 	if (chess) return true;
 	try {
-		if (!window.Chess) {
-			const urls = [
-				'chess.umd.js',
-				'https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.1/dist/chess.js',
-				'https://unpkg.com/chess.js@1.0.0-beta.1/dist/chess.js'
-			];
-			for (const url of urls) {
-				if (window.Chess) break;
-				await new Promise((resolve, reject) => {
-					const s = document.createElement('script');
-					s.src = url;
-					s.async = true;
-					s.onload = () => resolve();
-					s.onerror = () => reject(new Error('load failed'));
-					document.head.appendChild(s);
-				}).catch(() => {});
-			}
+		let mod = null;
+		try {
+			mod = await import('./chess.umd.js');
+		} catch {
+			mod = null;
 		}
-		if (!window.Chess) throw new Error('chess.js load failed');
-		ChessLib = window.Chess;
+		if (!mod || !mod.Chess) throw new Error('chess.js load failed');
+		ChessLib = mod.Chess;
 		chess = new ChessLib();
 		initChessBoard();
 		renderChessBoard();
@@ -1025,8 +1019,12 @@ async function applyEloIfNeeded() {
 if (chessStart) {
 	chessStart.addEventListener('click', () => {
 		if (!chessMode) return;
+		setChessStatus('Loading chess...');
 		ensureChess().then((ok) => {
-			if (!ok) return;
+			if (!ok) {
+				setChessStatus('Chess failed to load');
+				return;
+			}
 			const mode = chessMode.value;
 			if (mode.startsWith('bot')) {
 				startBotGame(mode.split('-')[1]);
