@@ -142,174 +142,190 @@ backBtn.addEventListener('click', () => {
 });
 
 // --- Calculator ---
-function setupCalculator() {
-	let expr = '';
-	let opsCount = { '+':0, '-':0, '*':0, '/':0 };
-	let sessionStart = Date.now();
-	
+let calcState = null;
+
+function startCalcSession() {
+	calcState = {
+		expr: '',
+		opsCount: { '+':0, '-':0, '*':0, '/':0 },
+		sessionStart: Date.now()
+	};
 	calcDisplay.value = '';
-	
-	// Clear button
-	const clearBtn = document.getElementById('calc-clear');
-	clearBtn.addEventListener('click', () => {
-		expr = '';
-		calcDisplay.value = '';
-	});
-	
-	// Bind calculator buttons
-	const calcBtns = document.querySelectorAll('#calc-panel .calc-btn');
-	calcBtns.forEach(btn => {
-		btn.addEventListener('click', (e) => {
-			e.stopPropagation();
-			const v = btn.dataset.val;
-			const op = btn.dataset.op;
-			
-			if(v) {
-				expr += v;
-				calcDisplay.value = expr;
-			} else if(op) {
-				opsCount[op] = (opsCount[op] || 0) + 1;
-				expr += op;
-				calcDisplay.value = expr;
-			}
-		});
-	});
-
-	// Equals button
-	calcEq.addEventListener('click', () => {
-		try {
-			const res = eval(expr);
-			calcDisplay.value = res;
-			expr = String(res);
-		} catch {
-			calcDisplay.value = 'Error';
-			expr = '';
-		}
-	});
-
-	exitCalcBtn.addEventListener('click', () => {
-		const secs = Math.floor((Date.now() - sessionStart) / 1000);
-		boards.calc = boards.calc || {};
-		const p = boards.calc[player] = boards.calc[player] || {time:0, ops:{'+':0,'-':0,'*':0,'/':0}};
-		p.time += secs;
-		Object.keys(opsCount).forEach(k => {
-			p.ops[k] = (p.ops[k] || 0) + (opsCount[k] || 0);
-		});
-		saveBoards();
-		renderLeaderboards();
-		hide(calcPanel);
-		openLobby();
-	});
 }
 
+function endCalcSession() {
+	if(!calcState) return;
+	const secs = Math.floor((Date.now() - calcState.sessionStart) / 1000);
+	boards.calc = boards.calc || {};
+	const p = boards.calc[player] = boards.calc[player] || {time:0, ops:{'+':0,'-':0,'*':0,'/':0}};
+	p.time += secs;
+	Object.keys(calcState.opsCount).forEach(k => {
+		p.ops[k] = (p.ops[k] || 0) + (calcState.opsCount[k] || 0);
+	});
+	saveBoards();
+	renderLeaderboards();
+	calcState = null;
+}
+
+// Bind calculator buttons once
+document.getElementById('calc-clear').addEventListener('click', () => {
+	if(!calcState) return;
+	calcState.expr = '';
+	calcDisplay.value = '';
+});
+
+document.querySelectorAll('#calc-panel .calc-btn').forEach(btn => {
+	btn.addEventListener('click', (e) => {
+		if(!calcState) return;
+		e.stopPropagation();
+		const v = btn.dataset.val;
+		const op = btn.dataset.op;
+		if(v) {
+			calcState.expr += v;
+			calcDisplay.value = calcState.expr;
+		} else if(op) {
+			calcState.opsCount[op] = (calcState.opsCount[op] || 0) + 1;
+			calcState.expr += op;
+			calcDisplay.value = calcState.expr;
+		}
+	});
+});
+
+calcEq.addEventListener('click', () => {
+	if(!calcState) return;
+	try {
+		const res = eval(calcState.expr);
+		calcDisplay.value = res;
+		calcState.expr = String(res);
+	} catch {
+		calcDisplay.value = 'Error';
+		calcState.expr = '';
+	}
+});
+
+exitCalcBtn.addEventListener('click', () => {
+	endCalcSession();
+	hide(calcPanel);
+	openLobby();
+});
+
 // --- Paint ---
-function setupPaint() {
+let paintState = null;
+let drawing = false;
+
+function setActiveTool(tool) {
+	pencilBtn.classList.toggle('active', tool === 'pencil');
+	eraserBtn.classList.toggle('active', tool === 'eraser');
+	fillBtn.classList.toggle('active', tool === 'fill');
+}
+
+function startPaintSession() {
 	const ctx = paintCanvas.getContext('2d');
-	let tool = 'pencil';
-	let toolCounts = {pencil:0, eraser:0, fill:0};
-	let sessionStart = Date.now();
-	let drawing = false;
-	
-	// Clear canvas and initialize
+	paintState = {
+		tool: 'pencil',
+		toolCounts: {pencil:0, eraser:0, fill:0},
+		sessionStart: Date.now(),
+		ctx
+	};
 	ctx.fillStyle = '#fff';
 	ctx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
 	ctx.strokeStyle = colorPicker.value;
 	ctx.fillStyle = colorPicker.value;
-	
-	// Get canvas rect for proper offset calculation
-	const rect = paintCanvas.getBoundingClientRect();
-	
-	// Remove old listeners - create new paint panel to avoid duplicates
-	const oldPanel = paintPanel;
-	const newPanel = oldPanel.cloneNode(true);
-	oldPanel.parentNode.replaceChild(newPanel, oldPanel);
-	
-	// Re-assign new references after clone
-	const newCanvas = document.getElementById('paint-canvas');
-	const newCtx = newCanvas.getContext('2d');
-	newCtx.fillStyle = '#fff';
-	newCtx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-	
-	const newPencilBtn = newPanel.querySelector('[data-tool="pencil"]');
-	const newEraserBtn = newPanel.querySelector('[data-tool="eraser"]');
-	const newFillBtn = newPanel.querySelector('[data-tool="fill"]');
-	const newColorPicker = newPanel.querySelector('#color-picker');
-	const newExitBtn = newPanel.querySelector('#exit-paint-btn');
-	
-	// Tool selection
-	newPencilBtn.addEventListener('click', () => { tool='pencil'; toolCounts.pencil++; newPencilBtn.classList.add('active'); newEraserBtn.classList.remove('active'); newFillBtn.classList.remove('active'); });
-	newEraserBtn.addEventListener('click', () => { tool='eraser'; toolCounts.eraser++; newEraserBtn.classList.add('active'); newPencilBtn.classList.remove('active'); newFillBtn.classList.remove('active'); });
-	newFillBtn.addEventListener('click', () => { tool='fill'; toolCounts.fill++; newFillBtn.classList.add('active'); newPencilBtn.classList.remove('active'); newEraserBtn.classList.remove('active'); });
-
-	// Color picker
-	newColorPicker.addEventListener('change', (e) => {
-		newCtx.strokeStyle = e.target.value;
-		newCtx.fillStyle = e.target.value;
-	});
-
-	// Canvas drawing with proper offset
-	newCanvas.addEventListener('mousedown', (e) => {
-		drawing = true;
-		const rect = newCanvas.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-		newCtx.beginPath();
-		newCtx.moveTo(x, y);
-		
-		if(tool === 'fill') {
-			newCtx.fillStyle = newColorPicker.value;
-			newCtx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-		} else {
-			newCtx.lineWidth = tool === 'eraser' ? 20 : 3;
-			newCtx.lineCap = 'round';
-			newCtx.lineJoin = 'round';
-			newCtx.strokeStyle = tool === 'eraser' ? '#fff' : newColorPicker.value;
-		}
-	});
-
-	newCanvas.addEventListener('mousemove', (e) => {
-		if(!drawing || tool === 'fill') return;
-		const rect = newCanvas.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-		newCtx.lineTo(x, y);
-		newCtx.stroke();
-	});
-
-	newCanvas.addEventListener('mouseup', () => {
-		drawing = false;
-	});
-
-	newCanvas.addEventListener('mouseleave', () => {
-		drawing = false;
-	});
-
-	newExitBtn.addEventListener('click', () => {
-		const secs = Math.floor((Date.now() - sessionStart) / 1000);
-		boards.paint = boards.paint || {};
-		const p = boards.paint[player] = boards.paint[player] || {time:0, tools:{pencil:0,eraser:0,fill:0}};
-		p.time += secs;
-		p.tools.pencil = (p.tools.pencil || 0) + (toolCounts.pencil || 0);
-		p.tools.eraser = (p.tools.eraser || 0) + (toolCounts.eraser || 0);
-		p.tools.fill = (p.tools.fill || 0) + (toolCounts.fill || 0);
-		saveBoards();
-		renderLeaderboards();
-		hide(paintPanel);
-		openLobby();
-	});
+	setActiveTool('pencil');
 }
+
+function endPaintSession() {
+	if(!paintState) return;
+	const secs = Math.floor((Date.now() - paintState.sessionStart) / 1000);
+	boards.paint = boards.paint || {};
+	const p = boards.paint[player] = boards.paint[player] || {time:0, tools:{pencil:0,eraser:0,fill:0}};
+	p.time += secs;
+	p.tools.pencil = (p.tools.pencil || 0) + (paintState.toolCounts.pencil || 0);
+	p.tools.eraser = (p.tools.eraser || 0) + (paintState.toolCounts.eraser || 0);
+	p.tools.fill = (p.tools.fill || 0) + (paintState.toolCounts.fill || 0);
+	saveBoards();
+	renderLeaderboards();
+	paintState = null;
+}
+
+// Tool selection
+pencilBtn.addEventListener('click', () => {
+	if(!paintState) return;
+	paintState.tool = 'pencil';
+	paintState.toolCounts.pencil++;
+	setActiveTool('pencil');
+});
+
+eraserBtn.addEventListener('click', () => {
+	if(!paintState) return;
+	paintState.tool = 'eraser';
+	paintState.toolCounts.eraser++;
+	setActiveTool('eraser');
+});
+
+fillBtn.addEventListener('click', () => {
+	if(!paintState) return;
+	paintState.tool = 'fill';
+	paintState.toolCounts.fill++;
+	setActiveTool('fill');
+});
+
+// Color picker
+colorPicker.addEventListener('change', (e) => {
+	if(!paintState) return;
+	paintState.ctx.strokeStyle = e.target.value;
+	paintState.ctx.fillStyle = e.target.value;
+});
+
+// Canvas drawing
+paintCanvas.addEventListener('mousedown', (e) => {
+	if(!paintState) return;
+	drawing = true;
+	const rect = paintCanvas.getBoundingClientRect();
+	const x = e.clientX - rect.left;
+	const y = e.clientY - rect.top;
+	paintState.ctx.beginPath();
+	paintState.ctx.moveTo(x, y);
+	if(paintState.tool === 'fill') {
+		paintState.ctx.fillStyle = colorPicker.value;
+		paintState.ctx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+	} else {
+		paintState.ctx.lineWidth = paintState.tool === 'eraser' ? 20 : 3;
+		paintState.ctx.lineCap = 'round';
+		paintState.ctx.lineJoin = 'round';
+		paintState.ctx.strokeStyle = paintState.tool === 'eraser' ? '#fff' : colorPicker.value;
+	}
+});
+
+paintCanvas.addEventListener('mousemove', (e) => {
+	if(!paintState || !drawing || paintState.tool === 'fill') return;
+	const rect = paintCanvas.getBoundingClientRect();
+	const x = e.clientX - rect.left;
+	const y = e.clientY - rect.top;
+	paintState.ctx.lineTo(x, y);
+	paintState.ctx.stroke();
+});
+
+paintCanvas.addEventListener('mouseup', () => { drawing = false; });
+paintCanvas.addEventListener('mouseleave', () => { drawing = false; });
+
+exitPaintBtn.addEventListener('click', () => {
+	endPaintSession();
+	hide(paintPanel);
+	openLobby();
+});
 
 // Game selection
 calcBtn.addEventListener('click', () => {
 	hide(lobbyPanel);
 	hide(boardPanel);
 	show(calcPanel);
-	setupCalculator();
+	startCalcSession();
 });
 
 paintBtn.addEventListener('click', () => {
 	hide(lobbyPanel);
 	hide(boardPanel);
 	show(paintPanel);
-	setupPaint();
+	startPaintSession();
 });
