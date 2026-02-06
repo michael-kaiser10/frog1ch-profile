@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, orderBy, limit, getDocs, addDoc, onSnapshot, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.1/dist/esm/chess.js";
 
 let ua = true;
 const T = {
@@ -473,7 +472,8 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // --- Chess ---
-const chess = new Chess();
+let ChessLib = null;
+let chess = null;
 const files = ['a','b','c','d','e','f','g','h'];
 const pieceMap = {
 	wp: '\u2659', wn: '\u2658', wb: '\u2657', wr: '\u2656', wq: '\u2655', wk: '\u2654',
@@ -510,7 +510,22 @@ function initChessBoard() {
 		}
 	}
 }
-initChessBoard();
+
+async function ensureChess() {
+	if (chess) return true;
+	try {
+		const mod = await import('https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.1/dist/esm/chess.js');
+		ChessLib = mod.Chess;
+		chess = new ChessLib();
+		initChessBoard();
+		renderChessBoard();
+		return true;
+	} catch (e) {
+		console.error(e);
+		setChessStatus('Chess failed to load');
+		return false;
+	}
+}
 
 function setChessStatus(text) {
 	if (chessStatus) chessStatus.textContent = text;
@@ -523,6 +538,7 @@ function setChessTimer(seconds) {
 }
 
 function renderChessBoard() {
+	if (!chess) return;
 	if (!chessBoardEl) return;
 	const board = chess.board();
 	const squares = chessBoardEl.querySelectorAll('.chess-square');
@@ -558,6 +574,7 @@ function isMyTurn() {
 }
 
 function onSquareClick(square) {
+	if (!chess) return;
 	if (!isMyTurn()) return;
 	if (!chessSelected) {
 		const moves = chess.moves({ square, verbose: true });
@@ -586,6 +603,7 @@ function onSquareClick(square) {
 }
 
 async function makeMove(from, to) {
+	if (!chess) return;
 	const move = chess.move({ from, to, promotion: 'q' });
 	if (!move) return;
 	if (chessIsBot) {
@@ -646,6 +664,7 @@ async function handleTimeout() {
 }
 
 function startBotGame(level) {
+	if (!chess) return;
 	chess.reset();
 	chessIsBot = true;
 	chessBotLevel = level;
@@ -659,6 +678,7 @@ function startBotGame(level) {
 }
 
 function botMove() {
+	if (!chess) return;
 	const moves = chess.moves({ verbose: true });
 	if (!moves.length) return;
 	let move;
@@ -736,6 +756,7 @@ function minimax(depth, game, alpha, beta, isMaximisingPlayer) {
 }
 
 async function finishGameLocal() {
+	if (!chess) return;
 	const result = chess.isCheckmate() ? (chess.turn() === 'w' ? 'black' : 'white') : 'draw';
 	setChessStatus(result === 'draw' ? 'Draw' : `${result} wins`);
 	if (chessTimerInterval) clearInterval(chessTimerInterval);
@@ -811,7 +832,7 @@ async function resumeActiveGame() {
 	const qBlack = query(collection(db, 'chess_games'), where('blackUid', '==', currentUser.uid), where('status', '==', 'active'));
 	const [sWhite, sBlack] = await Promise.all([getDocs(qWhite), getDocs(qBlack)]);
 	const docSnap = sWhite.docs[0] || sBlack.docs[0];
-	if (docSnap) listenToGame(docSnap.id);
+	if (docSnap) await listenToGame(docSnap.id);
 }
 
 async function sendInvite(toUid, toName) {
@@ -827,6 +848,7 @@ async function sendInvite(toUid, toName) {
 }
 
 async function acceptInvite(inviteId, data) {
+	if (!(await ensureChess())) return;
 	const gameDoc = await addDoc(collection(db, 'chess_games'), {
 		whiteUid: data.toUid,
 		blackUid: data.fromUid,
@@ -844,7 +866,8 @@ async function acceptInvite(inviteId, data) {
 	listenToGame(gameDoc.id);
 }
 
-function listenToGame(gameId) {
+async function listenToGame(gameId) {
+	if (!(await ensureChess())) return;
 	if (gameUnsub) gameUnsub();
 	chessGameId = gameId;
 	gameUnsub = onSnapshot(doc(db, 'chess_games', gameId), (snap) => {
@@ -969,17 +992,20 @@ async function applyEloIfNeeded() {
 if (chessStart) {
 	chessStart.addEventListener('click', () => {
 		if (!chessMode) return;
-		const mode = chessMode.value;
-		if (mode.startsWith('bot')) {
-			startBotGame(mode.split('-')[1]);
-		} else {
-			if (!currentUser) {
-				setChessStatus('Login required for online play.');
-				return;
+		ensureChess().then((ok) => {
+			if (!ok) return;
+			const mode = chessMode.value;
+			if (mode.startsWith('bot')) {
+				startBotGame(mode.split('-')[1]);
+			} else {
+				if (!currentUser) {
+					setChessStatus('Login required for online play.');
+					return;
+				}
+				startOnlineLists();
+				setChessStatus('Online mode: invite a player.');
 			}
-			startOnlineLists();
-			setChessStatus('Online mode: invite a player.');
-		}
+		});
 	});
 }
 

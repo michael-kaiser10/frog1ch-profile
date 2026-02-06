@@ -47,7 +47,7 @@ body{
   display:grid;
   grid-template-columns:1.2fr .8fr;
   gap:20px;
-  align-items:stretch;
+  align-items:start;
 }
 
 .hero-left{
@@ -106,7 +106,7 @@ body{
 .st{background:linear-gradient(135deg,#111827,#334155);color:#e6edf5}
 .mu{background:linear-gradient(135deg,#f59e0b,#f97316);color:#111827}
 
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
 .span-2{grid-column:span 2}
 .panel{
   background:linear-gradient(160deg,rgba(26,36,48,.96),rgba(20,29,39,.96));
