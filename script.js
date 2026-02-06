@@ -590,6 +590,16 @@ function renderChessBoard() {
 	}
 }
 
+function chessGameOver() {
+	if (!chess) return false;
+	return typeof chess.isGameOver === 'function' ? chess.isGameOver() : chess.game_over();
+}
+
+function chessCheckmate() {
+	if (!chess) return false;
+	return typeof chess.isCheckmate === 'function' ? chess.isCheckmate() : chess.in_checkmate();
+}
+
 function isMyTurn() {
 	if (chessIsBot) return chess.turn() === myColor;
 	if (!chessGame) return false;
@@ -630,7 +640,7 @@ async function makeMove(from, to) {
 	const move = chess.move({ from, to, promotion: 'q' });
 	if (!move) return;
 	if (chessIsBot) {
-		if (chess.isGameOver()) {
+		if (chessGameOver()) {
 			await finishGameLocal();
 			return;
 		}
@@ -640,8 +650,8 @@ async function makeMove(from, to) {
 		return;
 	}
 	if (chessGameId) {
-		if (chess.isGameOver()) {
-			const result = chess.isCheckmate()
+		if (chessGameOver()) {
+			const result = chessCheckmate()
 				? (chess.turn() === 'w' ? 'black' : 'white')
 				: 'draw';
 			await updateDoc(doc(db, 'chess_games', chessGameId), {
@@ -715,7 +725,7 @@ function botMove() {
 		move = minimaxRoot(depth, chess, chess.turn() === 'w');
 	}
 	if (move) chess.move(move);
-	if (chess.isGameOver()) {
+	if (chessGameOver()) {
 		finishGameLocal();
 		return;
 	}
@@ -780,7 +790,7 @@ function minimax(depth, game, alpha, beta, isMaximisingPlayer) {
 
 async function finishGameLocal() {
 	if (!chess) return;
-	const result = chess.isCheckmate() ? (chess.turn() === 'w' ? 'black' : 'white') : 'draw';
+	const result = chessCheckmate() ? (chess.turn() === 'w' ? 'black' : 'white') : 'draw';
 	setChessStatus(result === 'draw' ? 'Draw' : `${result} wins`);
 	if (chessTimerInterval) clearInterval(chessTimerInterval);
 	if (currentUser) await updateChessElo(result, true);
