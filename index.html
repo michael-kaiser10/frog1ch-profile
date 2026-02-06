@@ -6,7 +6,7 @@
 		<title>made_by_frog1ch</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
@@ -32,11 +32,11 @@
 			<section class="hero">
 				<div class="hero-main">
 					<div class="badge">Community Arcade</div>
-					<h1>Games, chat, and ranked climbs in one soft, fast hub.</h1>
-					<p>Play against bots or real players, post in global chat, and chase ELO. Built to grow with new games and features.</p>
+					<h1>Play, chat, climb. One hub for every mode.</h1>
+					<p>Fast games, global chat, and ranked ladders. Built to expand with new mini‑games and social tools.</p>
 					<div class="hero-actions">
 						<button id="play-btn" class="btn btn-primary">Play now</button>
-						<a class="btn btn-ghost" href="#games">See games</a>
+						<button id="chess-btn" class="btn btn-ghost">Open Chess</button>
 					</div>
 					<div class="hero-metrics">
 						<div class="metric">
@@ -56,13 +56,13 @@
 				<div class="hero-side">
 					<div class="panel callout">
 						<h3>Arcade lineup</h3>
-						<p>Jump into games, track stats, and keep your position on the ladder.</p>
+						<p>Jump into games, track stats, and hold your rank.</p>
 						<div class="chip-row">
 							<span class="chip">Chess</span>
 							<span class="chip">Paint</span>
 							<span class="chip">Calculator</span>
 						</div>
-						<button id="chess-btn" class="btn btn-soft">Open Chess</button>
+						<a class="btn btn-soft" href="#games">Browse games</a>
 					</div>
 					<div class="panel callout alt">
 						<h3>Global chat</h3>
@@ -73,12 +73,12 @@
 			</section>
 
 			<main class="layout">
-				<section id="games" class="tile span-7">
+				<section id="games" class="tile games">
 					<div class="tile-head">
 						<h2>Games</h2>
 						<span class="tag">Playable</span>
 					</div>
-					<p class="tile-sub">Pick a mode and start instantly. More games will drop here later.</p>
+					<p class="tile-sub">Pick a mode and start instantly.</p>
 					<div class="game-row">
 						<button id="calc-btn" class="btn btn-game">Calculator</button>
 						<button id="paint-btn" class="btn btn-game">Paint</button>
@@ -87,7 +87,15 @@
 					</div>
 				</section>
 
-				<section id="account" class="tile span-5">
+				<section id="leaderboard" class="tile leaderboard">
+					<div class="tile-head">
+						<h2>Leaderboard</h2>
+						<span class="tag">Ranked</span>
+					</div>
+					<div id="leaderboard-content"></div>
+				</section>
+
+				<section id="account" class="tile account">
 					<div class="tile-head">
 						<h2>Account</h2>
 						<span class="tag">Firebase</span>
@@ -108,7 +116,7 @@
 					<p class="hint">Login to sync chat, stats, and global rankings.</p>
 				</section>
 
-				<section id="chat" class="tile span-7">
+				<section id="chat" class="tile chat">
 					<div class="tile-head">
 						<h2>Global Chat</h2>
 						<span class="tag">Online</span>
@@ -129,15 +137,7 @@
 					<p class="hint">Chat is available after login. Images up to 200KB.</p>
 				</section>
 
-				<section id="leaderboard" class="tile span-5">
-					<div class="tile-head">
-						<h2>Leaderboard</h2>
-						<span class="tag">Ranked</span>
-					</div>
-					<div id="leaderboard-content"></div>
-				</section>
-
-				<section class="tile span-12" id="feedback">
+				<section class="tile feedback" id="feedback">
 					<div class="tile-head">
 						<h2>Feedback</h2>
 						<span class="tag">Contact</span>
