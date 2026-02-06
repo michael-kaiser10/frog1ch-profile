@@ -110,6 +110,7 @@ let pendingImageData = null;
 
 // Chess
 const chessBtn = document.getElementById('chess-btn');
+const chessPanel = document.getElementById('chess-panel');
 const chessMode = document.getElementById('chess-mode');
 const chessStart = document.getElementById('chess-start');
 const chessDraw = document.getElementById('chess-draw');
@@ -119,6 +120,7 @@ const chessTimer = document.getElementById('chess-timer');
 const chessBoardEl = document.getElementById('chess-board');
 const onlineList = document.getElementById('online-list');
 const inviteList = document.getElementById('invite-list');
+const exitChessBtn = document.getElementById('exit-chess-btn');
 
 let currentUser = null;
 let authMode = 'signup';
@@ -131,9 +133,11 @@ function openModal(title, panel) {
 	show(gameModal);
 	hide(calcPanel);
 	hide(paintPanel);
+	if (chessPanel) hide(chessPanel);
 	show(panel);
 	if (panel === calcPanel) startCalcSession();
 	if (panel === paintPanel) startPaintSession();
+	if (panel === chessPanel) ensureChess();
 }
 
 function closeGameModal() {
@@ -147,6 +151,7 @@ closeModal.addEventListener('click', closeGameModal);
 
 calcBtn.addEventListener('click', () => openModal('Calculator', calcPanel));
 paintBtn.addEventListener('click', () => openModal('Paint', paintPanel));
+if (chessBtn) chessBtn.addEventListener('click', () => openModal('Chess', chessPanel));
 
 onAuthStateChanged(auth, (user) => {
 	currentUser = user || null;
@@ -1308,3 +1313,10 @@ exitPaintBtn.addEventListener('click', async () => {
 	hide(paintPanel);
 	hide(gameModal);
 });
+
+if (exitChessBtn) {
+	exitChessBtn.addEventListener('click', () => {
+		hide(chessPanel);
+		hide(gameModal);
+	});
+}

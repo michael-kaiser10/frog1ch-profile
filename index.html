@@ -76,44 +76,6 @@
 					<div class="mini-note">Keep playing to grow your global ranking.</div>
 				</section>
 
-				<section class="panel chess span-2">
-					<h3>Chess Arena</h3>
-					<p>Play versus bots or invite real players. Ranked ELO for wins/losses.</p>
-					<div class="chess-top">
-						<div class="chess-controls">
-							<label class="field">
-								<span>Mode</span>
-								<select id="chess-mode">
-									<option value="bot-random">Bot: Random</option>
-									<option value="bot-easy">Bot: Easy</option>
-									<option value="bot-medium">Bot: Medium</option>
-									<option value="bot-hard">Bot: Hard</option>
-									<option value="online">Online Player</option>
-								</select>
-							</label>
-							<button id="chess-start" class="btn btn-primary">Start Game</button>
-							<button id="chess-draw" class="btn btn-ghost">Offer Draw</button>
-							<button id="chess-resign" class="btn btn-ghost">Resign</button>
-							<div class="chess-status">
-								<span id="chess-status">Idle</span>
-								<span id="chess-timer">60s</span>
-							</div>
-						</div>
-						<div class="chess-online">
-							<div class="chess-list">
-								<h4>Online Players</h4>
-								<div id="online-list"></div>
-							</div>
-							<div class="chess-list">
-								<h4>Invites</h4>
-								<div id="invite-list"></div>
-							</div>
-						</div>
-					</div>
-					<div id="chess-board" class="chess-board"></div>
-					<p class="hint">If you leave during a game, you lose after 30s unless you return.</p>
-				</section>
-
 				<section class="panel auth">
 					<h3>Account</h3>
 					<p id="auth-status">Not logged in.</p>
@@ -232,6 +194,46 @@
 						</div>
 					</div>
 					<button id="exit-paint-btn" class="btn btn-primary">Exit</button>
+				</div>
+
+				<!-- Chess -->
+				<div id="chess-panel" class="game-panel hidden">
+					<h3>Chess Arena</h3>
+					<p>Play versus bots or invite real players. Ranked ELO for wins/losses.</p>
+					<div class="chess-top">
+						<div class="chess-controls">
+							<label class="field">
+								<span>Mode</span>
+								<select id="chess-mode">
+									<option value="bot-random">Bot: Random</option>
+									<option value="bot-easy">Bot: Easy</option>
+									<option value="bot-medium">Bot: Medium</option>
+									<option value="bot-hard">Bot: Hard</option>
+									<option value="online">Online Player</option>
+								</select>
+							</label>
+							<button id="chess-start" class="btn btn-primary">Start Game</button>
+							<button id="chess-draw" class="btn btn-ghost">Offer Draw</button>
+							<button id="chess-resign" class="btn btn-ghost">Resign</button>
+							<div class="chess-status">
+								<span id="chess-status">Idle</span>
+								<span id="chess-timer">60s</span>
+							</div>
+						</div>
+						<div class="chess-online">
+							<div class="chess-list">
+								<h4>Online Players</h4>
+								<div id="online-list"></div>
+							</div>
+							<div class="chess-list">
+								<h4>Invites</h4>
+								<div id="invite-list"></div>
+							</div>
+						</div>
+					</div>
+					<div id="chess-board" class="chess-board"></div>
+					<p class="hint">If you leave during a game, you lose after 30s unless you return.</p>
+					<button id="exit-chess-btn" class="btn btn-primary">Exit</button>
 				</div>
 			</div>
 		</div>
