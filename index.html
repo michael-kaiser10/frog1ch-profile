@@ -6,21 +6,21 @@
 		<title>made_by_frog1ch</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Unbounded:wght@400;600;700&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
-		<div class="bg-aurora"></div>
+		<div class="bg-pulse"></div>
 		<div class="app">
 			<header class="topbar">
 				<div class="brand">
-					<span class="brand-dot"></span>
+					<span class="brand-gem"></span>
 					<span class="brand-text">made_by_frog1ch</span>
 				</div>
 				<nav class="nav">
-					<a href="#games">Games</a>
-					<a href="#chat">Chat</a>
-					<a href="#leaderboard">Leaderboard</a>
+					<a href="#arena">Arena</a>
+					<a href="#lounge">Lounge</a>
+					<a href="#ranking">Ranking</a>
 					<a href="#account">Account</a>
 				</nav>
 				<div class="top-actions">
@@ -30,10 +30,10 @@
 			</header>
 
 			<section class="hero">
-				<div class="hero-main">
-					<div class="badge">Community Arcade</div>
-					<h1>Play, chat, climb. One hub for every mode.</h1>
-					<p>Fast games, global chat, and ranked ladders. Built to expand with new mini‑games and social tools.</p>
+				<div class="hero-left">
+					<div class="hero-badge">Community Arcade</div>
+					<h1>Arcade hub for games, chat, and ranked battles.</h1>
+					<p>Everything lives in one flow: pick a game, jump into chat, and grind your position on the ladder.</p>
 					<div class="hero-actions">
 						<button id="play-btn" class="btn btn-primary">Play now</button>
 						<button id="chess-btn" class="btn btn-ghost">Open Chess</button>
@@ -53,32 +53,38 @@
 						</div>
 					</div>
 				</div>
-				<div class="hero-side">
-					<div class="panel callout">
-						<h3>Arcade lineup</h3>
-						<p>Jump into games, track stats, and hold your rank.</p>
-						<div class="chip-row">
-							<span class="chip">Chess</span>
-							<span class="chip">Paint</span>
-							<span class="chip">Calculator</span>
+				<div class="hero-right">
+					<div class="hero-grid">
+						<div class="hero-card">
+							<h3>Live ladder</h3>
+							<p>Every win updates ELO and global stats.</p>
+							<span class="accent">Ranked</span>
 						</div>
-						<a class="btn btn-soft" href="#games">Browse games</a>
-					</div>
-					<div class="panel callout alt">
-						<h3>Global chat</h3>
-						<p>Share ideas, memes, and find opponents. Images supported.</p>
-						<a class="btn btn-ghost" href="#chat">Open chat</a>
+						<div class="hero-card highlight">
+							<h3>Global chat</h3>
+							<p>Share screenshots, memes, and challenges.</p>
+							<span class="accent">Online</span>
+						</div>
+						<div class="hero-card">
+							<h3>Game modules</h3>
+							<p>More mini-games can be added later.</p>
+							<div class="chip-row">
+								<span class="chip">Chess</span>
+								<span class="chip">Paint</span>
+								<span class="chip">Calculator</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</section>
 
 			<main class="layout">
-				<section id="games" class="tile games">
+				<section id="arena" class="tile arena">
 					<div class="tile-head">
-						<h2>Games</h2>
-						<span class="tag">Playable</span>
+						<h2>Arena</h2>
+						<span class="tag">Play</span>
 					</div>
-					<p class="tile-sub">Pick a mode and start instantly.</p>
+					<p class="tile-sub">Choose a game and launch instantly.</p>
 					<div class="game-row">
 						<button id="calc-btn" class="btn btn-game">Calculator</button>
 						<button id="paint-btn" class="btn btn-game">Paint</button>
@@ -87,10 +93,10 @@
 					</div>
 				</section>
 
-				<section id="leaderboard" class="tile leaderboard">
+				<section id="ranking" class="tile ranking">
 					<div class="tile-head">
-						<h2>Leaderboard</h2>
-						<span class="tag">Ranked</span>
+						<h2>Ranking</h2>
+						<span class="tag">ELO</span>
 					</div>
 					<div id="leaderboard-content"></div>
 				</section>
@@ -98,7 +104,7 @@
 				<section id="account" class="tile account">
 					<div class="tile-head">
 						<h2>Account</h2>
-						<span class="tag">Firebase</span>
+						<span class="tag">Sync</span>
 					</div>
 					<p id="auth-status">Not logged in.</p>
 					<div class="auth-grid">
@@ -116,10 +122,10 @@
 					<p class="hint">Login to sync chat, stats, and global rankings.</p>
 				</section>
 
-				<section id="chat" class="tile chat">
+				<section id="lounge" class="tile lounge">
 					<div class="tile-head">
-						<h2>Global Chat</h2>
-						<span class="tag">Online</span>
+						<h2>Lounge</h2>
+						<span class="tag">Chat</span>
 					</div>
 					<div id="chat-list" class="chat-list"></div>
 					<div class="chat-input">

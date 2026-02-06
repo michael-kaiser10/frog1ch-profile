@@ -1,40 +1,40 @@
 ﻿*{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0b1218;
-  --bg-2:#101a24;
-  --panel:#141f2a;
-  --panel-2:#121c26;
-  --ink:#e6eef6;
-  --muted:#93a6ba;
+  --bg:#0c1117;
+  --bg-2:#111926;
+  --panel:#151f2d;
+  --panel-2:#101825;
+  --ink:#eaf2f9;
+  --muted:#9bb0c6;
   --accent:#ff7a40;
   --accent-2:#36c5b7;
   --accent-3:#7a89ff;
   --border:rgba(255,255,255,.08);
-  --shadow:0 24px 70px rgba(3,7,10,.55);
-  --glow:0 0 26px rgba(255,122,64,.28);
-  --radius:26px;
-  --font-head:'Oxanium','Segoe UI',sans-serif;
-  --font-body:'Manrope','Segoe UI',sans-serif;
+  --shadow:0 28px 70px rgba(4,8,12,.6);
+  --glow:0 0 26px rgba(255,122,64,.3);
+  --radius:24px;
+  --font-head:'Unbounded','Segoe UI',sans-serif;
+  --font-body:'Rubik','Segoe UI',sans-serif;
 }
 
 body{
   min-height:100vh;
-  background:radial-gradient(1100px 700px at 10% -10%, rgba(122,137,255,.24), transparent 60%),
-             radial-gradient(900px 600px at 95% 15%, rgba(54,197,183,.22), transparent 60%),
+  background:radial-gradient(1000px 650px at 8% -10%, rgba(122,137,255,.24), transparent 60%),
+             radial-gradient(900px 600px at 95% 8%, rgba(54,197,183,.22), transparent 60%),
              linear-gradient(160deg,var(--bg),var(--bg-2));
   color:var(--ink);
   font-family:var(--font-body);
   padding:24px;
 }
 
-.bg-aurora{
+.bg-pulse{
   position:fixed;
   inset:-25% -25% auto -25%;
-  height:125vh;
+  height:130vh;
   background:
-    radial-gradient(650px 450px at 12% 20%, rgba(255,122,64,.22), transparent 60%),
+    radial-gradient(650px 450px at 15% 18%, rgba(255,122,64,.22), transparent 60%),
     radial-gradient(700px 520px at 84% 10%, rgba(54,197,183,.2), transparent 60%),
-    radial-gradient(700px 520px at 50% 90%, rgba(122,137,255,.18), transparent 60%);
+    radial-gradient(700px 520px at 50% 90%, rgba(122,137,255,.2), transparent 60%);
   filter:blur(12px);
   pointer-events:none;
   z-index:-1;
@@ -42,39 +42,34 @@ body{
 
 .app{max-width:1240px;margin:0 auto;display:grid;gap:24px}
 
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:16px;
-}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-head);font-weight:700}
-.brand-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px rgba(255,122,64,.7)}
-.brand-text{letter-spacing:.3px}
+.brand-gem{width:12px;height:12px;border-radius:3px;transform:rotate(45deg);background:var(--accent);box-shadow:0 0 12px rgba(255,122,64,.7)}
+.brand-text{letter-spacing:.2px}
 
 .nav{display:flex;gap:16px;flex-wrap:wrap}
-.nav a{color:var(--muted);text-decoration:none;font-weight:600;font-size:13px}
+.nav a{color:var(--muted);text-decoration:none;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.12em}
 .nav a:hover{color:var(--ink)}
 
 .top-actions{display:flex;gap:10px;align-items:center}
 
 .hero{
   display:grid;
-  grid-template-columns:1.15fr .85fr;
+  grid-template-columns:1.1fr .9fr;
   gap:20px;
 }
 
-.hero-main{
-  background:linear-gradient(160deg,rgba(20,31,42,.96),rgba(16,26,36,.96));
+.hero-left{
+  background:linear-gradient(160deg,rgba(21,31,45,.98),rgba(15,24,36,.98));
   border:1px solid var(--border);
   border-radius:var(--radius);
-  padding:30px;
+  padding:28px;
   box-shadow:var(--shadow);
   display:grid;
   gap:16px;
 }
 
-.badge{
+.hero-badge{
   display:inline-flex;
   align-items:center;
   gap:8px;
@@ -83,20 +78,20 @@ body{
   background:rgba(255,122,64,.14);
   color:#ffd2bd;
   font-weight:700;
-  font-size:12px;
+  font-size:11px;
   text-transform:uppercase;
-  letter-spacing:.12em;
+  letter-spacing:.16em;
   width:fit-content;
 }
 
-.hero h1{font-family:var(--font-head);font-size:34px;line-height:1.15}
+.hero h1{font-family:var(--font-head);font-size:32px;line-height:1.15}
 .hero p{color:var(--muted);font-size:15px;max-width:560px}
 
 .hero-actions{display:flex;gap:10px;flex-wrap:wrap}
 
 .hero-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .metric{
-  background:rgba(12,18,26,.65);
+  background:rgba(10,16,24,.7);
   border:1px solid var(--border);
   border-radius:16px;
   padding:12px;
@@ -106,50 +101,44 @@ body{
 .metric .label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.12em}
 .metric .value{font-weight:700;font-family:var(--font-head)}
 
-.hero-side{display:grid;gap:16px}
-.panel{
-  background:linear-gradient(150deg,rgba(19,28,38,.98),rgba(14,22,31,.98));
+.hero-right{display:grid;gap:16px}
+.hero-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.hero-card{
+  background:linear-gradient(150deg,rgba(20,30,44,.98),rgba(14,22,33,.98));
   border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:20px;
+  border-radius:20px;
+  padding:16px;
   box-shadow:var(--shadow);
   display:grid;
-  gap:12px;
-  align-content:start;
+  gap:10px;
 }
-.panel h3{font-family:var(--font-head);font-size:18px}
-.panel p{color:var(--muted);font-size:13px}
-.panel.alt{background:linear-gradient(150deg,rgba(22,32,42,.98),rgba(18,26,36,.98))}
+.hero-card.highlight{border:1px solid rgba(255,122,64,.4)}
+.hero-card h3{font-family:var(--font-head);font-size:16px}
+.hero-card p{color:var(--muted);font-size:12px}
+.accent{color:var(--accent-2);font-size:12px;font-weight:700}
 
 .chip-row{display:flex;gap:8px;flex-wrap:wrap}
-.chip{
-  padding:6px 12px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:700;
-  background:rgba(122,137,255,.16);
-  color:#dfe4ff;
-}
+.chip{padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(122,137,255,.16);color:#dfe4ff}
 
 .layout{
   display:grid;
   grid-template-columns:repeat(12,minmax(0,1fr));
   grid-template-areas:
-    "games games games games games games leaderboard leaderboard leaderboard account account account"
-    "chat chat chat chat chat chat leaderboard leaderboard leaderboard account account account"
+    "arena arena arena arena ranking ranking ranking account account account account account"
+    "lounge lounge lounge lounge lounge lounge ranking ranking ranking account account account"
     "feedback feedback feedback feedback feedback feedback feedback feedback feedback feedback feedback feedback";
   gap:20px;
   align-items:start;
 }
 
-.games{grid-area:games}
-.leaderboard{grid-area:leaderboard}
+.arena{grid-area:arena}
+.ranking{grid-area:ranking}
 .account{grid-area:account}
-.chat{grid-area:chat}
+.lounge{grid-area:lounge}
 .feedback{grid-area:feedback}
 
 .tile{
-  background:linear-gradient(150deg,rgba(20,31,42,.98),rgba(16,26,36,.98));
+  background:linear-gradient(150deg,rgba(21,31,45,.98),rgba(15,24,36,.98));
   border:1px solid var(--border);
   border-radius:var(--radius);
   padding:20px;
@@ -159,17 +148,8 @@ body{
 }
 
 .tile-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.tile-head h2{font-family:var(--font-head);font-size:20px}
-.tag{
-  padding:6px 10px;
-  border-radius:999px;
-  background:rgba(54,197,183,.18);
-  color:#bff3ed;
-  font-size:11px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.08em;
-}
+.tile-head h2{font-family:var(--font-head);font-size:18px}
+.tag{padding:6px 10px;border-radius:999px;background:rgba(54,197,183,.18);color:#bff3ed;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
 .tile-sub{color:var(--muted);font-size:13px}
 
 .game-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
@@ -189,9 +169,9 @@ body{
 }
 .btn-primary{background:linear-gradient(135deg,var(--accent),#ff9b6a);color:#21110a}
 .btn-ghost{background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--border)}
-.btn-soft{background:rgba(122,137,255,.2);color:#e6eaff;border:1px solid rgba(122,137,255,.35)}
 .btn-game{background:linear-gradient(135deg,#49d5c3,#3a7bd5);color:#071518}
 .btn-disabled{background:#2a3745;color:#8ea2b4;border:1px solid var(--border);cursor:not-allowed}
+.btn-soft{background:rgba(122,137,255,.2);color:#e6eaff;border:1px solid rgba(122,137,255,.35)}
 .btn:hover{transform:translateY(-2px);box-shadow:var(--glow)}
 
 .auth-grid{display:grid;gap:8px}
@@ -230,14 +210,7 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
   flex-direction:column;
   gap:10px;
 }
-.chat-item{
-  display:grid;
-  gap:6px;
-  padding:10px 12px;
-  border-radius:12px;
-  background:rgba(20,30,40,.9);
-  border:1px solid rgba(255,255,255,.06);
-}
+.chat-item{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:rgba(20,30,40,.9);border:1px solid rgba(255,255,255,.06)}
 .chat-meta{font-size:11px;color:var(--muted)}
 .chat-text{font-size:13px;color:var(--ink)}
 .chat-input{display:flex;gap:8px;align-items:center}
@@ -250,19 +223,8 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
 
 .hidden{display:none!important}
 
-.game-modal{
-  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-  background:rgba(6,10,15,.6);backdrop-filter:blur(10px);padding:18px;z-index:9999;
-}
-.game-container{
-  width:min(1100px,96vw);max-height:92vh;overflow:auto;
-  background:linear-gradient(160deg,#121c26,#0f1822);
-  border:1px solid var(--border);
-  border-radius:26px;
-  box-shadow:var(--shadow);
-  padding:18px;
-  display:grid;gap:14px;
-}
+.game-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(6,10,15,.6);backdrop-filter:blur(10px);padding:18px;z-index:9999}
+.game-container{width:min(1100px,96vw);max-height:92vh;overflow:auto;background:linear-gradient(160deg,#121c26,#0f1822);border:1px solid var(--border);border-radius:26px;box-shadow:var(--shadow);padding:18px;display:grid;gap:14px}
 .game-header{display:flex;align-items:center;justify-content:space-between}
 .game-panel{background:linear-gradient(140deg,rgba(18,28,38,.98),rgba(12,20,28,.98));border:1px solid var(--border);border-radius:18px;padding:16px}
 .game-panel h3{font-family:var(--font-head);font-size:18px;margin-bottom:10px}
@@ -296,18 +258,7 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
 .online-item,.invite-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:10px;background:rgba(20,30,40,.9);margin-bottom:6px}
 .online-item button,.invite-item button{padding:6px 10px;font-size:12px}
 
-.chess-board{
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  border:1px solid var(--border);
-  border-radius:16px;
-  overflow:hidden;
-  background:#0b141d;
-  width:100%;
-  max-width:520px;
-  aspect-ratio:1/1;
-  margin-top:6px;
-}
+.chess-board{display:grid;grid-template-columns:repeat(8,1fr);border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#0b141d;width:100%;max-width:520px;aspect-ratio:1/1;margin-top:6px}
 .chess-square{display:flex;align-items:center;justify-content:center;font-size:clamp(18px, 3vw, 30px);user-select:none}
 .chess-square.light{background:#e9eff5;color:#0b1117}
 .chess-square.dark{background:#9aa8b6;color:#0b1117}
@@ -319,12 +270,13 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
   .layout{
     grid-template-columns:1fr;
     grid-template-areas:
-      "games"
-      "leaderboard"
+      "arena"
+      "ranking"
       "account"
-      "chat"
+      "lounge"
       "feedback";
   }
+  .hero-grid{grid-template-columns:1fr}
   .chess-top{grid-template-columns:1fr}
 }
 @media (max-width:720px){
