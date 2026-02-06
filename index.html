@@ -1,83 +1,97 @@
-<!DOCTYPE html>
-<html lang="uk">
+﻿<!DOCTYPE html>
+<html lang="en">
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width,initial-scale=1">
 		<title>made_by_frog1ch</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
-		<div class="bg-orbit"></div>
+		<div class="bg-aurora"></div>
 		<div class="app">
-			<header class="hero">
-				<div class="hero-left">
-					<div class="brand">
-						<span class="dot"></span>
-						<span class="brand-title">made_by_frog1ch</span>
-					</div>
-					<h1>Hub for games, ideas, and late-night experiments.</h1>
-					<p class="hero-sub">A community space where we play, build, and ship.</p>
-					<div class="hero-actions">
-						<button id="play-btn" class="btn btn-primary">Play now</button>
-						<button id="lang" class="btn btn-ghost">EN</button>
-					</div>
-					<div class="hero-stats">
-						<div class="stat">
-							<span class="label">&#1057;&#1090;&#1072;&#1090;&#1091;&#1089;</span>
-							<span class="value" id="t-status">&#1059; &#1084;&#1077;&#1088;&#1077;&#1078;&#1110;</span>
-						</div>
-						<div class="stat">
-							<span class="label">&#1063;&#1072;&#1089;</span>
-							<span class="value" id="time"></span>
-						</div>
-						<div class="stat">
-							<span class="label">&#1062;&#1080;&#1090;&#1072;&#1090;&#1072;</span>
-							<span class="value" id="t-quote">&#1060;&#1086;&#1082;&#1091;&#1089;. &#1056;&#1086;&#1079;&#1074;&#1080;&#1090;&#1086;&#1082;. &#1055;&#1086;&#1074;&#1090;&#1086;&#1088;.</span>
-						</div>
-					</div>
+			<header class="topbar">
+				<div class="brand">
+					<span class="brand-dot"></span>
+					<span class="brand-text">made_by_frog1ch</span>
 				</div>
-				<div class="hero-card">
-					<div class="avatar">
-						<img src="https://cdn.discordapp.com/avatars/1014193550935732266/141cd3e14cc7c029870fcb6458840696.webp?size=512" alt="avatar">
-					</div>
-					<h2>frog1ch</h2>
-					<p class="tag">Creator &amp; admin</p>
-					<div class="about">
-						<div class="about-row">
-							<span class="label">What is this</span>
-							<p>A gaming hub with global chat and ranked ladders. More games coming soon.</p>
-						</div>
-						<div class="about-row">
-							<span class="label">Send ideas</span>
-							<p>Ping me with new game ideas, features, or bugs.</p>
-						</div>
-					</div>
-					<div class="socials">
-						<a class="pill tg" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Telegram</a>
-						<a class="pill st" href="https://steamcommunity.com/profiles/76561199403262244/" target="_blank" rel="noopener">Steam</a>
-						<a class="pill mu" href="https://music.youtube.com/@cuatro_4_espada" target="_blank" rel="noopener">Music</a>
-					</div>
+				<nav class="nav">
+					<a href="#games">Games</a>
+					<a href="#chat">Chat</a>
+					<a href="#leaderboard">Leaderboard</a>
+					<a href="#account">Account</a>
+				</nav>
+				<div class="top-actions">
+					<button id="lang" class="btn btn-ghost">EN</button>
+					<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Telegram</a>
 				</div>
 			</header>
 
-			<main class="grid">
-				<section class="panel games">
-					<h3>Games</h3>
-					<p>Pick a game and jump right in. More modules soon.</p>
+			<section class="hero">
+				<div class="hero-main">
+					<div class="badge">Community Arcade</div>
+					<h1>Games, chat, and ranked climbs in one soft, fast hub.</h1>
+					<p>Play against bots or real players, post in global chat, and chase ELO. Built to grow with new games and features.</p>
+					<div class="hero-actions">
+						<button id="play-btn" class="btn btn-primary">Play now</button>
+						<a class="btn btn-ghost" href="#games">See games</a>
+					</div>
+					<div class="hero-metrics">
+						<div class="metric">
+							<span class="label">Status</span>
+							<span class="value" id="t-status">Online</span>
+						</div>
+						<div class="metric">
+							<span class="label">Time</span>
+							<span class="value" id="time"></span>
+						</div>
+						<div class="metric">
+							<span class="label">Quote</span>
+							<span class="value" id="t-quote">Focus. Improve. Repeat.</span>
+						</div>
+					</div>
+				</div>
+				<div class="hero-side">
+					<div class="panel callout">
+						<h3>Arcade lineup</h3>
+						<p>Jump into games, track stats, and keep your position on the ladder.</p>
+						<div class="chip-row">
+							<span class="chip">Chess</span>
+							<span class="chip">Paint</span>
+							<span class="chip">Calculator</span>
+						</div>
+						<button id="chess-btn" class="btn btn-soft">Open Chess</button>
+					</div>
+					<div class="panel callout alt">
+						<h3>Global chat</h3>
+						<p>Share ideas, memes, and find opponents. Images supported.</p>
+						<a class="btn btn-ghost" href="#chat">Open chat</a>
+					</div>
+				</div>
+			</section>
+
+			<main class="layout">
+				<section id="games" class="tile span-7">
+					<div class="tile-head">
+						<h2>Games</h2>
+						<span class="tag">Playable</span>
+					</div>
+					<p class="tile-sub">Pick a mode and start instantly. More games will drop here later.</p>
 					<div class="game-row">
 						<button id="calc-btn" class="btn btn-game">Calculator</button>
 						<button id="paint-btn" class="btn btn-game">Paint</button>
-						<button id="chess-btn" class="btn btn-game">Chess</button>
+						<button id="chess-btn-2" class="btn btn-game">Chess</button>
 						<button class="btn btn-disabled" disabled>More soon</button>
 					</div>
-					<div class="mini-note">Keep playing to grow your global ranking.</div>
 				</section>
 
-				<section class="panel auth">
-					<h3>Account</h3>
+				<section id="account" class="tile span-5">
+					<div class="tile-head">
+						<h2>Account</h2>
+						<span class="tag">Firebase</span>
+					</div>
 					<p id="auth-status">Not logged in.</p>
 					<div class="auth-grid">
 						<input id="email-input" type="email" placeholder="Email" autocomplete="email">
@@ -91,16 +105,14 @@
 						<button id="logout-btn" class="btn btn-ghost">Log out</button>
 					</div>
 					<p id="auth-msg" class="hint"></p>
-					<p class="hint">Firebase Auth handles login and global stats.</p>
+					<p class="hint">Login to sync chat, stats, and global rankings.</p>
 				</section>
 
-				<section class="panel leaderboard">
-					<h3>Leaderboard</h3>
-					<div id="leaderboard-content"></div>
-				</section>
-
-				<section class="panel chat">
-					<h3>Global Chat</h3>
+				<section id="chat" class="tile span-7">
+					<div class="tile-head">
+						<h2>Global Chat</h2>
+						<span class="tag">Online</span>
+					</div>
 					<div id="chat-list" class="chat-list"></div>
 					<div class="chat-input">
 						<input id="chat-message" type="text" placeholder="Type a message...">
@@ -117,14 +129,21 @@
 					<p class="hint">Chat is available after login. Images up to 200KB.</p>
 				</section>
 
-				<section class="panel ideas">
-					<h3>Ideas & Feedback</h3>
-					<p>Have an idea or new game? Send it here.</p>
-					<div class="socials">
-						<a class="pill tg" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Telegram</a>
-						<a class="pill st" href="https://steamcommunity.com/profiles/76561199403262244/" target="_blank" rel="noopener">Steam</a>
-						<a class="pill mu" href="https://music.youtube.com/@cuatro_4_espada" target="_blank" rel="noopener">Music</a>
+				<section id="leaderboard" class="tile span-5">
+					<div class="tile-head">
+						<h2>Leaderboard</h2>
+						<span class="tag">Ranked</span>
 					</div>
+					<div id="leaderboard-content"></div>
+				</section>
+
+				<section class="tile span-12" id="feedback">
+					<div class="tile-head">
+						<h2>Feedback</h2>
+						<span class="tag">Contact</span>
+					</div>
+					<p class="tile-sub">Send ideas, bug reports, or new game suggestions.</p>
+					<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
 				</section>
 			</main>
 		</div>

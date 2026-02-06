@@ -110,6 +110,7 @@ let pendingImageData = null;
 
 // Chess
 const chessBtn = document.getElementById('chess-btn');
+const chessBtn2 = document.getElementById('chess-btn-2');
 const chessPanel = document.getElementById('chess-panel');
 const chessMode = document.getElementById('chess-mode');
 const chessStart = document.getElementById('chess-start');
@@ -158,6 +159,7 @@ closeModal.addEventListener('click', closeGameModal);
 calcBtn.addEventListener('click', () => openModal('Calculator', calcPanel));
 paintBtn.addEventListener('click', () => openModal('Paint', paintPanel));
 if (chessBtn) chessBtn.addEventListener('click', () => openModal('Chess', chessPanel));
+if (chessBtn2) chessBtn2.addEventListener('click', () => openModal('Chess', chessPanel));
 
 onAuthStateChanged(auth, (user) => {
 	currentUser = user || null;
