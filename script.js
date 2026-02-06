@@ -1,13 +1,56 @@
-let ua=true
-const T={
-ua:{status:"Статус",online:"У мережі",time:"Час",quote:"Цитата",q:"Фокус. Розвиток. Повтор.",about:"Про мене",a:"Навчаюсь у коледжі на комп'ютерного інженера.<br>Займаюсь ремонтом та обслуговуванням ПК-техніки."},
-en:{status:"Status",online:"Online",time:"Time",quote:"Quote",q:"Focus. Improve. Repeat.",about:"About me",a:"College student in computer engineering.<br>PC repair and maintenance."}
+let ua = true;
+const T = {
+	ua: {
+		status: "??????",
+		online: "? ??????",
+		time: "???",
+		quote: "??????",
+		q: "?????. ????????. ??????.",
+		about: "??? ????",
+		a: "???????? ? ??????? ?? ????????????? ????????.<br>???????? ???????? ?? ??????????????? ??-???????."
+	},
+	en: {
+		status: "Status",
+		online: "Online",
+		time: "Time",
+		quote: "Quote",
+		q: "Focus. Improve. Repeat.",
+		about: "About me",
+		a: "College student in computer engineering.<br>PC repair and maintenance."
+	}
+};
+const hs = document.getElementById("h-status");
+const ts = document.getElementById("t-status");
+const ht = document.getElementById("h-time");
+const hq = document.getElementById("h-quote");
+const tq = document.getElementById("t-quote");
+const ha = document.getElementById("h-about");
+const ta = document.getElementById("t-about");
+const b = document.getElementById("lang");
+const tm = document.getElementById("time");
+
+function apply() {
+	const l = ua ? T.ua : T.en;
+	hs.textContent = l.status;
+	ts.textContent = l.online;
+	ht.textContent = l.time;
+	hq.textContent = l.quote;
+	tq.textContent = l.q;
+	ha.textContent = l.about;
+	ta.innerHTML = l.a;
+	b.textContent = ua ? "EN" : "UA";
 }
-const hs=document.getElementById("h-status"),ts=document.getElementById("t-status"),ht=document.getElementById("h-time"),hq=document.getElementById("h-quote"),tq=document.getElementById("t-quote"),ha=document.getElementById("h-about"),ta=document.getElementById("t-about"),b=document.getElementById("lang"),tm=document.getElementById("time")
-function apply(){const l=ua?T.ua:T.en;hs.textContent=l.status;ts.textContent=l.online;ht.textContent=l.time;hq.textContent=l.quote;tq.textContent=l.q;ha.textContent=l.about;ta.innerHTML=l.a;b.textContent=ua?"EN":"UA"}
-apply()
-b.onclick=()=>{ua=!ua;apply()}
-window.setInterval(()=>{const d=new Date();tm.textContent=d.toLocaleTimeString()+" • "+d.toLocaleDateString()},1000)
+apply();
+
+b.onclick = () => {
+	ua = !ua;
+	apply();
+};
+
+window.setInterval(() => {
+	const d = new Date();
+	tm.textContent = d.toLocaleTimeString() + " ? " + d.toLocaleDateString();
+}, 1000);
 
 // --- Game Logic ---
 const gameModal = document.getElementById('game-modal');
@@ -19,6 +62,7 @@ const paintPanel = document.getElementById('paint-panel');
 const boardPanel = document.getElementById('board-panel');
 
 const nickInput = document.getElementById('nick-input');
+const passInput = document.getElementById('pass-input');
 const playerName = document.getElementById('player-name');
 const regBtn = document.getElementById('reg-btn');
 const closeBtn = document.getElementById('close-btn');
@@ -27,71 +71,173 @@ const calcBtn = document.getElementById('calc-btn');
 const paintBtn = document.getElementById('paint-btn');
 const exitCalcBtn = document.getElementById('exit-calc-btn');
 const exitPaintBtn = document.getElementById('exit-paint-btn');
+const discordLoginBtn = document.getElementById('discord-login');
 
 const calcDisplay = document.getElementById('calc-display');
 const calcEq = document.getElementById('calc-eq');
 const paintCanvas = document.getElementById('paint-canvas');
 const colorPicker = document.getElementById('color-picker');
+const brushSize = document.getElementById('brush-size');
+const brushAlpha = document.getElementById('brush-alpha');
+const paintClearBtn = document.getElementById('paint-clear');
 const pencilBtn = document.getElementById('pencil-btn');
 const eraserBtn = document.getElementById('eraser-btn');
 const fillBtn = document.getElementById('fill-btn');
 const leaderboardContent = document.getElementById('leaderboard-content');
 
+// Optional: backend OAuth config (not available on GitHub Pages without server)
+const DISCORD_CLIENT_ID = '';
+const DISCORD_OAUTH_PROXY = '';
+const DISCORD_REDIRECT_URI = window.location.origin + window.location.pathname;
+
+let discordUser = JSON.parse(localStorage.getItem('discord_user') || 'null');
 let player = localStorage.getItem('game_nick') || '';
-let boards = JSON.parse(localStorage.getItem('game_leaderboards_v1') || '{}');
+let boards = JSON.parse(localStorage.getItem('game_leaderboards_v2') || '{}');
+let users = JSON.parse(localStorage.getItem('game_users_v1') || '{}');
 
 function show(el) { el.classList.remove('hidden'); }
 function hide(el) { el.classList.add('hidden'); }
 
 function saveBoards() {
-	localStorage.setItem('game_leaderboards_v1', JSON.stringify(boards));
+	localStorage.setItem('game_leaderboards_v2', JSON.stringify(boards));
+}
+
+function saveUsers() {
+	localStorage.setItem('game_users_v1', JSON.stringify(users));
+}
+
+function setDiscordUser(user) {
+	discordUser = user;
+	localStorage.setItem('discord_user', JSON.stringify(user));
+	player = user.username;
+	localStorage.setItem('game_nick', player);
+	updateAuthUI();
+}
+
+function updateAuthUI() {
+	if (discordUser) {
+		nickInput.value = discordUser.username;
+		nickInput.disabled = true;
+		passInput.disabled = true;
+		discordLoginBtn.textContent = 'Discord Connected';
+		discordLoginBtn.disabled = true;
+	} else {
+		nickInput.disabled = false;
+		passInput.disabled = false;
+		discordLoginBtn.textContent = 'Discord Login';
+		discordLoginBtn.disabled = false;
+	}
+}
+updateAuthUI();
+
+async function handleDiscordCallback() {
+	const url = new URL(window.location.href);
+	const code = url.searchParams.get('code');
+	if (!code || !DISCORD_OAUTH_PROXY) return;
+	try {
+		const res = await fetch(`${DISCORD_OAUTH_PROXY}/discord/exchange`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ code, redirectUri: DISCORD_REDIRECT_URI })
+		});
+		if (!res.ok) throw new Error('OAuth failed');
+		const data = await res.json();
+		if (data && data.user) setDiscordUser(data.user);
+	} catch (e) {
+		console.error(e);
+		alert('Discord login error.');
+	} finally {
+		url.searchParams.delete('code');
+		window.history.replaceState({}, document.title, url.toString());
+	}
+}
+handleDiscordCallback();
+
+function startDiscordLogin() {
+	if (!DISCORD_CLIENT_ID || !DISCORD_OAUTH_PROXY) {
+		alert('Discord OAuth ???????? ??????. ????? DISCORD_CLIENT_ID ?? DISCORD_OAUTH_PROXY ? script.js');
+		return;
+	}
+	const params = new URLSearchParams({
+		client_id: DISCORD_CLIENT_ID,
+		redirect_uri: DISCORD_REDIRECT_URI,
+		response_type: 'code',
+		scope: 'identify'
+	});
+	window.location.href = `https://discord.com/api/oauth2/authorize?${params.toString()}`;
+}
+
+discordLoginBtn.addEventListener('click', startDiscordLogin);
+
+async function hashPassword(value) {
+	if (window.crypto && window.crypto.subtle) {
+		const enc = new TextEncoder().encode(value);
+		const digest = await window.crypto.subtle.digest('SHA-256', enc);
+		return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+	}
+	return btoa(unescape(encodeURIComponent(value)));
+}
+
+function normalizeEntries(map) {
+	const out = [];
+	Object.entries(map || {}).forEach(([key, val]) => {
+		if (!val) return;
+		if (typeof val.time !== 'number') return;
+		out.push({
+			key,
+			name: val.name || key,
+			time: val.time || 0,
+			ops: val.ops || {},
+			tools: val.tools || {}
+		});
+	});
+	return out;
 }
 
 function renderLeaderboards() {
 	leaderboardContent.innerHTML = '';
-	
-	const calc = Object.entries(boards.calc||{}).sort((a,b)=>b[1].time - a[1].time);
-	const paint = Object.entries(boards.paint||{}).sort((a,b)=>b[1].time - a[1].time);
+	const calc = normalizeEntries(boards.calc).sort((a, b) => b.time - a.time);
+	const paint = normalizeEntries(boards.paint).sort((a, b) => b.time - a.time);
 
-	const calcDiv = document.createElement('div');
-	calcDiv.className = 'board-section';
-	calcDiv.innerHTML = '<strong>📱 Calculator</strong>';
-	if(calc.length) {
-		const ol = document.createElement('ol');
-		calc.forEach(d => {
-			const ops = d[1].ops || {};
-			const hours = Math.round(d[1].time/3600);
-			const li = document.createElement('li');
-			li.textContent = `${d[0]} — ${hours}h | +:${ops['+']||0} -:${ops['-']||0} ×:${ops['*']||0} ÷:${ops['/']||0}`;
-			ol.appendChild(li);
-		});
-		calcDiv.appendChild(ol);
-	} else {
-		const p = document.createElement('p');
-		p.textContent = 'Порожньо';
-		calcDiv.appendChild(p);
-	}
-	leaderboardContent.appendChild(calcDiv);
+	const topAll = {};
+	calc.forEach(row => {
+		topAll[row.key] = { name: row.name, time: (topAll[row.key]?.time || 0) + row.time };
+	});
+	paint.forEach(row => {
+		topAll[row.key] = { name: row.name, time: (topAll[row.key]?.time || 0) + row.time };
+	});
+	const overall = Object.entries(topAll).map(([key, v]) => ({ key, name: v.name, time: v.time }));
+	overall.sort((a, b) => b.time - a.time);
 
-	const paintDiv = document.createElement('div');
-	paintDiv.className = 'board-section';
-	paintDiv.innerHTML = '<strong>🎨 Paint</strong>';
-	if(paint.length) {
-		const ol = document.createElement('ol');
-		paint.forEach(d => {
-			const tools = d[1].tools || {};
-			const hours = Math.round(d[1].time/3600);
-			const li = document.createElement('li');
-			li.textContent = `${d[0]} — ${hours}h | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
-			ol.appendChild(li);
-		});
-		paintDiv.appendChild(ol);
-	} else {
-		const p = document.createElement('p');
-		p.textContent = 'Порожньо';
-		paintDiv.appendChild(p);
+	function renderSection(title, rows, formatter) {
+		const div = document.createElement('div');
+		div.className = 'board-section';
+		div.innerHTML = `<strong>${title}</strong>`;
+		if (rows.length) {
+			const ol = document.createElement('ol');
+			rows.forEach(row => {
+				const li = document.createElement('li');
+				li.textContent = formatter(row);
+				ol.appendChild(li);
+			});
+			div.appendChild(ol);
+		} else {
+			const p = document.createElement('p');
+			p.textContent = '????????';
+			div.appendChild(p);
+		}
+		leaderboardContent.appendChild(div);
 	}
-	leaderboardContent.appendChild(paintDiv);
+
+	renderSection('??? ?????????', overall, (row) => `${row.name} ? ${Math.round(row.time / 60)}m`);
+	renderSection('??? Calculator', calc, (row) => {
+		const ops = row.ops || {};
+		return `${row.name} ? ${Math.round(row.time / 60)}m | +:${ops['+']||0} -:${ops['-']||0} ?:${ops['*']||0} ?:${ops['/']||0}`;
+	});
+	renderSection('??? Paint', paint, (row) => {
+		const tools = row.tools || {};
+		return `${row.name} ? ${Math.round(row.time / 60)}m | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
+	});
 }
 
 function openLobby() {
@@ -102,11 +248,9 @@ function openLobby() {
 	show(boardPanel);
 }
 
-// Play button — open modal
 playBtn.addEventListener('click', () => {
-	console.log('Play button clicked');
 	show(gameModal);
-	if(player) {
+	if (player) {
 		openLobby();
 	} else {
 		show(regPanel);
@@ -117,22 +261,35 @@ playBtn.addEventListener('click', () => {
 	}
 });
 
-// Registration
-regBtn.addEventListener('click', () => {
+regBtn.addEventListener('click', async () => {
+	if (discordUser) {
+		player = discordUser.username;
+		openLobby();
+		return;
+	}
 	const nick = nickInput.value.trim();
-	if(!nick) return alert('Введи нік');
+	const pass = passInput.value.trim();
+	if (!nick || !pass) return alert('????? ??? ? ??????');
+	const passHash = await hashPassword(pass);
+	if (users[nick]) {
+		if (users[nick].passHash !== passHash) {
+			return alert('???????? ??????');
+		}
+	} else {
+		users[nick] = { name: nick, passHash };
+		saveUsers();
+	}
 	player = nick;
 	localStorage.setItem('game_nick', player);
 	openLobby();
 });
 
-// Close modal
 closeBtn.addEventListener('click', () => {
 	hide(gameModal);
 	nickInput.value = '';
+	passInput.value = '';
 });
 
-// Back to registration
 backBtn.addEventListener('click', () => {
 	hide(lobbyPanel);
 	hide(calcPanel);
@@ -140,6 +297,10 @@ backBtn.addEventListener('click', () => {
 	hide(boardPanel);
 	show(regPanel);
 });
+
+function getPlayerKey() {
+	return discordUser?.id || player;
+}
 
 // --- Calculator ---
 let calcState = null;
@@ -154,10 +315,13 @@ function startCalcSession() {
 }
 
 function endCalcSession() {
-	if(!calcState) return;
+	if (!calcState) return;
 	const secs = Math.floor((Date.now() - calcState.sessionStart) / 1000);
 	boards.calc = boards.calc || {};
-	const p = boards.calc[player] = boards.calc[player] || {time:0, ops:{'+':0,'-':0,'*':0,'/':0}};
+	const key = getPlayerKey();
+	const name = discordUser?.username || player;
+	const p = boards.calc[key] = boards.calc[key] || { name, time:0, ops:{'+':0,'-':0,'*':0,'/':0} };
+	p.name = name;
 	p.time += secs;
 	Object.keys(calcState.opsCount).forEach(k => {
 		p.ops[k] = (p.ops[k] || 0) + (calcState.opsCount[k] || 0);
@@ -167,36 +331,63 @@ function endCalcSession() {
 	calcState = null;
 }
 
-// Bind calculator buttons once
+function updateCalcDisplay() {
+	calcDisplay.value = calcState.expr || '0';
+}
+
+function appendValue(v) {
+	if (!calcState) return;
+	if (calcState.expr.length > 32) return;
+	const last = calcState.expr.split(/[-+*/]/).pop();
+	if (v === '.' && last.includes('.')) return;
+	calcState.expr += v;
+	updateCalcDisplay();
+}
+
+function appendOp(op) {
+	if (!calcState) return;
+	if (!calcState.expr && op === '-') {
+		calcState.expr = '-';
+		updateCalcDisplay();
+		return;
+	}
+	if (!calcState.expr) return;
+	if (/[+\-*/]$/.test(calcState.expr)) {
+		calcState.expr = calcState.expr.slice(0, -1) + op;
+	} else {
+		calcState.expr += op;
+	}
+	calcState.opsCount[op] = (calcState.opsCount[op] || 0) + 1;
+	updateCalcDisplay();
+}
+
+calcDisplay.addEventListener('keydown', (e) => e.preventDefault());
+
 document.getElementById('calc-clear').addEventListener('click', () => {
-	if(!calcState) return;
+	if (!calcState) return;
 	calcState.expr = '';
-	calcDisplay.value = '';
+	updateCalcDisplay();
 });
 
 document.querySelectorAll('#calc-panel .calc-btn').forEach(btn => {
 	btn.addEventListener('click', (e) => {
-		if(!calcState) return;
+		if (!calcState) return;
 		e.stopPropagation();
 		const v = btn.dataset.val;
 		const op = btn.dataset.op;
-		if(v) {
-			calcState.expr += v;
-			calcDisplay.value = calcState.expr;
-		} else if(op) {
-			calcState.opsCount[op] = (calcState.opsCount[op] || 0) + 1;
-			calcState.expr += op;
-			calcDisplay.value = calcState.expr;
-		}
+		if (v) appendValue(v);
+		if (op) appendOp(op);
 	});
 });
 
 calcEq.addEventListener('click', () => {
-	if(!calcState) return;
+	if (!calcState) return;
 	try {
-		const res = eval(calcState.expr);
-		calcDisplay.value = res;
+		let expr = calcState.expr.replace(/[+\-*/]+$/, '');
+		if (!expr) return;
+		const res = eval(expr);
 		calcState.expr = String(res);
+		updateCalcDisplay();
 	} catch {
 		calcDisplay.value = 'Error';
 		calcState.expr = '';
@@ -219,6 +410,13 @@ function setActiveTool(tool) {
 	fillBtn.classList.toggle('active', tool === 'fill');
 }
 
+function resizeCanvas() {
+	const rect = paintCanvas.getBoundingClientRect();
+	const dpr = window.devicePixelRatio || 1;
+	paintCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
+	paintCanvas.height = Math.max(1, Math.floor(rect.height * dpr));
+}
+
 function startPaintSession() {
 	const ctx = paintCanvas.getContext('2d');
 	paintState = {
@@ -227,18 +425,24 @@ function startPaintSession() {
 		sessionStart: Date.now(),
 		ctx
 	};
+	resizeCanvas();
 	ctx.fillStyle = '#fff';
 	ctx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
 	ctx.strokeStyle = colorPicker.value;
 	ctx.fillStyle = colorPicker.value;
+	ctx.lineCap = 'round';
+	ctx.lineJoin = 'round';
 	setActiveTool('pencil');
 }
 
 function endPaintSession() {
-	if(!paintState) return;
+	if (!paintState) return;
 	const secs = Math.floor((Date.now() - paintState.sessionStart) / 1000);
 	boards.paint = boards.paint || {};
-	const p = boards.paint[player] = boards.paint[player] || {time:0, tools:{pencil:0,eraser:0,fill:0}};
+	const key = getPlayerKey();
+	const name = discordUser?.username || player;
+	const p = boards.paint[key] = boards.paint[key] || { name, time:0, tools:{pencil:0,eraser:0,fill:0} };
+	p.name = name;
 	p.time += secs;
 	p.tools.pencil = (p.tools.pencil || 0) + (paintState.toolCounts.pencil || 0);
 	p.tools.eraser = (p.tools.eraser || 0) + (paintState.toolCounts.eraser || 0);
@@ -248,66 +452,94 @@ function endPaintSession() {
 	paintState = null;
 }
 
-// Tool selection
 pencilBtn.addEventListener('click', () => {
-	if(!paintState) return;
+	if (!paintState) return;
 	paintState.tool = 'pencil';
 	paintState.toolCounts.pencil++;
 	setActiveTool('pencil');
 });
 
 eraserBtn.addEventListener('click', () => {
-	if(!paintState) return;
+	if (!paintState) return;
 	paintState.tool = 'eraser';
 	paintState.toolCounts.eraser++;
 	setActiveTool('eraser');
 });
 
 fillBtn.addEventListener('click', () => {
-	if(!paintState) return;
+	if (!paintState) return;
 	paintState.tool = 'fill';
 	paintState.toolCounts.fill++;
 	setActiveTool('fill');
 });
 
-// Color picker
+paintClearBtn.addEventListener('click', () => {
+	if (!paintState) return;
+	paintState.ctx.save();
+	paintState.ctx.globalAlpha = 1;
+	paintState.ctx.fillStyle = '#fff';
+	paintState.ctx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+	paintState.ctx.restore();
+});
+
 colorPicker.addEventListener('change', (e) => {
-	if(!paintState) return;
+	if (!paintState) return;
 	paintState.ctx.strokeStyle = e.target.value;
 	paintState.ctx.fillStyle = e.target.value;
 });
 
-// Canvas drawing
-paintCanvas.addEventListener('mousedown', (e) => {
-	if(!paintState) return;
-	drawing = true;
+function getCanvasPoint(e) {
 	const rect = paintCanvas.getBoundingClientRect();
-	const x = e.clientX - rect.left;
-	const y = e.clientY - rect.top;
+	const scaleX = paintCanvas.width / rect.width;
+	const scaleY = paintCanvas.height / rect.height;
+	return {
+		x: (e.clientX - rect.left) * scaleX,
+		y: (e.clientY - rect.top) * scaleY
+	};
+}
+
+function paintStart(e) {
+	if (!paintState) return;
+	drawing = true;
+	paintCanvas.setPointerCapture(e.pointerId);
+	const rect = paintCanvas.getBoundingClientRect();
+	const scale = paintCanvas.width / rect.width;
+	const { x, y } = getCanvasPoint(e);
 	paintState.ctx.beginPath();
 	paintState.ctx.moveTo(x, y);
-	if(paintState.tool === 'fill') {
+	if (paintState.tool === 'fill') {
+		paintState.ctx.save();
+		paintState.ctx.globalAlpha = Number(brushAlpha.value);
 		paintState.ctx.fillStyle = colorPicker.value;
 		paintState.ctx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+		paintState.ctx.restore();
 	} else {
-		paintState.ctx.lineWidth = paintState.tool === 'eraser' ? 20 : 3;
-		paintState.ctx.lineCap = 'round';
-		paintState.ctx.lineJoin = 'round';
+		const baseSize = paintState.tool === 'eraser' ? 20 : Number(brushSize.value);
+		paintState.ctx.lineWidth = baseSize * scale;
+		paintState.ctx.globalAlpha = paintState.tool === 'eraser' ? 1 : Number(brushAlpha.value);
 		paintState.ctx.strokeStyle = paintState.tool === 'eraser' ? '#fff' : colorPicker.value;
 	}
-});
+}
 
-paintCanvas.addEventListener('mousemove', (e) => {
-	if(!paintState || !drawing || paintState.tool === 'fill') return;
-	const rect = paintCanvas.getBoundingClientRect();
-	const x = e.clientX - rect.left;
-	const y = e.clientY - rect.top;
+function paintMove(e) {
+	if (!paintState || !drawing || paintState.tool === 'fill') return;
+	const { x, y } = getCanvasPoint(e);
 	paintState.ctx.lineTo(x, y);
 	paintState.ctx.stroke();
-});
+}
 
-paintCanvas.addEventListener('mouseup', () => { drawing = false; });
-paintCanvas.addEventListener('mouseleave', () => { drawing = false; });
+function paintEnd() {
+	drawing = false;
+}
+
+paintCanvas.addEventListener('pointerdown', paintStart);
+paintCanvas.addEventListener('pointermove', paintMove);
+paintCanvas.addEventListener('pointerup', paintEnd);
+paintCanvas.addEventListener('pointerleave', paintEnd);
+
+window.addEventListener('resize', () => {
+	if (paintState) resizeCanvas();
+});
 
 exitPaintBtn.addEventListener('click', () => {
 	endPaintSession();
