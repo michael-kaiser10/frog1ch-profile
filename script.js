@@ -110,10 +110,18 @@ function openModal(title, panel) {
 	hide(calcPanel);
 	hide(paintPanel);
 	show(panel);
+	if (panel === calcPanel) startCalcSession();
+	if (panel === paintPanel) startPaintSession();
+}
+
+function closeGameModal() {
+	hide(gameModal);
+	calcState = null;
+	paintState = null;
 }
 
 playBtn.addEventListener('click', () => openModal('Games', calcPanel));
-closeModal.addEventListener('click', () => hide(gameModal));
+closeModal.addEventListener('click', closeGameModal);
 
 calcBtn.addEventListener('click', () => openModal('Calculator', calcPanel));
 paintBtn.addEventListener('click', () => openModal('Paint', paintPanel));
