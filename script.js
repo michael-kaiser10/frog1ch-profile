@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, orderBy, limit, getDocs, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, orderBy, limit, getDocs, addDoc, onSnapshot, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.1/dist/esm/chess.js";
 
 let ua = true;
 const T = {
@@ -34,7 +35,7 @@ function apply() {
 	const l = ua ? T.ua : T.en;
 	ts.textContent = l.online;
 	tq.textContent = l.q;
-	ta.innerHTML = l.a;
+	if (ta) ta.innerHTML = l.a;
 	if (aboutLabel) aboutLabel.textContent = l.about;
 	b.textContent = ua ? "EN" : "UA";
 }
@@ -108,6 +109,18 @@ const chatPreviewImg = document.getElementById('chat-preview-img');
 const chatCancel = document.getElementById('chat-cancel');
 let pendingImageData = null;
 
+// Chess
+const chessBtn = document.getElementById('chess-btn');
+const chessMode = document.getElementById('chess-mode');
+const chessStart = document.getElementById('chess-start');
+const chessDraw = document.getElementById('chess-draw');
+const chessResign = document.getElementById('chess-resign');
+const chessStatus = document.getElementById('chess-status');
+const chessTimer = document.getElementById('chess-timer');
+const chessBoardEl = document.getElementById('chess-board');
+const onlineList = document.getElementById('online-list');
+const inviteList = document.getElementById('invite-list');
+
 let currentUser = null;
 let authMode = 'signup';
 
@@ -141,6 +154,7 @@ onAuthStateChanged(auth, (user) => {
 	updateAuthUI();
 	setChatState();
 	renderLeaderboards();
+	if (currentUser) resumeActiveGame();
 });
 
 function setAuthMessage(text, isError = false) {
@@ -241,13 +255,19 @@ function normalizeEntries(map) {
 	const out = [];
 	Object.entries(map || {}).forEach(([key, val]) => {
 		if (!val) return;
-		if (typeof val.totalTime !== 'number') return;
+		const hasAny =
+			typeof val.totalTime === 'number' ||
+			typeof val.calcTime === 'number' ||
+			typeof val.paintTime === 'number' ||
+			typeof val.chessElo === 'number';
+		if (!hasAny) return;
 		out.push({
 			key,
 			name: val.name || key,
 			totalTime: val.totalTime || 0,
 			calcTime: val.calcTime || 0,
 			paintTime: val.paintTime || 0,
+			chessElo: val.chessElo || 1000,
 			ops: val.ops || {},
 			tools: val.tools || {}
 		});
@@ -272,6 +292,7 @@ async function renderLeaderboards() {
 		const overall = await fetchLeaders('totalTime');
 		const calc = await fetchLeaders('calcTime');
 		const paint = await fetchLeaders('paintTime');
+		const chess = await fetchLeaders('chessElo');
 
 		function renderSection(title, rows, formatter) {
 			const div = document.createElement('div');
@@ -302,6 +323,7 @@ async function renderLeaderboards() {
 			const tools = row.tools || {};
 			return `${row.name} \u2014 ${Math.round(row.paintTime / 60)}m | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
 		});
+		renderSection('TOP Chess ELO', chess, (row) => `${row.name} \u2014 ${row.chessElo}`);
 	} catch (e) {
 		console.error(e);
 		leaderboardContent.innerHTML = '<p>\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u0440\u0435\u0439\u0442\u0438\u043d\u0433.</p>';
@@ -346,7 +368,7 @@ function renderChatItem(data) {
 	wrap.className = 'chat-item';
 	const meta = document.createElement('div');
 	meta.className = 'chat-meta';
-	meta.textContent = `${data.name || 'Anon'} ? ${data.time || ''}`;
+	meta.textContent = `${data.name || 'Anon'} \u2022 ${data.time || ''}`;
 	const text = document.createElement('div');
 	text.className = 'chat-text';
 	text.textContent = data.text || '';
@@ -422,6 +444,578 @@ if (chatCancel) {
 		pendingImageData = null;
 		if (chatImageInput) chatImageInput.value = '';
 		if (chatPreview) chatPreview.classList.add('hidden');
+	});
+}
+
+// --- Presence (Firestore heartbeat) ---
+let presenceTimer = null;
+function startPresence() {
+	if (!currentUser) return;
+	const ref = doc(db, 'users', currentUser.uid);
+	const update = async () => {
+		await setDoc(ref, {
+			uid: currentUser.uid,
+			name: currentUser.displayName || currentUser.email || 'Player',
+			lastSeenMs: Date.now()
+		}, { merge: true });
+	};
+	update();
+	if (presenceTimer) clearInterval(presenceTimer);
+	presenceTimer = setInterval(update, 10000);
+}
+function stopPresence() {
+	if (presenceTimer) clearInterval(presenceTimer);
+	presenceTimer = null;
+}
+onAuthStateChanged(auth, (user) => {
+	if (user) startPresence();
+	else stopPresence();
+});
+
+// --- Chess ---
+const chess = new Chess();
+const files = ['a','b','c','d','e','f','g','h'];
+const pieceMap = {
+	wp: '\u2659', wn: '\u2658', wb: '\u2657', wr: '\u2656', wq: '\u2655', wk: '\u2654',
+	bp: '\u265F', bn: '\u265E', bb: '\u265D', br: '\u265C', bq: '\u265B', bk: '\u265A'
+};
+
+let chessSelected = null;
+let chessLegal = [];
+let chessGameId = null;
+let chessGame = null;
+let chessIsBot = false;
+let chessBotLevel = 'random';
+let myColor = 'w';
+let chessDeadline = null;
+let chessTimerInterval = null;
+let invitesUnsub = null;
+let sentInvitesUnsub = null;
+let gameUnsub = null;
+let usersUnsub = null;
+let disconnectInterval = null;
+
+function initChessBoard() {
+	if (!chessBoardEl) return;
+	chessBoardEl.innerHTML = '';
+	for (let r = 8; r >= 1; r--) {
+		for (let f = 0; f < 8; f++) {
+			const sq = `${files[f]}${r}`;
+			const div = document.createElement('div');
+			const isLight = (r + f) % 2 === 0;
+			div.className = `chess-square ${isLight ? 'light' : 'dark'}`;
+			div.dataset.square = sq;
+			div.addEventListener('click', () => onSquareClick(sq));
+			chessBoardEl.appendChild(div);
+		}
+	}
+}
+initChessBoard();
+
+function setChessStatus(text) {
+	if (chessStatus) chessStatus.textContent = text;
+}
+
+function setChessTimer(seconds) {
+	if (!chessTimer) return;
+	const s = Math.max(0, Math.floor(seconds));
+	chessTimer.textContent = `${s}s`;
+}
+
+function renderChessBoard() {
+	if (!chessBoardEl) return;
+	const board = chess.board();
+	const squares = chessBoardEl.querySelectorAll('.chess-square');
+	squares.forEach((el) => {
+		el.textContent = '';
+		el.classList.remove('selected', 'legal');
+	});
+	board.forEach((row, rIdx) => {
+		row.forEach((piece, fIdx) => {
+			const square = `${files[fIdx]}${8 - rIdx}`;
+			const el = chessBoardEl.querySelector(`[data-square="${square}"]`);
+			if (!el) return;
+			if (piece) {
+				const key = piece.color + piece.type;
+				el.textContent = pieceMap[key] || '';
+			}
+		});
+	});
+	if (chessSelected) {
+		const sel = chessBoardEl.querySelector(`[data-square="${chessSelected}"]`);
+		if (sel) sel.classList.add('selected');
+		chessLegal.forEach((m) => {
+			const el = chessBoardEl.querySelector(`[data-square="${m}"]`);
+			if (el) el.classList.add('legal');
+		});
+	}
+}
+
+function isMyTurn() {
+	if (chessIsBot) return chess.turn() === myColor;
+	if (!chessGame) return false;
+	return chess.turn() === myColor;
+}
+
+function onSquareClick(square) {
+	if (!isMyTurn()) return;
+	if (!chessSelected) {
+		const moves = chess.moves({ square, verbose: true });
+		if (!moves.length) return;
+		chessSelected = square;
+		chessLegal = moves.map(m => m.to);
+		renderChessBoard();
+		return;
+	}
+	if (square === chessSelected) {
+		chessSelected = null;
+		chessLegal = [];
+		renderChessBoard();
+		return;
+	}
+	if (!chessLegal.includes(square)) {
+		chessSelected = null;
+		chessLegal = [];
+		renderChessBoard();
+		return;
+	}
+	makeMove(chessSelected, square);
+	chessSelected = null;
+	chessLegal = [];
+	renderChessBoard();
+}
+
+async function makeMove(from, to) {
+	const move = chess.move({ from, to, promotion: 'q' });
+	if (!move) return;
+	if (chessIsBot) {
+		if (chess.isGameOver()) {
+			await finishGameLocal();
+			return;
+		}
+		chessDeadline = Date.now() + 60000;
+		startTimerLoop();
+		setTimeout(() => botMove(), 300);
+		return;
+	}
+	if (chessGameId) {
+		if (chess.isGameOver()) {
+			const result = chess.isCheckmate()
+				? (chess.turn() === 'w' ? 'black' : 'white')
+				: 'draw';
+			await updateDoc(doc(db, 'chess_games', chessGameId), {
+				fen: chess.fen(),
+				turn: chess.turn(),
+				status: 'ended',
+				result,
+				reason: 'checkmate_or_draw'
+			});
+			return;
+		}
+		await updateDoc(doc(db, 'chess_games', chessGameId), {
+			fen: chess.fen(),
+			turn: chess.turn(),
+			turnDeadline: Date.now() + 60000,
+			lastMoveAtMs: Date.now()
+		});
+	}
+}
+
+function startTimerLoop() {
+	if (chessTimerInterval) clearInterval(chessTimerInterval);
+	chessTimerInterval = setInterval(() => {
+		if (!chessDeadline) return;
+		const remaining = Math.max(0, chessDeadline - Date.now());
+		setChessTimer(remaining / 1000);
+		if (remaining <= 0) handleTimeout();
+	}, 500);
+}
+
+async function handleTimeout() {
+	if (chessIsBot) {
+		if (chess.turn() === myColor) {
+			setChessStatus('Time out. Bot wins.');
+			await updateChessElo(myColor === 'w' ? 'black' : 'white', true);
+		}
+		return;
+	}
+	if (!chessGame || chessGame.status !== 'active') return;
+	const loser = chessGame.turn;
+	const winner = loser === 'w' ? 'b' : 'w';
+	await endGameOnline(winner, 'timeout');
+}
+
+function startBotGame(level) {
+	chess.reset();
+	chessIsBot = true;
+	chessBotLevel = level;
+	myColor = 'w';
+	chessGameId = null;
+	chessGame = null;
+	setChessStatus(`Bot game: ${level}`);
+	chessDeadline = Date.now() + 60000;
+	startTimerLoop();
+	renderChessBoard();
+}
+
+function botMove() {
+	const moves = chess.moves({ verbose: true });
+	if (!moves.length) return;
+	let move;
+	if (chessBotLevel === 'random') {
+		move = moves[Math.floor(Math.random() * moves.length)];
+	} else if (chessBotLevel === 'easy') {
+		const captures = moves.filter(m => m.captured);
+		move = (captures.length ? captures : moves)[Math.floor(Math.random() * (captures.length ? captures.length : moves.length))];
+	} else {
+		const depth = chessBotLevel === 'medium' ? 2 : 3;
+		move = minimaxRoot(depth, chess, chess.turn() === 'w');
+	}
+	if (move) chess.move(move);
+	if (chess.isGameOver()) {
+		finishGameLocal();
+		return;
+	}
+	chessDeadline = Date.now() + 60000;
+	startTimerLoop();
+	renderChessBoard();
+}
+
+function evaluateBoard(board) {
+	const values = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
+	let score = 0;
+	for (const row of board) {
+		for (const piece of row) {
+			if (!piece) continue;
+			const val = values[piece.type] || 0;
+			score += piece.color === 'w' ? val : -val;
+		}
+	}
+	return score;
+}
+
+function minimaxRoot(depth, game, isMaximisingPlayer) {
+	let bestMove = null;
+	let bestValue = -Infinity;
+	const moves = game.moves({ verbose: true });
+	for (const move of moves) {
+		game.move(move);
+		const value = minimax(depth - 1, game, -Infinity, Infinity, !isMaximisingPlayer);
+		game.undo();
+		if (value >= bestValue) {
+			bestValue = value;
+			bestMove = move;
+		}
+	}
+	return bestMove;
+}
+
+function minimax(depth, game, alpha, beta, isMaximisingPlayer) {
+	if (depth === 0) return evaluateBoard(game.board());
+	const moves = game.moves({ verbose: true });
+	if (isMaximisingPlayer) {
+		let best = -Infinity;
+		for (const move of moves) {
+			game.move(move);
+			best = Math.max(best, minimax(depth - 1, game, alpha, beta, false));
+			game.undo();
+			alpha = Math.max(alpha, best);
+			if (beta <= alpha) break;
+		}
+		return best;
+	}
+	let best = Infinity;
+	for (const move of moves) {
+		game.move(move);
+		best = Math.min(best, minimax(depth - 1, game, alpha, beta, true));
+		game.undo();
+		beta = Math.min(beta, best);
+		if (beta <= alpha) break;
+	}
+	return best;
+}
+
+async function finishGameLocal() {
+	const result = chess.isCheckmate() ? (chess.turn() === 'w' ? 'black' : 'white') : 'draw';
+	setChessStatus(result === 'draw' ? 'Draw' : `${result} wins`);
+	if (chessTimerInterval) clearInterval(chessTimerInterval);
+	if (currentUser) await updateChessElo(result, true);
+}
+
+function resetOnlineUI() {
+	if (onlineList) onlineList.innerHTML = '';
+	if (inviteList) inviteList.innerHTML = '';
+}
+
+async function startOnlineLists() {
+	if (!currentUser) return;
+	if (usersUnsub) usersUnsub();
+	const qUsers = query(collection(db, 'users'), orderBy('lastSeenMs', 'desc'), limit(30));
+	usersUnsub = onSnapshot(qUsers, (snap) => {
+		if (!onlineList) return;
+		onlineList.innerHTML = '';
+		const now = Date.now();
+		snap.forEach(docSnap => {
+			const data = docSnap.data();
+			if (!data || !data.uid || data.uid === currentUser.uid) return;
+			if (now - (data.lastSeenMs || 0) > 40000) return;
+			const row = document.createElement('div');
+			row.className = 'online-item';
+			row.innerHTML = `<span>${data.name || data.uid}</span>`;
+			const btn = document.createElement('button');
+			btn.className = 'btn btn-ghost';
+			btn.textContent = 'Invite';
+			btn.addEventListener('click', () => sendInvite(data.uid, data.name));
+			row.appendChild(btn);
+			onlineList.appendChild(row);
+		});
+	});
+
+	if (invitesUnsub) invitesUnsub();
+	const qInv = query(collection(db, 'chess_invites'), where('toUid', '==', currentUser.uid), where('status', '==', 'pending'));
+	invitesUnsub = onSnapshot(qInv, (snap) => {
+		if (!inviteList) return;
+		inviteList.innerHTML = '';
+		snap.forEach(docSnap => {
+			const data = docSnap.data();
+			const row = document.createElement('div');
+			row.className = 'invite-item';
+			row.innerHTML = `<span>${data.fromName || 'Player'}</span>`;
+			const accept = document.createElement('button');
+			accept.className = 'btn btn-primary';
+			accept.textContent = 'Accept';
+			accept.addEventListener('click', () => acceptInvite(docSnap.id, data));
+			const decline = document.createElement('button');
+			decline.className = 'btn btn-ghost';
+			decline.textContent = 'Decline';
+			decline.addEventListener('click', () => updateDoc(doc(db, 'chess_invites', docSnap.id), { status: 'declined' }));
+			row.appendChild(accept);
+			row.appendChild(decline);
+			inviteList.appendChild(row);
+		});
+	});
+
+	if (sentInvitesUnsub) sentInvitesUnsub();
+	const qSent = query(collection(db, 'chess_invites'), where('fromUid', '==', currentUser.uid), where('status', '==', 'accepted'));
+	sentInvitesUnsub = onSnapshot(qSent, (snap) => {
+		snap.forEach(docSnap => {
+			const data = docSnap.data();
+			if (data.gameId) listenToGame(data.gameId);
+		});
+	});
+}
+
+async function resumeActiveGame() {
+	if (!currentUser) return;
+	const qWhite = query(collection(db, 'chess_games'), where('whiteUid', '==', currentUser.uid), where('status', '==', 'active'));
+	const qBlack = query(collection(db, 'chess_games'), where('blackUid', '==', currentUser.uid), where('status', '==', 'active'));
+	const [sWhite, sBlack] = await Promise.all([getDocs(qWhite), getDocs(qBlack)]);
+	const docSnap = sWhite.docs[0] || sBlack.docs[0];
+	if (docSnap) listenToGame(docSnap.id);
+}
+
+async function sendInvite(toUid, toName) {
+	if (!currentUser) return;
+	await addDoc(collection(db, 'chess_invites'), {
+		fromUid: currentUser.uid,
+		fromName: currentUser.displayName || currentUser.email || 'Player',
+		toUid,
+		toName: toName || '',
+		status: 'pending',
+		createdAt: serverTimestamp()
+	});
+}
+
+async function acceptInvite(inviteId, data) {
+	const gameDoc = await addDoc(collection(db, 'chess_games'), {
+		whiteUid: data.toUid,
+		blackUid: data.fromUid,
+		whiteName: data.toName || 'Player',
+		blackName: data.fromName || 'Player',
+		fen: new Chess().fen(),
+		turn: 'w',
+		status: 'active',
+		turnDeadline: Date.now() + 60000,
+		lastMoveAtMs: Date.now(),
+		drawOffer: null,
+		disconnects: {}
+	});
+	await updateDoc(doc(db, 'chess_invites', inviteId), { status: 'accepted', gameId: gameDoc.id });
+	listenToGame(gameDoc.id);
+}
+
+function listenToGame(gameId) {
+	if (gameUnsub) gameUnsub();
+	chessGameId = gameId;
+	gameUnsub = onSnapshot(doc(db, 'chess_games', gameId), (snap) => {
+		if (!snap.exists()) return;
+		chessGame = snap.data();
+		myColor = chessGame.whiteUid === currentUser.uid ? 'w' : 'b';
+		chessIsBot = false;
+		chess.load(chessGame.fen);
+		chessDeadline = chessGame.turnDeadline;
+		if (chessGame.status === 'active') {
+			const turnLabel = chessGame.turn === 'w' ? 'White' : 'Black';
+			const drawNote = chessGame.drawOffer && chessGame.drawOffer !== currentUser.uid ? ' (Draw offered)' : '';
+			setChessStatus(`${turnLabel} to move${drawNote}`);
+		} else {
+			if (chessGame.result === 'draw') setChessStatus('Draw');
+			else if (chessGame.result === 'white') setChessStatus('White wins');
+			else if (chessGame.result === 'black') setChessStatus('Black wins');
+			else setChessStatus('Game ended');
+		}
+		startTimerLoop();
+		renderChessBoard();
+		if (disconnectInterval) clearInterval(disconnectInterval);
+		disconnectInterval = setInterval(checkDisconnect, 5000);
+		applyEloIfNeeded();
+	});
+}
+
+async function endGameOnline(winner, reason) {
+	if (!chessGameId || !chessGame || chessGame.status !== 'active') return;
+	const result = winner === 'w' ? 'white' : winner === 'b' ? 'black' : 'draw';
+	await updateDoc(doc(db, 'chess_games', chessGameId), {
+		status: 'ended',
+		result,
+		reason
+	});
+}
+
+function checkDisconnect() {
+	if (!chessGame || chessGame.status !== 'active') return;
+	if (!currentUser) return;
+	const oppUid = chessGame.whiteUid === currentUser.uid ? chessGame.blackUid : chessGame.whiteUid;
+	const opp = chessGame.whiteUid === currentUser.uid ? 'b' : 'w';
+	const now = Date.now();
+	const disconnects = chessGame.disconnects || {};
+	const oppLastSeen = chessGame.oppLastSeenMs;
+	const userDocId = oppUid;
+	getDoc(doc(db, 'users', userDocId)).then((snap) => {
+		const data = snap.data() || {};
+		const last = data.lastSeenMs || 0;
+		if (now - last > 30000) {
+			if (!disconnects[oppUid]) {
+				updateDoc(doc(db, 'chess_games', chessGameId), { [`disconnects.${oppUid}`]: now });
+				return;
+			}
+			if (now - disconnects[oppUid] > 30000) {
+				endGameOnline(myColor, 'forfeit');
+			}
+		} else if (disconnects[oppUid]) {
+			updateDoc(doc(db, 'chess_games', chessGameId), { [`disconnects.${oppUid}`]: null });
+		}
+	}).catch(() => {});
+}
+
+async function updateChessElo(result, isBot = false) {
+	if (!currentUser) return;
+	const myRef = doc(db, 'leaderboards', currentUser.uid);
+	const mySnap = await getDoc(myRef);
+	const my = mySnap.exists() ? mySnap.data() : { chessElo: 1000 };
+	let oppElo = 1000;
+	let oppUid = null;
+	let oppName = 'Player';
+	let oppData = {};
+	if (!isBot && chessGame) {
+		oppUid = chessGame.whiteUid === currentUser.uid ? chessGame.blackUid : chessGame.whiteUid;
+		oppName = chessGame.whiteUid === currentUser.uid ? chessGame.blackName : chessGame.whiteName;
+		const oppSnap = await getDoc(doc(db, 'leaderboards', oppUid));
+		if (oppSnap.exists()) {
+			oppData = oppSnap.data();
+			oppElo = oppData.chessElo || 1000;
+		}
+	}
+	const myElo = my.chessElo || 1000;
+	const score = result === 'draw' ? 0.5 : (result === (myColor === 'w' ? 'white' : 'black') ? 1 : 0);
+	const expected = 1 / (1 + Math.pow(10, (oppElo - myElo) / 400));
+	const k = 32;
+	const newElo = Math.round(myElo + k * (score - expected));
+	await setDoc(myRef, {
+		name: currentUser.displayName || currentUser.email || 'Player',
+		chessElo: newElo,
+		chessWins: (my.chessWins || 0) + (score === 1 ? 1 : 0),
+		chessLosses: (my.chessLosses || 0) + (score === 0 ? 1 : 0),
+		chessDraws: (my.chessDraws || 0) + (score === 0.5 ? 1 : 0)
+	}, { merge: true });
+
+	if (!isBot && oppUid) {
+		const oppScore = score === 0.5 ? 0.5 : (score === 1 ? 0 : 1);
+		const oppExpected = 1 / (1 + Math.pow(10, (myElo - oppElo) / 400));
+		const oppNew = Math.round(oppElo + k * (oppScore - oppExpected));
+		await setDoc(doc(db, 'leaderboards', oppUid), {
+			name: oppName || 'Player',
+			chessElo: oppNew,
+			chessWins: (oppData.chessWins || 0) + (score === 0 ? 1 : 0),
+			chessLosses: (oppData.chessLosses || 0) + (score === 1 ? 1 : 0),
+			chessDraws: (oppData.chessDraws || 0) + (score === 0.5 ? 1 : 0)
+		}, { merge: true });
+	}
+}
+
+async function applyEloIfNeeded() {
+	if (!chessGame || chessGame.status !== 'ended') return;
+	if (chessGame.eloApplied) return;
+	const myRole = myColor === 'w' ? 'white' : 'black';
+	const result = chessGame.result === 'draw' ? 'draw' : chessGame.result;
+	const isWinner = result === myRole;
+	// Only winner (or white in draw) applies ELO to avoid double updates
+	const shouldApply = result === 'draw' ? myColor === 'w' : isWinner;
+	if (!shouldApply) return;
+	await updateChessElo(result, false);
+	await updateDoc(doc(db, 'chess_games', chessGameId), { eloApplied: true });
+}
+
+if (chessStart) {
+	chessStart.addEventListener('click', () => {
+		if (!chessMode) return;
+		const mode = chessMode.value;
+		if (mode.startsWith('bot')) {
+			startBotGame(mode.split('-')[1]);
+		} else {
+			if (!currentUser) {
+				setChessStatus('Login required for online play.');
+				return;
+			}
+			startOnlineLists();
+			setChessStatus('Online mode: invite a player.');
+		}
+	});
+}
+
+if (chessDraw) {
+	chessDraw.addEventListener('click', async () => {
+		if (!chessGameId || !chessGame) return;
+		if (!chessGame.drawOffer) {
+			await updateDoc(doc(db, 'chess_games', chessGameId), { drawOffer: currentUser.uid });
+			setChessStatus('Draw offered');
+			return;
+		}
+		if (chessGame.drawOffer && chessGame.drawOffer !== currentUser.uid) {
+			await updateDoc(doc(db, 'chess_games', chessGameId), { status: 'ended', result: 'draw', reason: 'draw', drawOffer: null });
+		} else {
+			await updateDoc(doc(db, 'chess_games', chessGameId), { drawOffer: null });
+		}
+	});
+}
+
+if (chessResign) {
+	chessResign.addEventListener('click', async () => {
+		if (chessIsBot) {
+			setChessStatus('Resigned. Bot wins.');
+			await updateChessElo(myColor === 'w' ? 'black' : 'white', true);
+			return;
+		}
+		if (!chessGameId || !chessGame) return;
+		const winner = myColor === 'w' ? 'b' : 'w';
+		await endGameOnline(winner, 'resign');
+	});
+}
+
+if (chessBtn) {
+	chessBtn.addEventListener('click', () => {
+		const section = document.querySelector('.panel.chess');
+		if (section) section.scrollIntoView({ behavior: 'smooth' });
 	});
 }
 

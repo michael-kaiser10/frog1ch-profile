@@ -44,15 +44,15 @@
 						<img src="https://cdn.discordapp.com/avatars/1014193550935732266/141cd3e14cc7c029870fcb6458840696.webp?size=512" alt="avatar">
 					</div>
 					<h2>frog1ch</h2>
-					<p class="tag">@xx_silent_xx</p>
+					<p class="tag">Creator &amp; admin</p>
 					<div class="about">
 						<div class="about-row">
-							<span class="label" id="h-about">&#1055;&#1088;&#1086; &#1084;&#1077;&#1085;&#1077;</span>
-							<p id="t-about">&#1053;&#1072;&#1074;&#1095;&#1072;&#1102;&#1089;&#1100; &#1091; &#1082;&#1086;&#1083;&#1077;&#1076;&#1078;&#1110; &#1085;&#1072; &#1082;&#1086;&#1084;&#1087;&#39;&#1102;&#1090;&#1077;&#1088;&#1085;&#1086;&#1075;&#1086; &#1110;&#1085;&#1078;&#1077;&#1085;&#1077;&#1088;&#1072;.<br>&#1047;&#1072;&#1081;&#1084;&#1072;&#1102;&#1089;&#1100; &#1088;&#1077;&#1084;&#1086;&#1085;&#1090;&#1086;&#1084; &#1090;&#1072; &#1086;&#1073;&#1089;&#1083;&#1091;&#1075;&#1086;&#1074;&#1091;&#1074;&#1072;&#1085;&#1085;&#1103;&#1084; &#1055;&#1050;-&#1090;&#1077;&#1093;&#1085;&#1110;&#1082;&#1080;.</p>
+							<span class="label">What is this</span>
+							<p>A gaming hub with global chat and ranked ladders. More games coming soon.</p>
 						</div>
 						<div class="about-row">
-							<span class="label">CS2</span>
-							<p>? Big Star (Wingman)</p>
+							<span class="label">Send ideas</span>
+							<p>Ping me with new game ideas, features, or bugs.</p>
 						</div>
 					</div>
 					<div class="socials">
@@ -70,9 +70,48 @@
 					<div class="game-row">
 						<button id="calc-btn" class="btn btn-game">Calculator</button>
 						<button id="paint-btn" class="btn btn-game">Paint</button>
+						<button id="chess-btn" class="btn btn-game">Chess</button>
 						<button class="btn btn-disabled" disabled>More soon</button>
 					</div>
 					<div class="mini-note">Keep playing to grow your global ranking.</div>
+				</section>
+
+				<section class="panel chess span-2">
+					<h3>Chess Arena</h3>
+					<p>Play versus bots or invite real players. Ranked ELO for wins/losses.</p>
+					<div class="chess-top">
+						<div class="chess-controls">
+							<label class="field">
+								<span>Mode</span>
+								<select id="chess-mode">
+									<option value="bot-random">Bot: Random</option>
+									<option value="bot-easy">Bot: Easy</option>
+									<option value="bot-medium">Bot: Medium</option>
+									<option value="bot-hard">Bot: Hard</option>
+									<option value="online">Online Player</option>
+								</select>
+							</label>
+							<button id="chess-start" class="btn btn-primary">Start Game</button>
+							<button id="chess-draw" class="btn btn-ghost">Offer Draw</button>
+							<button id="chess-resign" class="btn btn-ghost">Resign</button>
+							<div class="chess-status">
+								<span id="chess-status">Idle</span>
+								<span id="chess-timer">60s</span>
+							</div>
+						</div>
+						<div class="chess-online">
+							<div class="chess-list">
+								<h4>Online Players</h4>
+								<div id="online-list"></div>
+							</div>
+							<div class="chess-list">
+								<h4>Invites</h4>
+								<div id="invite-list"></div>
+							</div>
+						</div>
+					</div>
+					<div id="chess-board" class="chess-board"></div>
+					<p class="hint">If you leave during a game, you lose after 30s unless you return.</p>
 				</section>
 
 				<section class="panel auth">
@@ -147,15 +186,15 @@
 						<button class="calc-btn" data-val="7">7</button>
 						<button class="calc-btn" data-val="8">8</button>
 						<button class="calc-btn" data-val="9">9</button>
-						<button class="calc-btn" data-op="/">?</button>
+						<button class="calc-btn" data-op="/">&divide;</button>
 						<button class="calc-btn" data-val="4">4</button>
 						<button class="calc-btn" data-val="5">5</button>
 						<button class="calc-btn" data-val="6">6</button>
-						<button class="calc-btn" data-op="*">?</button>
+						<button class="calc-btn" data-op="*">&times;</button>
 						<button class="calc-btn" data-val="1">1</button>
 						<button class="calc-btn" data-val="2">2</button>
 						<button class="calc-btn" data-val="3">3</button>
-						<button class="calc-btn" data-op="-">?</button>
+						<button class="calc-btn" data-op="-">&minus;</button>
 						<button class="calc-btn" data-val="0">0</button>
 						<button class="calc-btn" data-val=".">.</button>
 						<button class="calc-btn" id="calc-eq">=</button>

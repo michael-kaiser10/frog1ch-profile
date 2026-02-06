@@ -107,6 +107,7 @@ body{
 .mu{background:linear-gradient(135deg,#f59e0b,#f97316);color:#111827}
 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.span-2{grid-column:span 2}
 .panel{
   background:linear-gradient(160deg,rgba(26,36,48,.96),rgba(20,29,39,.96));
   border:1px solid var(--border);
@@ -117,6 +118,42 @@ body{
 }
 .panel h3{font-family:var(--font-head);font-size:18px}
 .panel p{color:var(--muted);font-size:13px}
+
+.chess-top{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.chess-controls{display:grid;gap:10px;align-content:start}
+.field{display:grid;gap:6px}
+.field span{font-size:12px;color:var(--muted)}
+.field select{padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#16212c;color:var(--text)}
+.chess-status{display:flex;gap:12px;align-items:center;font-weight:700}
+.chess-online{display:grid;gap:10px}
+.chess-list{border:1px solid var(--border);border-radius:14px;padding:10px;background:rgba(20,29,39,.7);min-height:110px}
+.chess-list h4{font-family:var(--font-head);font-size:13px;margin-bottom:6px}
+.online-item,.invite-item{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:10px;background:rgba(26,36,48,.6);margin-bottom:6px}
+.online-item button,.invite-item button{padding:6px 10px;font-size:12px}
+
+.chess-board{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  background:#111b25;
+  width:100%;
+  max-width:520px;
+  aspect-ratio:1/1;
+  margin-top:6px;
+}
+.chess-square{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:clamp(18px, 3vw, 30px);
+  user-select:none;
+}
+.chess-square.light{background:#e6eef7;color:#0b1117}
+.chess-square.dark{background:#98a7b6;color:#0b1117}
+.chess-square.selected{outline:3px solid var(--accent);outline-offset:-3px}
+.chess-square.legal{box-shadow:inset 0 0 0 3px rgba(245,158,11,.6)}
 
 .game-row{display:flex;gap:10px;flex-wrap:wrap}
 .mini-note{font-size:12px;color:var(--muted)}
@@ -215,6 +252,8 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus{
 @media (max-width:980px){
   .hero{grid-template-columns:1fr}
   .grid{grid-template-columns:1fr}
+  .span-2{grid-column:span 1}
+  .chess-top{grid-template-columns:1fr}
 }
 @media (max-width:720px){
   .paint-layout{grid-template-columns:1fr}
