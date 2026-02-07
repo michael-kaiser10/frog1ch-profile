@@ -269,6 +269,8 @@ async function signup() {
 		if (nick) await updateProfile(cred.user, { displayName: nick });
 		currentUser = cred.user;
 		setAuthMessage('Account created.', false);
+		updateAuthUI();
+		if (authModal) authModal.classList.add('hidden');
 		renderLeaderboards();
 	} catch (e) {
 		console.error(e);
@@ -285,6 +287,8 @@ async function login() {
 		const cred = await signInWithEmailAndPassword(auth, email, pass);
 		currentUser = cred.user;
 		setAuthMessage('Logged in.', false);
+		updateAuthUI();
+		if (authModal) authModal.classList.add('hidden');
 		renderLeaderboards();
 	} catch (e) {
 		console.error(e);
