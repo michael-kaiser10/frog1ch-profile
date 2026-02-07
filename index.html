@@ -6,130 +6,135 @@
 		<title>made_by_frog1ch</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
-		<div class="bg-grid"></div>
+		<div class="bg-metal"></div>
 		<div class="app">
-			<aside class="rail">
-				<div class="rail-brand">
-					<span class="rail-logo"></span>
+			<header class="topbar">
+				<div class="brand">
+					<span class="brand-core"></span>
 					<div>
-						<div class="rail-title">made_by_frog1ch</div>
-						<div class="rail-sub">Metal Tech Hub</div>
+						<div class="brand-title">made_by_frog1ch</div>
+						<div class="brand-sub">Metal Tech Arcade</div>
 					</div>
 				</div>
-				<nav class="rail-nav">
+				<nav class="top-nav">
 					<a href="#arena">Arena</a>
 					<a href="#lounge">Lounge</a>
 					<a href="#ranking">Ranking</a>
 					<a href="#account">Account</a>
 				</nav>
-				<div class="rail-actions">
+				<div class="top-actions">
 					<button id="lang" class="btn btn-ghost">EN</button>
 					<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Telegram</a>
 				</div>
-			</aside>
+			</header>
 
-			<main class="main">
-				<header class="control-strip">
-					<div class="control-card">
-						<span class="control-label">Status</span>
-						<span id="t-status" class="control-value">Online</span>
-					</div>
-					<div class="control-card">
-						<span class="control-label">Time</span>
-						<span id="time" class="control-value"></span>
-					</div>
-					<div class="control-card">
-						<span class="control-label">Quote</span>
-						<span id="t-quote" class="control-value">Focus. Improve. Repeat.</span>
-					</div>
-					<div class="control-actions">
+			<section class="hero">
+				<div class="hero-left">
+					<div class="hero-tag">ARCade Control</div>
+					<h1>Games, chat, ranking. One solid tech hub.</h1>
+					<p>Minimal latency, global chat, and ELO ladders. Built for quick matches and daily progress.</p>
+					<div class="hero-actions">
 						<button id="play-btn" class="btn btn-primary">Play now</button>
 						<button id="chess-btn" class="btn btn-ghost">Open Chess</button>
 					</div>
-				</header>
+				</div>
+				<div class="hero-right">
+					<div class="stat">
+						<span class="stat-label">Status</span>
+						<span id="t-status" class="stat-value">Online</span>
+					</div>
+					<div class="stat">
+						<span class="stat-label">Time</span>
+						<span id="time" class="stat-value"></span>
+					</div>
+					<div class="stat">
+						<span class="stat-label">Quote</span>
+						<span id="t-quote" class="stat-value">Focus. Improve. Repeat.</span>
+					</div>
+				</div>
+			</section>
 
-				<section class="grid">
-					<section id="arena" class="panel panel-wide">
-						<div class="panel-head">
-							<h2>Arena</h2>
-							<span class="tag">Play</span>
-						</div>
-						<p class="panel-sub">Pick a game and launch instantly.</p>
-						<div class="game-row">
-							<button id="calc-btn" class="btn btn-game">Calculator</button>
-							<button id="paint-btn" class="btn btn-game">Paint</button>
-							<button id="chess-btn-2" class="btn btn-game">Chess</button>
-							<button class="btn btn-disabled" disabled>More soon</button>
-						</div>
-					</section>
-
-					<section id="lounge" class="panel panel-tall">
-						<div class="panel-head">
-							<h2>Lounge</h2>
-							<span class="tag">Chat</span>
-						</div>
-						<div id="chat-list" class="chat-list"></div>
-						<div class="chat-input">
-							<button id="chat-emoji-btn" class="btn btn-ghost" type="button">😊</button>
-							<input id="chat-message" type="text" placeholder="Type a message...">
-							<label class="chat-attach">
-								<input id="chat-image" type="file" accept="image/*">
-								<span>Image</span>
-							</label>
-							<button id="chat-send" class="btn btn-primary">Send</button>
-						</div>
-						<div id="chat-emoji-panel" class="emoji-panel hidden"></div>
-						<div id="chat-preview" class="chat-preview hidden">
-							<img id="chat-preview-img" alt="preview">
-							<button id="chat-cancel" class="btn btn-ghost">Remove</button>
-						</div>
-						<p class="hint">Chat auto‑resets daily. Images up to 200KB.</p>
-					</section>
-
-					<section id="ranking" class="panel">
-						<div class="panel-head">
-							<h2>Ranking</h2>
-							<span class="tag">ELO</span>
-						</div>
-						<div id="leaderboard-content"></div>
-					</section>
-
-					<section id="account" class="panel">
-						<div class="panel-head">
-							<h2>Account</h2>
-							<span class="tag">Sync</span>
-						</div>
-						<p id="auth-status">Not logged in.</p>
-						<div class="btn-row">
-							<button id="auth-open" class="btn btn-primary">Login / Register</button>
-							<button id="logout-btn" class="btn btn-ghost">Log out</button>
-						</div>
-						<p class="hint">Login to sync chat, stats, and global rankings.</p>
-					</section>
-
-					<section class="panel" id="drop">
-						<div class="panel-head">
-							<h2>Arcade Drop</h2>
-							<span class="tag">Daily</span>
-						</div>
-						<p id="drop-text">Win 3 games in a row today.</p>
-						<button id="drop-btn" class="btn btn-soft">New challenge</button>
-					</section>
-
-					<section class="panel panel-wide" id="feedback">
-						<div class="panel-head">
-							<h2>Feedback</h2>
-							<span class="tag">Contact</span>
-						</div>
-						<p class="panel-sub">Send ideas, bug reports, or new game suggestions.</p>
-						<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
-					</section>
+			<section class="grid">
+				<section id="arena" class="panel panel-wide">
+					<div class="panel-head">
+						<h2>Arena</h2>
+						<span class="tag">Play</span>
+					</div>
+					<p class="panel-sub">Pick a game and launch instantly.</p>
+					<div class="game-row">
+						<button id="calc-btn" class="btn btn-game">Calculator</button>
+						<button id="paint-btn" class="btn btn-game">Paint</button>
+						<button id="chess-btn-2" class="btn btn-game">Chess</button>
+						<button class="btn btn-disabled" disabled>More soon</button>
+					</div>
 				</section>
-			</main>
+
+				<section id="ranking" class="panel">
+					<div class="panel-head">
+						<h2>Ranking</h2>
+						<span class="tag">ELO</span>
+					</div>
+					<div id="leaderboard-content"></div>
+				</section>
+
+				<section id="account" class="panel">
+					<div class="panel-head">
+						<h2>Account</h2>
+						<span class="tag">Sync</span>
+					</div>
+					<p id="auth-status">Not logged in.</p>
+					<div class="btn-row">
+						<button id="auth-open" class="btn btn-primary">Login / Register</button>
+						<button id="logout-btn" class="btn btn-ghost">Log out</button>
+					</div>
+					<p class="hint">Login to sync chat, stats, and global rankings.</p>
+				</section>
+
+				<section id="lounge" class="panel panel-tall">
+					<div class="panel-head">
+						<h2>Lounge</h2>
+						<span class="tag">Chat</span>
+					</div>
+					<div id="chat-list" class="chat-list"></div>
+					<div class="chat-input">
+						<button id="chat-emoji-btn" class="btn btn-ghost" type="button">😊</button>
+						<input id="chat-message" type="text" placeholder="Type a message...">
+						<label class="chat-attach">
+							<input id="chat-image" type="file" accept="image/*">
+							<span>Image</span>
+						</label>
+						<button id="chat-send" class="btn btn-primary">Send</button>
+					</div>
+					<div id="chat-emoji-panel" class="emoji-panel hidden"></div>
+					<div id="chat-preview" class="chat-preview hidden">
+						<img id="chat-preview-img" alt="preview">
+						<button id="chat-cancel" class="btn btn-ghost">Remove</button>
+					</div>
+					<p class="hint">Chat auto‑resets daily. Images up to 200KB.</p>
+				</section>
+
+				<section class="panel" id="drop">
+					<div class="panel-head">
+						<h2>Arcade Drop</h2>
+						<span class="tag">Daily</span>
+					</div>
+					<p id="drop-text">Win 3 games in a row today.</p>
+					<button id="drop-btn" class="btn btn-soft">New challenge</button>
+				</section>
+
+				<section class="panel panel-wide" id="feedback">
+					<div class="panel-head">
+						<h2>Feedback</h2>
+						<span class="tag">Contact</span>
+					</div>
+					<p class="panel-sub">Send ideas, bug reports, or new game suggestions.</p>
+					<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
+				</section>
+			</section>
 		</div>
 
 		<div id="auth-modal" class="auth-modal hidden">
