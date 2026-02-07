@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+﻿import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, orderBy, limit, getDocs, addDoc, onSnapshot, updateDoc, where, deleteDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
@@ -99,7 +99,9 @@ const badgeIcon = document.getElementById('badge-icon');
 const badgeColor = document.getElementById('badge-color');
 const badgeDesc = document.getElementById('badge-desc');
 const badgeCreate = document.getElementById('badge-create');
+const badgePresets = document.getElementById('badge-presets');
 const assignUid = document.getElementById('assign-uid');
+const assignUser = document.getElementById('assign-user');
 const assignBadge = document.getElementById('assign-badge');
 const assignBadgeBtn = document.getElementById('assign-badge-btn');
 const calcBtn = document.getElementById('calc-btn');
@@ -154,6 +156,13 @@ let currentUser = null;
 const ADMIN_UIDS = ['GTWT222m9NRixYoFZBPJ6IfSN3j1'];
 const isAdmin = () => !!currentUser && ADMIN_UIDS.includes(currentUser.uid);
 let authMode = 'signup';
+const BADGE_PRESETS = [
+	{ name: 'HLTV Top 1', icon: '\uD83E\uDD47', color: '#f2c46d', desc: 'Season #1' },
+	{ name: 'HLTV Top 2', icon: '\uD83E\uDD48', color: '#c7d1db', desc: 'Season #2' },
+	{ name: 'HLTV Top 3', icon: '\uD83E\uDD49', color: '#d9a26f', desc: 'Season #3' },
+	{ name: 'MVP', icon: '\u2B50', color: '#9fe6c1', desc: 'Best player' },
+	{ name: 'Clutch', icon: '\u26A1', color: '#7fb0d9', desc: 'Clutch winner' }
+];
 
 function show(el) { if (el) el.classList.remove('hidden'); }
 function hide(el) { if (el) el.classList.add('hidden'); }
@@ -383,7 +392,7 @@ async function renderLeaderboards() {
 				rows.forEach(row => {
 					const li = document.createElement('li');
 					li.textContent = formatter(row);
-					const uid = row.id || row.uid;
+					const uid = row.id || row.uid || row.key;
 					if (uid) {
 						li.style.cursor = 'pointer';
 						li.addEventListener('click', () => openProfile(uid, row));
@@ -485,24 +494,29 @@ async function openProfile(uid, fallback = {}) {
 async function renderBadgesFor(uid, container) {
 	if (!container) return;
 	container.innerHTML = '';
-	const badgeSnap = await getDocs(query(collection(db, 'user_badges'), where('uid', '==', uid)));
-	const badgeIds = [];
-	badgeSnap.forEach(docSnap => badgeIds.push(docSnap.data().badgeId));
-	if (!badgeIds.length) {
-		container.innerHTML = '<span class="muted">No medals yet.</span>';
-		return;
+	try {
+		const badgeSnap = await getDocs(query(collection(db, 'user_badges'), where('uid', '==', uid)));
+		const badgeIds = [];
+		badgeSnap.forEach(docSnap => badgeIds.push(docSnap.data().badgeId));
+		if (!badgeIds.length) {
+			container.innerHTML = '<span class="muted">No medals yet.</span>';
+			return;
+		}
+		const allBadges = await loadBadges();
+		const map = new Map(allBadges.map(b => [b.id, b]));
+		badgeIds.forEach(id => {
+			const b = map.get(id);
+			if (!b) return;
+			const el = document.createElement('div');
+			el.className = 'badge';
+			const color = b.color || '#f2c46d';
+			el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
+			container.appendChild(el);
+		});
+	} catch (err) {
+		console.warn('Badges load failed:', err);
+		container.innerHTML = '<span class="muted">Could not load medals. Check Firebase rules.</span>';
 	}
-	const allBadges = await loadBadges();
-	const map = new Map(allBadges.map(b => [b.id, b]));
-	badgeIds.forEach(id => {
-		const b = map.get(id);
-		if (!b) return;
-		const el = document.createElement('div');
-		el.className = 'badge';
-		const color = b.color || '#f2c46d';
-		el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '🏅'} ${b.name || 'Medal'}`;
-		container.appendChild(el);
-	});
 }
 
 async function renderUserBadges() {
@@ -512,36 +526,62 @@ async function renderUserBadges() {
 		userBadges.innerHTML = '<span class="muted">Login to see medals.</span>';
 		return;
 	}
-	const badgeSnap = await getDocs(query(collection(db, 'user_badges'), where('uid', '==', currentUser.uid)));
-	const badgeIds = [];
-	badgeSnap.forEach(docSnap => badgeIds.push(docSnap.data().badgeId));
-	if (!badgeIds.length) {
-		userBadges.innerHTML = '<span class="muted">No medals yet.</span>';
-		return;
+	try {
+		const badgeSnap = await getDocs(query(collection(db, 'user_badges'), where('uid', '==', currentUser.uid)));
+		const badgeIds = [];
+		badgeSnap.forEach(docSnap => badgeIds.push(docSnap.data().badgeId));
+		if (!badgeIds.length) {
+			userBadges.innerHTML = '<span class="muted">No medals yet.</span>';
+			return;
+		}
+		const allBadges = await loadBadges();
+		const map = new Map(allBadges.map(b => [b.id, b]));
+		badgeIds.forEach(id => {
+			const b = map.get(id);
+			if (!b) return;
+			const el = document.createElement('div');
+			el.className = 'badge';
+			const color = b.color || '#f2c46d';
+			el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
+			userBadges.appendChild(el);
+		});
+	} catch (err) {
+		console.warn('User badges load failed:', err);
+		userBadges.innerHTML = '<span class="muted">Could not load medals. Check Firebase rules.</span>';
 	}
-	const allBadges = await loadBadges();
-	const map = new Map(allBadges.map(b => [b.id, b]));
-	badgeIds.forEach(id => {
-		const b = map.get(id);
-		if (!b) return;
-		const el = document.createElement('div');
-		el.className = 'badge';
-		const color = b.color || '#f2c46d';
-		el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '🏅'} ${b.name || 'Medal'}`;
-		userBadges.appendChild(el);
-	});
 }
 
 async function renderBadgeAdmin() {
 	if (!adminPanel || !isAdmin()) return;
-	const badges = await loadBadges();
+	let badges = [];
+	try {
+		badges = await loadBadges();
+	} catch (err) {
+		console.warn('Badge admin load failed:', err);
+	}
+	if (badgePresets) {
+		badgePresets.innerHTML = '';
+		BADGE_PRESETS.forEach(preset => {
+			const btn = document.createElement('button');
+			btn.type = 'button';
+			btn.className = 'preset-btn';
+			btn.textContent = `${preset.icon} ${preset.name}`;
+			btn.addEventListener('click', () => {
+				if (badgeName) badgeName.value = preset.name;
+				if (badgeIcon) badgeIcon.value = preset.icon;
+				if (badgeColor) badgeColor.value = preset.color;
+				if (badgeDesc) badgeDesc.value = preset.desc;
+			});
+			badgePresets.appendChild(btn);
+		});
+	}
 	if (badgeList) {
 		badgeList.innerHTML = '';
 		badges.forEach(b => {
 			const el = document.createElement('div');
 			el.className = 'badge';
 			const color = b.color || '#f2c46d';
-			el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '🏅'} ${b.name || 'Medal'}`;
+			el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
 			badgeList.appendChild(el);
 		});
 	}
@@ -550,9 +590,27 @@ async function renderBadgeAdmin() {
 		badges.forEach(b => {
 			const opt = document.createElement('option');
 			opt.value = b.id;
-			opt.textContent = `${b.icon || '🏅'} ${b.name || 'Medal'}`;
+			opt.textContent = `${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
 			assignBadge.appendChild(opt);
 		});
+	}
+	if (assignUser) {
+		assignUser.innerHTML = '';
+		const empty = document.createElement('option');
+		empty.value = '';
+		empty.textContent = 'Pick player (top list)';
+		assignUser.appendChild(empty);
+		try {
+			const leaders = await fetchLeaders('totalTime');
+			leaders.forEach(row => {
+				const opt = document.createElement('option');
+				opt.value = row.id || row.uid || '';
+				opt.textContent = `${row.name || 'Player'} • ${Math.round((row.totalTime || 0) / 60)}m`;
+				assignUser.appendChild(opt);
+			});
+		} catch (err) {
+			console.warn('Assign user list failed:', err);
+		}
 	}
 }
 
@@ -560,7 +618,7 @@ async function createBadge() {
 	if (!isAdmin()) return;
 	const name = (badgeName?.value || '').trim();
 	if (!name) return;
-	const icon = (badgeIcon?.value || '').trim() || '🏅';
+	const icon = (badgeIcon?.value || '').trim() || '\uD83C\uDFC5';
 	const color = (badgeColor?.value || '').trim() || '#f2c46d';
 	const desc = (badgeDesc?.value || '').trim();
 	await addDoc(collection(db, 'badges'), {
@@ -596,7 +654,11 @@ async function assignBadgeToUser() {
 
 if (badgeCreate) badgeCreate.addEventListener('click', createBadge);
 if (assignBadgeBtn) assignBadgeBtn.addEventListener('click', assignBadgeToUser);
-
+if (assignUser && assignUid) {
+	assignUser.addEventListener('change', () => {
+		assignUid.value = assignUser.value || '';
+	});
+}
 // --- Chat ---
 function setChatState() {
 	const enabled = !!currentUser;
@@ -733,7 +795,7 @@ if (chatCancel) {
 }
 
 if (chatEmojiBtn && chatEmojiPanel) {
-	const emojis = ['😀','😅','😂','🤣','😊','😍','😎','😤','😭','😱','🤯','🤔','😴','😡','👍','🔥','🎯','💯','✨','⚡','🎮','🕹️','🏆','🚀','💬','📌','📸','🧩','🛡️','🧠'];
+	const emojis = ['\uD83D\uDE00','\uD83D\uDE05','\uD83D\uDE02','\uD83E\uDD23','\uD83D\uDE0A','\uD83D\uDE0D','\uD83D\uDE0E','\uD83D\uDE24','\uD83D\uDE2D','\uD83D\uDE31','\uD83E\uDD2F','\uD83E\uDD14','\uD83D\uDE34','\uD83D\uDE21','\uD83D\uDC4D','\uD83D\uDD25','\uD83C\uDFAF','\uD83D\uDCAF','\u2728','\u26A1','\uD83C\uDFAE','\uD83D\uDDB1\uFE0F','\uD83C\uDFC6','\uD83D\uDE80','\uD83D\uDCAC','\uD83D\uDCCC','\uD83D\uDCF8','\uD83E\uDDE9','\uD83D\uDEE1\uFE0F','\uD83E\uDDE0'];
 	chatEmojiPanel.innerHTML = '';
 	emojis.forEach(e => {
 		const btn = document.createElement('button');
@@ -1658,3 +1720,19 @@ if (exitChessBtn) {
 		hide(gameModal);
 	});
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
