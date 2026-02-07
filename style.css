@@ -78,8 +78,27 @@ body{
 .label{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:var(--muted)}
 .value{font-family:var(--font-head);font-size:13px}
 
-.stage{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
+.stage{display:block}
 
+.stage-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.stage-main{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
+.stage-chat{display:grid;gap:18px;position:sticky;top:20px}
+
+.arena{grid-column:span 4}
+.ranking{grid-column:span 4}
+.cards{grid-column:span 4}
+.account{grid-column:span 6}
+.drop{grid-column:span 6}
+.feedback{grid-column:span 12}
+
+.dm-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dm-controls .btn{grid-column:span 2}
+
+.chat .chat-list{height:320px}
+.dm .chat-list{height:260px}
+
+.chat-item .msg-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
+.msg-actions button{padding:4px 8px;font-size:11px;border-radius:8px;border:1px solid var(--edge);background:rgba(255,255,255,.05);color:var(--ink);cursor:pointer}
 .panel{
   background:linear-gradient(160deg,rgba(36,45,56,.98),rgba(27,34,42,.98));
   border:1px solid var(--edge);
@@ -95,19 +114,13 @@ body{
 .tag{padding:6px 10px;border-radius:999px;background:rgba(106,169,161,.18);color:#dff7f1;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em}
 .muted{color:var(--muted);font-size:12px}
 
-.intro{grid-column:span 12;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center}
+.intro{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center}
 .intro h1{font-family:var(--font-head);font-size:32px;line-height:1.15}
 .intro p{color:var(--muted);font-size:14px}
 .intro-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-start}
 .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(159,230,193,.18);color:#e9fff4;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.16em;width:fit-content}
 
-.arena{grid-column:span 4}
-.ranking{grid-column:span 4}
-.cards{grid-column:span 4}
-.chat{grid-column:span 7}
-.account{grid-column:span 5}
-.drop{grid-column:span 5}
-.feedback{grid-column:span 7}
+
 
 .game-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:6px}
 
@@ -219,12 +232,16 @@ input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus,
 @media (max-width:1100px){
   .app{grid-template-columns:1fr}
   .rail{position:static}
-  .stage{grid-template-columns:1fr}
+  .stage-grid{grid-template-columns:1fr}
+  .stage-chat{position:static}
+  .stage-main{grid-template-columns:1fr}
   .intro{grid-template-columns:1fr}
-  .arena,.ranking,.cards,.chat,.account,.drop,.feedback{grid-column:span 12}
+  .arena,.ranking,.cards,.account,.drop,.feedback{grid-column:span 12}
   .profile-body{grid-template-columns:1fr}
 }
 @media (max-width:720px){
   .chat-input{flex-direction:column;align-items:stretch}
   .emoji-panel{grid-template-columns:repeat(6,1fr)}
+  .dm-controls{grid-template-columns:1fr}
+  .dm-controls .btn{grid-column:span 1}
 }

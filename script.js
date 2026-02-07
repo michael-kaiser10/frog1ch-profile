@@ -155,7 +155,7 @@ const dropText = document.getElementById('drop-text');
 let currentUser = null;
 const ADMIN_UIDS = ['GTWT222m9NRixYoFZBPJ6IfSN3j1'];
 const isAdmin = () => !!currentUser && ADMIN_UIDS.includes(currentUser.uid);
-let authMode = 'signup';
+let authMode = 'signup';\nlet dmUnsub = null;\nlet dmThreadId = null;\nlet dmPeer = null;
 const BADGE_PRESETS = [
 	{ name: 'HLTV Top 1', icon: '\uD83E\uDD47', color: '#f2c46d', desc: 'Season #1' },
 	{ name: 'HLTV Top 2', icon: '\uD83E\uDD48', color: '#c7d1db', desc: 'Season #2' },
@@ -203,16 +203,7 @@ if (paintBtn) paintBtn.addEventListener('click', () => openModal('Paint', paintP
 if (chessBtn) chessBtn.addEventListener('click', () => openModal('Chess', chessPanel));
 if (chessBtn2) chessBtn2.addEventListener('click', () => openModal('Chess', chessPanel));
 
-onAuthStateChanged(auth, (user) => {
-	currentUser = user || null;
-	updateAuthUI();
-	setChatState();
-	cleanupChatIfNeeded();
-	renderLeaderboards();
-	renderUserBadges();
-	renderBadgeAdmin();
-	if (currentUser) resumeActiveGame();
-});
+
 
 if (profileOpen) profileOpen.addEventListener('click', () => {
 	openProfile(currentUser && currentUser.uid);
@@ -587,12 +578,19 @@ async function renderBadgeAdmin() {
 	}
 	if (assignBadge) {
 		assignBadge.innerHTML = '';
-		badges.forEach(b => {
+		if (!badges.length) {
 			const opt = document.createElement('option');
-			opt.value = b.id;
-			opt.textContent = `${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
+			opt.value = '';
+			opt.textContent = 'No medals loaded';
 			assignBadge.appendChild(opt);
-		});
+		} else {
+			badges.forEach(b => {
+				const opt = document.createElement('option');
+				opt.value = b.id;
+				opt.textContent = `${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
+				assignBadge.appendChild(opt);
+			});
+		}
 	}
 	if (assignUser) {
 		assignUser.innerHTML = '';
@@ -634,11 +632,12 @@ async function createBadge() {
 	if (badgeColor) badgeColor.value = '';
 	if (badgeDesc) badgeDesc.value = '';
 	await renderBadgeAdmin();
+\tpopulateDmUsers();
 }
 
 async function assignBadgeToUser() {
 	if (!isAdmin()) return;
-	const uid = (assignUid?.value || '').trim();
+	const uid = (assignUid?.value || assignUser?.value || '').trim();
 	const badgeId = assignBadge?.value;
 	if (!uid || !badgeId) return;
 	const existing = await getDocs(query(collection(db, 'user_badges'), where('uid', '==', uid), where('badgeId', '==', badgeId)));
@@ -662,11 +661,16 @@ if (assignUser && assignUid) {
 // --- Chat ---
 function setChatState() {
 	const enabled = !!currentUser;
-	chatInput.disabled = !enabled;
-	chatSend.disabled = !enabled;
+	if (chatInput) chatInput.disabled = !enabled;
+	if (chatSend) chatSend.disabled = !enabled;
 	if (chatImageInput) chatImageInput.disabled = !enabled;
 	if (chatCancel) chatCancel.disabled = !enabled;
-	chatInput.placeholder = enabled ? 'Type a message...' : 'Login to chat...';
+	if (chatInput) chatInput.placeholder = enabled ? 'Type a message...' : 'Login to chat...';
+	if (dmInput) dmInput.disabled = !enabled;
+	if (dmSend) dmSend.disabled = !enabled;
+	if (dmLoadBtn) dmLoadBtn.disabled = !enabled;
+	if (dmUserSelect) dmUserSelect.disabled = !enabled;
+	if (dmUidInput) dmUidInput.disabled = !enabled;
 }
 
 function getDayKey(date = new Date()) {
@@ -676,13 +680,13 @@ function getDayKey(date = new Date()) {
 	return `${y}-${m}-${d}`;
 }
 
-function renderChatItem(data) {
+function renderChatItem(data, id, collectionName = 'chat') {
 	const wrap = document.createElement('div');
 	const isSelf = currentUser && data.uid && currentUser.uid === data.uid;
 	wrap.className = isSelf ? 'chat-item self' : 'chat-item';
 	const meta = document.createElement('div');
 	meta.className = 'chat-meta';
-	meta.textContent = `${data.name || 'Anon'} \u2022 ${data.time || ''}`;
+	meta.textContent = `${data.name || 'Anon'} • ${data.time || ''}`;
 	const bubble = document.createElement('div');
 	bubble.className = 'chat-bubble';
 	if (data.image) {
@@ -698,25 +702,31 @@ function renderChatItem(data) {
 		bubble.appendChild(text);
 	}
 	wrap.appendChild(bubble);
+
+	if (currentUser && (isAdmin() || isSelf)) {
+		const actions = document.createElement('div');
+		actions.className = 'msg-actions';
+		const del = document.createElement('button');
+		del.type = 'button';
+		del.textContent = 'Delete';
+		del.addEventListener('click', async () => {
+			if (!id) return;
+			try {
+				await deleteDoc(doc(db, collectionName, id));
+			} catch (err) {
+				console.warn('Delete failed:', err);
+			}
+		});
+		actions.appendChild(del);
+		wrap.appendChild(actions);
+	}
+
 	wrap.appendChild(meta);
 	return wrap;
 }
 
 async function cleanupChatIfNeeded() {
-	if (!currentUser) return;
-	const today = getDayKey();
-	const lastCleanup = localStorage.getItem('chatCleanup') || '';
-	if (lastCleanup === today) return;
-	try {
-		const oldQ = query(collection(db, 'chat'), where('dayKey', '<', today));
-		const oldSnap = await getDocs(oldQ);
-		const deletions = [];
-		oldSnap.forEach(docSnap => deletions.push(deleteDoc(docSnap.ref)));
-		await Promise.all(deletions);
-		localStorage.setItem('chatCleanup', today);
-	} catch (err) {
-		console.warn('Chat cleanup failed:', err);
-	}
+	return;
 }
 
 function startChatListener() {
@@ -732,13 +742,99 @@ function startChatListener() {
 				const createdKey = getDayKey(data.createdAt.toDate());
 				if (createdKey !== today) return;
 			}
-			items.push(data);
+			items.push({ id: docSnap.id, ...data });
 		});
-		items.reverse().forEach(item => chatList.appendChild(renderChatItem(item)));
+		items.reverse().forEach(item => chatList.appendChild(renderChatItem(item, item.id, 'chat')));
 		chatList.scrollTop = chatList.scrollHeight;
 	});
 }
 startChatListener();
+function getThreadId(a, b) {
+	if (!a || !b) return null;
+	return [a, b].sort().join('_');
+}
+
+async function populateDmUsers() {
+	if (!dmUserSelect) return;
+	dmUserSelect.innerHTML = '';
+	const empty = document.createElement('option');
+	empty.value = '';
+	empty.textContent = 'Pick player (top list)';
+	dmUserSelect.appendChild(empty);
+	try {
+		const leaders = await fetchLeaders('totalTime');
+		leaders.forEach(row => {
+			const opt = document.createElement('option');
+			opt.value = row.id || row.uid || row.key || '';
+			opt.textContent = `${row.name || 'Player'} • ${Math.round((row.totalTime || 0) / 60)}m`;
+			dmUserSelect.appendChild(opt);
+		});
+	} catch (err) {
+		console.warn('DM users load failed:', err);
+	}
+}
+
+function openDmWith(uid) {
+	if (!currentUser || !uid) return;
+	dmPeer = uid;
+	dmThreadId = getThreadId(currentUser.uid, uid);
+	if (dmUidInput) dmUidInput.value = uid;
+	startDmListener();
+}
+
+function startDmListener() {
+	if (!dmList || !dmThreadId) return;
+	if (dmUnsub) dmUnsub();
+	const q = query(collection(db, 'dm_messages'), where('threadId', '==', dmThreadId), orderBy('createdAt', 'desc'), limit(50));
+	dmUnsub = onSnapshot(q, (snap) => {
+		dmList.innerHTML = '';
+		const items = [];
+		snap.forEach(docSnap => {
+			const data = docSnap.data();
+			items.push({ id: docSnap.id, ...data });
+		});
+		items.reverse().forEach(item => dmList.appendChild(renderChatItem(item, item.id, 'dm_messages')));
+		dmList.scrollTop = dmList.scrollHeight;
+	}, (err) => {
+		console.warn('DM listener failed:', err);
+	});
+}
+
+async function sendDm() {
+	if (!currentUser || !dmThreadId || !dmPeer) return;
+	const text = (dmInput?.value || '').trim();
+	if (!text) return;
+	const name = currentUser.displayName || currentUser.email || 'Player';
+	const now = new Date();
+	await addDoc(collection(db, 'dm_messages'), {
+		uid: currentUser.uid,
+		name,
+		text,
+		threadId: dmThreadId,
+		toUid: dmPeer,
+		time: now.toLocaleTimeString(),
+		createdAt: serverTimestamp()
+	});
+	dmInput.value = '';
+}
+
+if (dmLoadBtn) {
+	dmLoadBtn.addEventListener('click', () => {
+		const uid = (dmUidInput?.value || dmUserSelect?.value || '').trim();
+		openDmWith(uid);
+	});
+}
+if (dmUserSelect && dmUidInput) {
+	dmUserSelect.addEventListener('change', () => {
+		dmUidInput.value = dmUserSelect.value || '';
+	});
+}
+if (dmSend) dmSend.addEventListener('click', sendDm);
+if (dmInput) {
+	dmInput.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter') sendDm();
+	});
+}
 
 async function sendChat() {
 	if (!currentUser) return;
@@ -856,8 +952,21 @@ function stopPresence() {
 	presenceTimer = null;
 }
 onAuthStateChanged(auth, (user) => {
-	if (user) startPresence();
-	else stopPresence();
+	currentUser = user || null;
+	updateAuthUI();
+	setChatState();
+	cleanupChatIfNeeded();
+	renderLeaderboards();
+	renderUserBadges();
+	renderBadgeAdmin();
+	populateDmUsers();
+	if (currentUser) resumeActiveGame();
+	if (!currentUser && dmList) {
+		dmList.innerHTML = '';
+		dmThreadId = null;
+		dmPeer = null;
+		if (dmUnsub) { dmUnsub(); dmUnsub = null; }
+	}
 });
 
 // --- Chess ---
@@ -1720,6 +1829,31 @@ if (exitChessBtn) {
 		hide(gameModal);
 	});
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

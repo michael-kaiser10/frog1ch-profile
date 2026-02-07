@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
@@ -52,124 +52,150 @@
 			</aside>
 
 			<main class="stage">
-				<section id="intro" class="panel intro">
-					<div>
-						<span class="pill">Arcade Core</span>
-						<h1>Play. Chat. Climb. A clean arena for daily wins.</h1>
-						<p>Games, rankings, and real-time talk in one tight flow. Lightweight, fast, and built for the grind.</p>
-					</div>
-					<div class="intro-actions">
-						<button id="play-btn" class="btn btn-primary">Play now</button>
-						<button id="chess-btn" class="btn btn-ghost">Open Chess</button>
-					</div>
-				</section>
+				<div class="stage-grid">
+					<div class="stage-main">
+						<section id="intro" class="panel intro">
+							<div>
+								<span class="pill">Arcade Core</span>
+								<h1>Play. Chat. Climb. A clean arena for daily wins.</h1>
+								<p>Games, rankings, and real-time talk in one tight flow. Lightweight, fast, and built for the grind.</p>
+							</div>
+							<div class="intro-actions">
+								<button id="play-btn" class="btn btn-primary">Play now</button>
+								<button id="chess-btn" class="btn btn-ghost">Open Chess</button>
+							</div>
+						</section>
 
-				<section id="arena" class="panel arena">
-					<div class="panel-head">
-						<h2>Arena</h2>
-						<span class="tag">Play</span>
-					</div>
-					<p class="muted">Pick a game and launch instantly.</p>
-					<div class="game-row">
-						<button id="chess-btn-2" class="btn btn-game">Chess</button>
-						<button class="btn btn-disabled" disabled>More soon</button>
-					</div>
-				</section>
+						<section id="arena" class="panel arena">
+							<div class="panel-head">
+								<h2>Arena</h2>
+								<span class="tag">Play</span>
+							</div>
+							<p class="muted">Pick a game and launch instantly.</p>
+							<div class="game-row">
+								<button id="chess-btn-2" class="btn btn-game">Chess</button>
+								<button class="btn btn-disabled" disabled>More soon</button>
+							</div>
+						</section>
 
-				<section id="ranking" class="panel ranking">
-					<div class="panel-head">
-						<h2>Ranking</h2>
-						<span class="tag">ELO</span>
-					</div>
-					<div id="leaderboard-content" class="ranking-content"></div>
-				</section>
+						<section id="ranking" class="panel ranking">
+							<div class="panel-head">
+								<h2>Ranking</h2>
+								<span class="tag">ELO</span>
+							</div>
+							<div id="leaderboard-content" class="ranking-content"></div>
+						</section>
 
-				<section id="cards" class="panel cards">
-					<div class="panel-head">
-						<h2>Player Cards</h2>
-						<span class="tag">Top</span>
-					</div>
-					<div id="player-cards" class="card-grid"></div>
-				</section>
+						<section id="cards" class="panel cards">
+							<div class="panel-head">
+								<h2>Player Cards</h2>
+								<span class="tag">Top</span>
+							</div>
+							<div id="player-cards" class="card-grid"></div>
+						</section>
 
-				<section id="chat" class="panel chat">
-					<div class="panel-head">
-						<h2>Global Chat</h2>
-						<span class="tag">Live</span>
-					</div>
-					<div id="chat-list" class="chat-list"></div>
-					<div class="chat-actions">
-						<button id="chat-emoji-btn" class="btn btn-ghost" type="button">😊</button>
-						<label class="chat-attach">
-							<input id="chat-image" type="file" accept="image/*">
-							<span>Image</span>
-						</label>
-						<div class="chat-input">
-							<input id="chat-message" type="text" placeholder="Type a message...">
-							<button id="chat-send" class="btn btn-primary">Send</button>
-						</div>
-					</div>
-					<div id="chat-emoji-panel" class="emoji-panel hidden"></div>
-					<div id="chat-preview" class="chat-preview hidden">
-						<img id="chat-preview-img" alt="preview">
-						<button id="chat-cancel" class="btn btn-ghost">Remove</button>
-					</div>
-					<p class="hint">Chat auto‑resets daily. Images up to 200KB.</p>
-				</section>
+						<section id="account" class="panel account">
+							<div class="panel-head">
+								<h2>Account</h2>
+								<span class="tag">Sync</span>
+							</div>
+							<p id="auth-status">Not logged in.</p>
+							<p class="muted">Login to sync chat, stats, and global rankings.</p>
+							<div class="btn-row">
+								<button id="auth-open" class="btn btn-primary">Login / Register</button>
+								<button id="logout-btn" class="btn btn-ghost">Log out</button>
+							</div>
+							<div class="badge-block">
+								<h3>Your Medals</h3>
+								<div id="user-badges" class="badge-list"></div>
+							</div>
+							<div id="admin-panel" class="admin-panel hidden">
+								<h3>Admin Medals</h3>
+								<div id="badge-presets" class="badge-presets"></div>
+								<div class="admin-grid">
+									<input id="badge-name" type="text" placeholder="Medal name">
+									<input id="badge-icon" type="text" placeholder="Icon (emoji)">
+									<input id="badge-color" type="text" placeholder="Color (e.g. #a6e6b8)">
+									<input id="badge-desc" type="text" placeholder="Short description">
+									<button id="badge-create" class="btn btn-primary">Create Medal</button>
+								</div>
+								<div class="admin-grid">
+									<input id="assign-uid" type="text" placeholder="User UID">
+									<select id="assign-user"></select>
+									<select id="assign-badge"></select>
+									<button id="assign-badge-btn" class="btn btn-ghost">Assign Medal</button>
+								</div>
+								<p class="muted">Tip: use Firebase Auth Users to copy UID. Medals appear in profiles and Your Medals.</p>
+								<div id="badge-list" class="badge-list"></div>
+							</div>
+						</section>
 
-				<section id="account" class="panel account">
-					<div class="panel-head">
-						<h2>Account</h2>
-						<span class="tag">Sync</span>
-					</div>
-					<p id="auth-status">Not logged in.</p>
-					<p class="muted">Login to sync chat, stats, and global rankings.</p>
-					<div class="btn-row">
-						<button id="auth-open" class="btn btn-primary">Login / Register</button>
-						<button id="logout-btn" class="btn btn-ghost">Log out</button>
-					</div>
-					<div class="badge-block">
-						<h3>Your Medals</h3>
-						<div id="user-badges" class="badge-list"></div>
-					</div>
-					<div id="admin-panel" class="admin-panel hidden">
-						<h3>Admin Medals</h3>
-						<div id="badge-presets" class="badge-presets"></div>
-						<div class="admin-grid">
-							<input id="badge-name" type="text" placeholder="Medal name">
-							<input id="badge-icon" type="text" placeholder="Icon (emoji)">
-							<input id="badge-color" type="text" placeholder="Color (e.g. #a6e6b8)">
-							<input id="badge-desc" type="text" placeholder="Short description">
-							<button id="badge-create" class="btn btn-primary">Create Medal</button>
-						</div>
-						<div class="admin-grid">
-							<input id="assign-uid" type="text" placeholder="User UID">
-							<select id="assign-user"></select>
-							<select id="assign-badge"></select>
-							<button id="assign-badge-btn" class="btn btn-ghost">Assign Medal</button>
-						</div>
-						<p class="muted">Tip: use Firebase Auth Users to copy UID. Medals appear in profiles and Your Medals.</p>
-						<div id="badge-list" class="badge-list"></div>
-					</div>
-				</section>
+						<section id="drop" class="panel drop">
+							<div class="panel-head">
+								<h2>Arcade Drop</h2>
+								<span class="tag">Daily</span>
+							</div>
+							<p id="drop-text">Win 3 games in a row today.</p>
+							<button id="drop-btn" class="btn btn-soft">New challenge</button>
+						</section>
 
-				<section id="drop" class="panel drop">
-					<div class="panel-head">
-						<h2>Arcade Drop</h2>
-						<span class="tag">Daily</span>
+						<section id="feedback" class="panel feedback">
+							<div class="panel-head">
+								<h2>Feedback</h2>
+								<span class="tag">Contact</span>
+							</div>
+							<p class="muted">Send ideas, bug reports, or new game suggestions.</p>
+							<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
+						</section>
 					</div>
-					<p id="drop-text">Win 3 games in a row today.</p>
-					<button id="drop-btn" class="btn btn-soft">New challenge</button>
-				</section>
 
-				<section id="feedback" class="panel feedback">
-					<div class="panel-head">
-						<h2>Feedback</h2>
-						<span class="tag">Contact</span>
-					</div>
-					<p class="muted">Send ideas, bug reports, or new game suggestions.</p>
-					<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
-				</section>
+					<aside class="stage-chat">
+						<section id="chat" class="panel chat">
+							<div class="panel-head">
+								<h2>Global Chat</h2>
+								<span class="tag">Live</span>
+							</div>
+							<div id="chat-list" class="chat-list"></div>
+							<div class="chat-actions">
+								<button id="chat-emoji-btn" class="btn btn-ghost" type="button">Emoji</button>
+								<label class="chat-attach">
+									<input id="chat-image" type="file" accept="image/*">
+									<span>Image</span>
+								</label>
+								<div class="chat-input">
+									<input id="chat-message" type="text" placeholder="Type a message...">
+									<button id="chat-send" class="btn btn-primary">Send</button>
+								</div>
+							</div>
+							<div id="chat-emoji-panel" class="emoji-panel hidden"></div>
+							<div id="chat-preview" class="chat-preview hidden">
+								<img id="chat-preview-img" alt="preview">
+								<button id="chat-cancel" class="btn btn-ghost">Remove</button>
+							</div>
+							<p class="hint">Chat does not auto?reset now. Images up to 200KB.</p>
+						</section>
+
+						<section id="dm" class="panel dm">
+							<div class="panel-head">
+								<h2>Direct Messages</h2>
+								<span class="tag">DM</span>
+							</div>
+							<div class="dm-controls">
+								<input id="dm-uid" type="text" placeholder="User UID">
+								<select id="dm-user"></select>
+								<button id="dm-load" class="btn btn-ghost">Open</button>
+							</div>
+							<div id="dm-list" class="chat-list"></div>
+							<div class="chat-actions">
+								<div class="chat-input">
+									<input id="dm-message" type="text" placeholder="Type a message...">
+									<button id="dm-send" class="btn btn-primary">Send</button>
+								</div>
+							</div>
+							<p class="hint">DM is private between two users. Admin can delete for everyone.</p>
+						</section>
+					</aside>
+				</div>
 			</main>
 		</div>
 
@@ -276,3 +302,6 @@
 		<script type="module" src="script.js"></script>
 	</body>
 </html>
+
+
+
