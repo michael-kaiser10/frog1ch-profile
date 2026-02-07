@@ -325,6 +325,17 @@ async function renderLeaderboards() {
 	if (!leaderboardContent) return;
 	leaderboardContent.innerHTML = '';
 	try {
+		const formatSeconds = (sec) => {
+			const s = Number(sec || 0);
+			if (!Number.isFinite(s) || s <= 0) return '0s';
+			if (s < 60) return `${Math.round(s)}s`;
+			const m = Math.floor(s / 60);
+			const h = Math.floor(m / 60);
+			const mm = m % 60;
+			if (h > 0) return `${h}h ${mm}m`;
+			return `${m}m`;
+		};
+
 		const overall = await fetchLeaders('totalTime');
 		const calc = await fetchLeaders('calcTime');
 		const paint = await fetchLeaders('paintTime');
@@ -350,14 +361,14 @@ async function renderLeaderboards() {
 			leaderboardContent.appendChild(div);
 		}
 
-		renderSection('\u0422\u041e\u041f \u0417\u0430\u0433\u0430\u043b\u044c\u043d\u0438\u0439', overall, (row) => `${row.name} \u2014 ${Math.round(row.totalTime / 60)}m`);
+		renderSection('\u0422\u041e\u041f \u0417\u0430\u0433\u0430\u043b\u044c\u043d\u0438\u0439', overall, (row) => `${row.name} \u2014 ${formatSeconds(row.totalTime)}`);
 		renderSection('\u0422\u041e\u041f Calculator', calc, (row) => {
 			const ops = row.ops || {};
-			return `${row.name} \u2014 ${Math.round(row.calcTime / 60)}m | +:${ops['+']||0} -:${ops['-']||0} \u00d7:${ops['*']||0} \u00f7:${ops['/']||0}`;
+			return `${row.name} \u2014 ${formatSeconds(row.calcTime)} | +:${ops['+']||0} -:${ops['-']||0} \u00d7:${ops['*']||0} \u00f7:${ops['/']||0}`;
 		});
 		renderSection('\u0422\u041e\u041f Paint', paint, (row) => {
 			const tools = row.tools || {};
-			return `${row.name} \u2014 ${Math.round(row.paintTime / 60)}m | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
+			return `${row.name} \u2014 ${formatSeconds(row.paintTime)} | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
 		});
 		renderSection('TOP Chess ELO', chess, (row) => `${row.name} \u2014 ${row.chessElo}`);
 	} catch (e) {
