@@ -635,7 +635,7 @@ async function createBadge() {
 	if (badgeColor) badgeColor.value = '';
 	if (badgeDesc) badgeDesc.value = '';
 	await renderBadgeAdmin();
-\tpopulateDmUsers();
+	populateDmUsers();
 }
 
 async function assignBadgeToUser() {
@@ -732,7 +732,8 @@ async function cleanupChatIfNeeded() {
 	return;
 }
 
-function startChatListener() {\n\tif (!chatList) return;
+function startChatListener() {
+	if (!chatList) return;
 	const q = query(collection(db, 'chat'), orderBy('createdAt', 'desc'), limit(30));
 	onSnapshot(q, (snap) => {
 		chatList.innerHTML = '';
