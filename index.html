@@ -66,17 +66,20 @@
 							</div>
 						</section>
 
-						<section class="panel arena">
-							<div class="panel-head">
-								<h2>Arena</h2>
-								<span class="tag">Play</span>
-							</div>
-							<p class="muted">Pick a game and launch instantly.</p>
-							<div class="game-row">
-								<button id="chess-btn-2" class="btn btn-game">Chess</button>
-								<button class="btn btn-disabled" disabled>More soon</button>
-							</div>
-						</section>
+					<section class="panel arena">
+						<div class="panel-head">
+							<h2>Arena</h2>
+							<span class="tag">Play</span>
+						</div>
+						<p class="muted">Pick a game and launch instantly.</p>
+						<div class="game-row">
+							<button id="chess-btn-2" class="btn btn-game">Chess</button>
+							<button id="ttt-btn" class="btn btn-game">Tic-Tac-Toe</button>
+							<button id="cards-btn" class="btn btn-game">Card Duel</button>
+							<button id="blackjack-btn" class="btn btn-game">Blackjack</button>
+							<button id="memory-btn" class="btn btn-game">Memory</button>
+						</div>
+					</section>
 
 						<section class="panel ranking">
 							<div class="panel-head">
@@ -115,6 +118,7 @@
 								<div class="admin-grid">
 									<input id="badge-name" type="text" placeholder="Medal name">
 									<input id="badge-icon" type="text" placeholder="Icon (emoji)">
+									<input id="badge-icon-upload" type="file" accept="image/*">
 									<input id="badge-color" type="text" placeholder="Color (e.g. #a6e6b8)">
 									<input id="badge-desc" type="text" placeholder="Short description">
 									<button id="badge-create" class="btn btn-primary">Create Medal</button>
@@ -245,6 +249,59 @@
 					<div id="chess-board" class="chess-board"></div>
 					<p class="hint">If you leave during a game, you lose after 30s unless you return.</p>
 					<button id="exit-chess-btn" class="btn btn-primary">Exit</button>
+				</div>
+				<div id="ttt-panel" class="game-panel hidden">
+					<h3>Tic-Tac-Toe</h3>
+					<p>Play versus a bot or invite a player.</p>
+					<div class="game-row">
+						<button id="ttt-bot" class="btn btn-ghost">Bot Match</button>
+						<button id="ttt-online" class="btn btn-primary">Online Match</button>
+					</div>
+					<div id="ttt-board" class="ttt-board"></div>
+					<p id="ttt-status" class="hint">Ready.</p>
+				</div>
+				<div id="cards-panel" class="game-panel hidden">
+					<h3>Card Duel</h3>
+					<p>Invite a player for a high-card duel.</p>
+					<div class="game-row">
+						<button id="cards-online" class="btn btn-primary">Online Duel</button>
+					</div>
+					<div id="cards-result" class="cards-result muted">Waiting for opponent...</div>
+				</div>
+				<div id="blackjack-panel" class="game-panel hidden">
+					<h3>Blackjack</h3>
+					<p>Solo practice with settings.</p>
+					<div class="admin-grid">
+						<label class="field">
+							<span>Decks</span>
+							<select id="bj-decks">
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="4">4</option>
+								<option value="6">6</option>
+							</select>
+						</label>
+						<label class="field">
+							<span>Dealer Soft 17</span>
+							<select id="bj-soft17">
+								<option value="stand">Stand</option>
+								<option value="hit">Hit</option>
+							</select>
+						</label>
+					</div>
+					<div id="bj-table" class="bj-table"></div>
+					<div class="game-row">
+						<button id="bj-hit" class="btn btn-ghost">Hit</button>
+						<button id="bj-stand" class="btn btn-primary">Stand</button>
+						<button id="bj-new" class="btn btn-ghost">New Round</button>
+					</div>
+					<p id="bj-status" class="hint">Ready.</p>
+				</div>
+				<div id="memory-panel" class="game-panel hidden">
+					<h3>Memory</h3>
+					<p>Find all matching pairs.</p>
+					<div id="memory-board" class="memory-board"></div>
+					<p id="memory-status" class="hint">0 moves.</p>
 				</div>
 			</div>
 		</div>

@@ -64,6 +64,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+document.addEventListener('DOMContentLoaded', () => {
+	if (authModal) authModal.classList.add('hidden');
+});
 
 const playBtn = document.getElementById('play-btn');
 const gameModal = document.getElementById('game-modal');
@@ -96,6 +99,7 @@ const adminPanel = document.getElementById('admin-panel');
 const badgeList = document.getElementById('badge-list');
 const badgeName = document.getElementById('badge-name');
 const badgeIcon = document.getElementById('badge-icon');
+const badgeIconUpload = document.getElementById('badge-icon-upload');
 const badgeColor = document.getElementById('badge-color');
 const badgeDesc = document.getElementById('badge-desc');
 const badgeCreate = document.getElementById('badge-create');
@@ -138,7 +142,15 @@ let pendingImageData = null;
 // Chess
 const chessBtn = document.getElementById('chess-btn');
 const chessBtn2 = document.getElementById('chess-btn-2');
+const tttBtn = document.getElementById('ttt-btn');
+const cardsBtn = document.getElementById('cards-btn');
+const blackjackBtn = document.getElementById('blackjack-btn');
+const memoryBtn = document.getElementById('memory-btn');
 const chessPanel = document.getElementById('chess-panel');
+const tttPanel = document.getElementById('ttt-panel');
+const cardsPanel = document.getElementById('cards-panel');
+const blackjackPanel = document.getElementById('blackjack-panel');
+const memoryPanel = document.getElementById('memory-panel');
 const chessMode = document.getElementById('chess-mode');
 const chessStart = document.getElementById('chess-start');
 const chessDraw = document.getElementById('chess-draw');
@@ -148,6 +160,9 @@ const chessTimer = document.getElementById('chess-timer');
 const chessBoardEl = document.getElementById('chess-board');
 const onlineList = document.getElementById('online-list');
 const inviteList = document.getElementById('invite-list');
+const globalOnline = document.getElementById('global-online');
+const globalInvites = document.getElementById('global-invites');
+const inviteGame = document.getElementById('invite-game');
 const exitChessBtn = document.getElementById('exit-chess-btn');
 const dropBtn = document.getElementById('drop-btn');
 const dropText = document.getElementById('drop-text');
@@ -176,6 +191,10 @@ function openModal(title, panel) {
 	hide(calcPanel);
 	hide(paintPanel);
 	if (chessPanel) hide(chessPanel);
+	if (tttPanel) hide(tttPanel);
+	if (cardsPanel) hide(cardsPanel);
+	if (blackjackPanel) hide(blackjackPanel);
+	if (memoryPanel) hide(memoryPanel);
 	show(panel);
 	if (panel === calcPanel) startCalcSession();
 	if (panel === paintPanel) startPaintSession();
@@ -185,6 +204,14 @@ function openModal(title, panel) {
 			if (!ok) setChessStatus('Chess failed to load');
 			else setChessStatus('Idle');
 		});
+	}
+	if (panel === blackjackPanel) bjStart();
+	if (panel === memoryPanel) memoryStart();
+	if (panel === cardsPanel && cardsResult) cardsResult.textContent = 'Use Invites to start an online duel.';
+	if (panel === tttPanel) {
+		tttState = { board: Array(9).fill(''), mode: 'bot', turn: 'X' };
+		tttUpdateStatus(null);
+		renderTttBoard();
 	}
 }
 
@@ -199,12 +226,16 @@ if (playBtn) {
 		if (chessPanel) openModal('Chess', chessPanel);
 	});
 }
-closeModal.addEventListener('click', closeGameModal);
+if (closeModal) closeModal.addEventListener('click', closeGameModal);
 
 if (calcBtn) calcBtn.addEventListener('click', () => openModal('Calculator', calcPanel));
 if (paintBtn) paintBtn.addEventListener('click', () => openModal('Paint', paintPanel));
 if (chessBtn) chessBtn.addEventListener('click', () => openModal('Chess', chessPanel));
 if (chessBtn2) chessBtn2.addEventListener('click', () => openModal('Chess', chessPanel));
+if (tttBtn) tttBtn.addEventListener('click', () => openModal('Tic-Tac-Toe', tttPanel));
+if (cardsBtn) cardsBtn.addEventListener('click', () => openModal('Card Duel', cardsPanel));
+if (blackjackBtn) blackjackBtn.addEventListener('click', () => openModal('Blackjack', blackjackPanel));
+if (memoryBtn) memoryBtn.addEventListener('click', () => openModal('Memory', memoryPanel));
 
 
 
@@ -301,21 +332,21 @@ async function logout() {
 }
 
 if (submitAuth) {
-	submitAuth.addEventListener('click', () => {
+	if (submitAuth) submitAuth.addEventListener('click', () => {
 		setAuthMessage('');
 		if (authMode === 'signup') signup();
 		else login();
 	});
 }
 if (toggleAuth) {
-	toggleAuth.addEventListener('click', () => {
+	if (toggleAuth) toggleAuth.addEventListener('click', () => {
 		authMode = authMode === 'signup' ? 'login' : 'signup';
 		setAuthMessage('');
 		updateAuthUI();
 	});
 }
 if (authOpen && authModal) {
-	authOpen.addEventListener('click', () => authModal.classList.remove('hidden'));
+	if (authOpen && authModal) authOpen.addEventListener('click', () => authModal.classList.remove('hidden'));
 }
 // Auth is required: disable manual closing when not logged in
 if (authClose && authModal) {
@@ -469,6 +500,14 @@ async function loadBadges() {
 	return badges;
 }
 
+function renderBadgeIcon(icon) {
+	const fallback = '🏅';
+	if (!icon) return fallback;
+	if (icon.startsWith('data:image')) return `<img class="badge-icon" src="${icon}" alt="">`;
+	if (icon.startsWith('<svg')) return icon;
+	return icon;
+}
+
 async function openProfile(uid, fallback = {}) {
 	if (!profileModal) return;
 	const userId = uid || (currentUser && currentUser.uid);
@@ -505,7 +544,7 @@ async function renderBadgesFor(uid, container) {
 			const el = document.createElement('div');
 			el.className = 'badge';
 			const color = b.color || '#f2c46d';
-			el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
+			el.innerHTML = `<span class="dot" style="background:${color}"></span>${renderBadgeIcon(b.icon)} ${b.name || 'Medal'}`;
 			container.appendChild(el);
 		});
 	} catch (err) {
@@ -537,7 +576,7 @@ async function renderUserBadges() {
 			const el = document.createElement('div');
 			el.className = 'badge';
 			const color = b.color || '#f2c46d';
-			el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
+			el.innerHTML = `<span class="dot" style="background:${color}"></span>${renderBadgeIcon(b.icon)} ${b.name || 'Medal'}`;
 			userBadges.appendChild(el);
 		});
 	} catch (err) {
@@ -576,7 +615,7 @@ async function renderBadgeAdmin() {
 			const el = document.createElement('div');
 			el.className = 'badge';
 			const color = b.color || '#f2c46d';
-			el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
+			el.innerHTML = `<span class="dot" style="background:${color}"></span>${renderBadgeIcon(b.icon)} ${b.name || 'Medal'}`;
 			badgeList.appendChild(el);
 		});
 	}
@@ -591,7 +630,7 @@ async function renderBadgeAdmin() {
 			badges.forEach(b => {
 				const opt = document.createElement('option');
 				opt.value = b.id;
-				opt.textContent = `${b.icon || '\uD83C\uDFC5'} ${b.name || 'Medal'}`;
+			opt.textContent = `${b.name || 'Medal'}`;
 				assignBadge.appendChild(opt);
 			});
 		}
@@ -660,6 +699,22 @@ if (assignBadgeBtn) assignBadgeBtn.addEventListener('click', assignBadgeToUser);
 if (assignUser && assignUid) {
 	assignUser.addEventListener('change', () => {
 		assignUid.value = assignUser.value || '';
+	});
+}
+if (badgeIconUpload) {
+	badgeIconUpload.addEventListener('change', () => {
+		const file = badgeIconUpload.files && badgeIconUpload.files[0];
+		if (!file) return;
+		if (file.size > 200 * 1024) {
+			alert('Icon too large. Max 200KB.');
+			badgeIconUpload.value = '';
+			return;
+		}
+		const reader = new FileReader();
+		reader.onload = () => {
+			if (badgeIcon) badgeIcon.value = String(reader.result || '');
+		};
+		reader.readAsDataURL(file);
 	});
 }
 // --- Chat ---
@@ -965,7 +1020,13 @@ onAuthStateChanged(auth, (user) => {
 	renderUserBadges();
 	renderBadgeAdmin();
 	populateDmUsers();
-	if (currentUser) resumeActiveGame();
+	startGlobalInvites();
+	if (currentUser) {
+		startPresence();
+		resumeActiveGame();
+	} else {
+		stopPresence();
+	}
 	if (!currentUser && dmList) {
 		dmList.innerHTML = '';
 		dmThreadId = null;
@@ -1508,8 +1569,7 @@ async function applyEloIfNeeded() {
 	await updateDoc(doc(db, 'chess_games', chessGameId), { eloApplied: true });
 }
 
-if (chessStart) {
-	chessStart.addEventListener('click', () => {
+if (chessStart) {\n\tchessStart.addEventListener('click', () => {
 		if (!chessMode) return;
 		setChessStatus('Loading chess...');
 		ensureChess().then((ok) => {
@@ -1532,8 +1592,7 @@ if (chessStart) {
 	});
 }
 
-if (chessDraw) {
-	chessDraw.addEventListener('click', async () => {
+if (chessDraw) {\n\tchessDraw.addEventListener('click', async () => {
 		if (!chessGameId || !chessGame) return;
 		if (!chessGame.drawOffer) {
 			await updateDoc(doc(db, 'chess_games', chessGameId), { drawOffer: currentUser.uid });
@@ -1559,6 +1618,7 @@ if (chessResign) {
 		const winner = myColor === 'w' ? 'b' : 'w';
 		await endGameOnline(winner, 'resign');
 	});
+	});
 }
 
 if (chessBtn) {
@@ -1567,6 +1627,376 @@ if (chessBtn) {
 		if (section) section.scrollIntoView({ behavior: 'smooth' });
 	});
 }
+
+// --- Global Invites (TTT / Cards / Chess) ---
+let globalInvitesUnsub = null;
+let globalUsersUnsub = null;
+
+async function createChessGame(fromUid, toUid, fromName, toName) {
+	if (!(await ensureChess())) return null;
+	const gameDoc = await addDoc(collection(db, 'chess_games'), {
+		whiteUid: fromUid,
+		blackUid: toUid,
+		whiteName: fromName || 'Player',
+		blackName: toName || 'Player',
+		fen: new Chess().fen(),
+		turn: 'w',
+		status: 'active',
+		turnDeadline: Date.now() + 60000,
+		lastMoveAtMs: Date.now(),
+		drawOffer: null,
+		disconnects: {}
+	});
+	return gameDoc.id;
+}
+
+async function acceptGlobalInvite(inviteId, data) {
+	if (!currentUser) return;
+	let gameId = null;
+	if (data.game === 'ttt') {
+		const docRef = await addDoc(collection(db, 'ttt_games'), {
+			xUid: data.fromUid,
+			oUid: data.toUid,
+			turn: 'x',
+			board: Array(9).fill(''),
+			status: 'active',
+			createdAt: serverTimestamp()
+		});
+		gameId = docRef.id;
+		listenTttGame(gameId);
+		openModal('Tic-Tac-Toe', tttPanel);
+	} else if (data.game === 'cards') {
+		const card = () => Math.floor(Math.random() * 13) + 1;
+		const suit = () => ['♠', '♥', '♦', '♣'][Math.floor(Math.random() * 4)];
+		const docRef = await addDoc(collection(db, 'card_games'), {
+			aUid: data.fromUid,
+			bUid: data.toUid,
+			aCard: card(),
+			bCard: card(),
+			aSuit: suit(),
+			bSuit: suit(),
+			status: 'done',
+			createdAt: serverTimestamp()
+		});
+		gameId = docRef.id;
+		listenCardGame(gameId);
+		openModal('Card Duel', cardsPanel);
+	} else if (data.game === 'chess') {
+		gameId = await createChessGame(data.fromUid, data.toUid, data.fromName, data.toName);
+		if (gameId) listenToGame(gameId);
+		openModal('Chess', chessPanel);
+	}
+	await updateDoc(doc(db, 'game_invites', inviteId), { status: 'accepted', gameId });
+}
+
+async function startGlobalInvites() {
+	if (!currentUser || !globalOnline || !globalInvites) return;
+	if (globalUsersUnsub) globalUsersUnsub();
+	const qUsers = query(collection(db, 'users'), orderBy('lastSeenMs', 'desc'), limit(30));
+	globalUsersUnsub = onSnapshot(qUsers, (snap) => {
+		globalOnline.innerHTML = '';
+		const now = Date.now();
+		snap.forEach(docSnap => {
+			const data = docSnap.data();
+			if (!data || !data.uid || data.uid === currentUser.uid) return;
+			if (now - (data.lastSeenMs || 0) > 45000) return;
+			const row = document.createElement('div');
+			row.className = 'online-item';
+			row.innerHTML = `<span>${data.name || data.uid}</span>`;
+			const btn = document.createElement('button');
+			btn.className = 'btn btn-ghost';
+			btn.textContent = 'Invite';
+			btn.addEventListener('click', () => {
+				const game = inviteGame ? inviteGame.value : 'ttt';
+				addDoc(collection(db, 'game_invites'), {
+					game,
+					fromUid: currentUser.uid,
+					fromName: currentUser.displayName || currentUser.email || 'Player',
+					toUid: data.uid,
+					toName: data.name || '',
+					status: 'pending',
+					createdAt: serverTimestamp()
+				});
+			});
+			row.appendChild(btn);
+			globalOnline.appendChild(row);
+		});
+	});
+
+	if (globalInvitesUnsub) globalInvitesUnsub();
+	const qInv = query(collection(db, 'game_invites'), where('toUid', '==', currentUser.uid), where('status', '==', 'pending'));
+	globalInvitesUnsub = onSnapshot(qInv, (snap) => {
+		globalInvites.innerHTML = '';
+		snap.forEach(docSnap => {
+			const data = docSnap.data();
+			const row = document.createElement('div');
+			row.className = 'invite-item';
+			row.innerHTML = `<span>${data.fromName || 'Player'} • ${data.game}</span>`;
+			const accept = document.createElement('button');
+			accept.className = 'btn btn-primary';
+			accept.textContent = 'Accept';
+			accept.addEventListener('click', () => acceptGlobalInvite(docSnap.id, data));
+			const decline = document.createElement('button');
+			decline.className = 'btn btn-ghost';
+			decline.textContent = 'Decline';
+			decline.addEventListener('click', () => updateDoc(doc(db, 'game_invites', docSnap.id), { status: 'declined' }));
+			row.appendChild(accept);
+			row.appendChild(decline);
+			globalInvites.appendChild(row);
+		});
+	});
+}
+
+// --- Tic Tac Toe ---
+const tttBoardEl = document.getElementById('ttt-board');
+const tttStatus = document.getElementById('ttt-status');
+const tttBotBtn = document.getElementById('ttt-bot');
+const tttOnlineBtn = document.getElementById('ttt-online');
+let tttState = null;
+let tttUnsub = null;
+let tttGameId = null;
+let tttMy = 'X';
+
+function renderTttBoard() {
+	if (!tttBoardEl || !tttState) return;
+	tttBoardEl.innerHTML = '';
+	tttState.board.forEach((cell, idx) => {
+		const div = document.createElement('div');
+		div.className = 'ttt-cell';
+		div.textContent = cell || '';
+		div.addEventListener('click', () => tttMove(idx));
+		tttBoardEl.appendChild(div);
+	});
+}
+
+function tttWinner(board) {
+	const wins = [
+		[0,1,2],[3,4,5],[6,7,8],
+		[0,3,6],[1,4,7],[2,5,8],
+		[0,4,8],[2,4,6]
+	];
+	for (const [a,b,c] of wins) {
+		if (board[a] && board[a] === board[b] && board[b] === board[c]) return board[a];
+	}
+	return board.every(Boolean) ? 'draw' : null;
+}
+
+async function tttMove(idx) {
+	if (!tttState) return;
+	if (tttState.board[idx]) return;
+	const winner = tttWinner(tttState.board);
+	if (winner) return;
+	if (tttState.mode === 'online') {
+		if (tttState.turn !== tttMy) return;
+		const next = [...tttState.board];
+		next[idx] = tttMy;
+		const nextTurn = tttMy === 'X' ? 'O' : 'X';
+		await updateDoc(doc(db, 'ttt_games', tttGameId), { board: next, turn: nextTurn });
+		return;
+	}
+	tttState.board[idx] = 'X';
+	let win = tttWinner(tttState.board);
+	if (win) return tttUpdateStatus(win);
+	const empty = tttState.board.map((v,i) => v ? null : i).filter(v => v !== null);
+	const pick = empty[Math.floor(Math.random() * empty.length)];
+	if (pick !== undefined) tttState.board[pick] = 'O';
+	win = tttWinner(tttState.board);
+	tttUpdateStatus(win);
+	renderTttBoard();
+}
+
+function tttUpdateStatus(win) {
+	if (!tttStatus) return;
+	if (!win) tttStatus.textContent = tttState.mode === 'online' ? `Turn: ${tttState.turn}` : 'Your move';
+	else if (win === 'draw') tttStatus.textContent = 'Draw';
+	else tttStatus.textContent = `${win} wins`;
+}
+
+function startTttBot() {
+	tttState = { board: Array(9).fill(''), mode: 'bot', turn: 'X' };
+	tttUpdateStatus(null);
+	renderTttBoard();
+}
+
+function listenTttGame(gameId) {
+	if (!currentUser || !gameId) return;
+	if (tttUnsub) tttUnsub();
+	tttGameId = gameId;
+	tttState = { board: Array(9).fill(''), mode: 'online', turn: 'X' };
+	tttUnsub = onSnapshot(doc(db, 'ttt_games', gameId), (snap) => {
+		if (!snap.exists()) return;
+		const data = snap.data();
+		tttState.board = data.board || Array(9).fill('');
+		tttState.turn = data.turn || 'X';
+		tttMy = data.xUid === currentUser.uid ? 'X' : 'O';
+		tttUpdateStatus(tttWinner(tttState.board));
+		renderTttBoard();
+	});
+}
+
+if (tttBotBtn) tttBotBtn.addEventListener('click', startTttBot);
+if (tttOnlineBtn) tttOnlineBtn.addEventListener('click', () => {
+	if (tttStatus) tttStatus.textContent = 'Use Invites to start an online match.';
+});
+
+// --- Card Duel ---
+const cardsOnlineBtn = document.getElementById('cards-online');
+const cardsResult = document.getElementById('cards-result');
+let cardsUnsub = null;
+let cardsGameId = null;
+
+function cardLabel(value, suit) {
+	const map = {1:'A',11:'J',12:'Q',13:'K'};
+	return `${map[value] || value}${suit}`;
+}
+
+function listenCardGame(gameId) {
+	if (!gameId || !cardsResult) return;
+	if (cardsUnsub) cardsUnsub();
+	cardsGameId = gameId;
+	cardsUnsub = onSnapshot(doc(db, 'card_games', gameId), (snap) => {
+		if (!snap.exists()) return;
+		const data = snap.data();
+		const a = cardLabel(data.aCard, data.aSuit);
+		const b = cardLabel(data.bCard, data.bSuit);
+		const winner = data.aCard === data.bCard ? 'Draw' : (data.aCard > data.bCard ? 'Player A wins' : 'Player B wins');
+		cardsResult.textContent = `A: ${a} | B: ${b} • ${winner}`;
+	});
+}
+if (cardsOnlineBtn) cardsOnlineBtn.addEventListener('click', () => {
+	if (cardsResult) cardsResult.textContent = 'Use Invites to start an online duel.';
+});
+
+// --- Blackjack (Solo) ---
+const bjDecks = document.getElementById('bj-decks');
+const bjSoft17 = document.getElementById('bj-soft17');
+const bjHit = document.getElementById('bj-hit');
+const bjStand = document.getElementById('bj-stand');
+const bjNew = document.getElementById('bj-new');
+const bjTable = document.getElementById('bj-table');
+const bjStatus = document.getElementById('bj-status');
+let bjState = null;
+
+function bjCreateDeck(count) {
+	const suits = ['♠','♥','♦','♣'];
+	const deck = [];
+	for (let d=0; d<count; d++) {
+		for (const s of suits) for (let v=1; v<=13; v++) deck.push({v, s});
+	}
+	for (let i=deck.length-1; i>0; i--) {
+		const j = Math.floor(Math.random() * (i+1));
+		[deck[i], deck[j]] = [deck[j], deck[i]];
+	}
+	return deck;
+}
+
+function bjScore(hand) {
+	let total = 0, aces = 0;
+	for (const c of hand) {
+		if (c.v === 1) { aces++; total += 11; }
+		else total += Math.min(10, c.v);
+	}
+	while (total > 21 && aces) { total -= 10; aces--; }
+	return total;
+}
+
+function bjRender() {
+	if (!bjTable || !bjState) return;
+	const dealer = bjScore(bjState.dealer);
+	const player = bjScore(bjState.player);
+	bjTable.innerHTML = `
+		<div class="bj-hand"><strong>Dealer:</strong> ${bjState.dealer.map(c => `<span class="bj-card">${c.v}${c.s}</span>`).join('')}</div>
+		<div class="bj-hand"><strong>You:</strong> ${bjState.player.map(c => `<span class="bj-card">${c.v}${c.s}</span>`).join('')}</div>
+	`;
+	if (bjStatus) bjStatus.textContent = `You ${player} • Dealer ${dealer}`;
+}
+
+function bjStart() {
+	const decks = Number(bjDecks?.value || 1);
+	bjState = { deck: bjCreateDeck(decks), dealer: [], player: [], done: false };
+	bjState.player.push(bjState.deck.pop(), bjState.deck.pop());
+	bjState.dealer.push(bjState.deck.pop(), bjState.deck.pop());
+	bjRender();
+}
+
+function bjDealerPlay() {
+	let dealer = bjScore(bjState.dealer);
+	let soft17 = bjSoft17?.value === 'hit';
+	while (dealer < 17 || (soft17 && dealer === 17 && bjState.dealer.some(c => c.v === 1))) {
+		bjState.dealer.push(bjState.deck.pop());
+		dealer = bjScore(bjState.dealer);
+	}
+}
+
+if (bjHit) bjHit.addEventListener('click', () => {
+	if (!bjState || bjState.done) return;
+	bjState.player.push(bjState.deck.pop());
+	if (bjScore(bjState.player) > 21) {
+		bjState.done = true;
+		if (bjStatus) bjStatus.textContent = 'Bust. Dealer wins.';
+	}
+	bjRender();
+});
+if (bjStand) bjStand.addEventListener('click', () => {
+	if (!bjState || bjState.done) return;
+	bjDealerPlay();
+	const p = bjScore(bjState.player);
+	const d = bjScore(bjState.dealer);
+	bjState.done = true;
+	if (bjStatus) bjStatus.textContent = p > 21 ? 'Bust. Dealer wins.' : d > 21 || p > d ? 'You win.' : p === d ? 'Draw.' : 'Dealer wins.';
+	bjRender();
+});
+if (bjNew) bjNew.addEventListener('click', bjStart);
+
+// --- Memory ---
+const memoryBoard = document.getElementById('memory-board');
+const memoryStatus = document.getElementById('memory-status');
+let memoryState = null;
+
+function memoryStart() {
+	if (!memoryBoard) return;
+	const icons = ['★','◆','●','■','▲','✿','☀','☂'];
+	const deck = [...icons, ...icons].sort(() => Math.random() - 0.5);
+	memoryState = { deck, revealed: [], matched: new Set(), moves: 0 };
+	renderMemory();
+}
+
+function renderMemory() {
+	if (!memoryBoard || !memoryState) return;
+	memoryBoard.innerHTML = '';
+	memoryState.deck.forEach((val, idx) => {
+		const card = document.createElement('div');
+		const show = memoryState.revealed.includes(idx) || memoryState.matched.has(idx);
+		card.className = 'memory-card' + (show ? ' revealed' : '');
+		card.textContent = show ? val : '';
+		card.addEventListener('click', () => memoryFlip(idx));
+		memoryBoard.appendChild(card);
+	});
+	if (memoryStatus) memoryStatus.textContent = `${memoryState.moves} moves`;
+}
+
+function memoryFlip(idx) {
+	if (!memoryState || memoryState.matched.has(idx)) return;
+	if (memoryState.revealed.length === 2) return;
+	memoryState.revealed.push(idx);
+	if (memoryState.revealed.length === 2) {
+		memoryState.moves++;
+		const [a,b] = memoryState.revealed;
+		if (memoryState.deck[a] === memoryState.deck[b]) {
+			memoryState.matched.add(a);
+			memoryState.matched.add(b);
+			memoryState.revealed = [];
+		} else {
+			setTimeout(() => {
+				memoryState.revealed = [];
+				renderMemory();
+			}, 600);
+		}
+	}
+	renderMemory();
+}
+
+if (memoryPanel) memoryStart();
 
 // --- Calculator ---
 let calcState = null;
@@ -1834,6 +2264,10 @@ if (exitChessBtn) {
 		hide(gameModal);
 	});
 }
+
+
+
+
 
 
 
