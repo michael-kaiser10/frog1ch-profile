@@ -232,11 +232,8 @@ function updateAuthUI() {
 	if (submitAuth) submitAuth.textContent = authMode === 'signup' ? 'Sign up' : 'Log in';
 	if (toggleAuth) toggleAuth.textContent = authMode === 'signup' ? 'Switch to Login' : 'Switch to Sign up';
 	if (authOpen) authOpen.style.display = loggedIn ? 'none' : '';
-	if (authClose) authClose.style.display = loggedIn ? '' : 'none';
-	if (authModal) {
-		if (loggedIn) authModal.classList.add('hidden');
-		else authModal.classList.remove('hidden');
-	}
+	if (authClose) authClose.style.display = '';
+	if (authModal && loggedIn) authModal.classList.add('hidden');
 	if (adminPanel) adminPanel.classList.toggle('hidden', !isAdmin());
 }
 updateAuthUI();
@@ -323,7 +320,7 @@ if (authOpen && authModal) {
 // Auth is required: disable manual closing when not logged in
 if (authClose && authModal) {
 	authClose.addEventListener('click', () => {
-		if (currentUser) authModal.classList.add('hidden');
+		authModal.classList.add('hidden');
 	});
 }
 if (logoutBtn) logoutBtn.addEventListener('click', logout);
