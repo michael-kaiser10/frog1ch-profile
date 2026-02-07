@@ -105,8 +105,8 @@
 				</div>
 			</section>
 
-			<section class="rows">
-				<div class="card ranking" id="ranking">
+		<section class="rows">
+			<div class="card ranking" id="ranking">
 					<div class="card-head">
 						<h2>Ranking</h2>
 						<span class="pill">ELO</span>
@@ -114,37 +114,50 @@
 					<div id="leaderboard-content"></div>
 				</div>
 
-				<div class="card account" id="account">
-					<div class="card-head">
-						<h2>Account</h2>
-						<span class="pill">Sync</span>
-					</div>
-					<p id="auth-status">Not logged in.</p>
-					<div class="auth-grid">
-						<input id="email-input" type="email" placeholder="Email" autocomplete="email">
-						<input id="pass-input" type="password" placeholder="Password" autocomplete="current-password">
-						<input id="pass-confirm" type="password" placeholder="Confirm password" autocomplete="new-password">
-						<input id="nick-input" type="text" placeholder="Nickname" maxlength="20">
-					</div>
-					<div class="btn-row">
-						<button id="submit-auth" class="btn btn-primary">Sign up</button>
-						<button id="toggle-auth" class="btn btn-ghost">Switch to Login</button>
-						<button id="logout-btn" class="btn btn-ghost">Log out</button>
-					</div>
-					<p id="auth-msg" class="hint"></p>
-					<p class="hint">Login to sync chat, stats, and global rankings.</p>
+			<div class="card account" id="account">
+				<div class="card-head">
+					<h2>Account</h2>
+					<span class="pill">Sync</span>
 				</div>
-			</section>
+				<p id="auth-status">Not logged in.</p>
+				<div class="btn-row">
+					<button id="auth-open" class="btn btn-primary">Login / Register</button>
+					<button id="logout-btn" class="btn btn-ghost">Log out</button>
+				</div>
+				<p class="hint">Login to sync chat, stats, and global rankings.</p>
+			</div>
+		</section>
 
-			<section class="card feedback" id="feedback">
+		<section class="card feedback" id="feedback">
 				<div class="card-head">
 					<h2>Feedback</h2>
 					<span class="pill">Contact</span>
 				</div>
 				<p class="card-sub">Send ideas, bug reports, or new game suggestions.</p>
 				<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
-			</section>
+		</section>
+	</div>
+
+	<div id="auth-modal" class="auth-modal hidden">
+		<div class="auth-card">
+			<div class="auth-head">
+				<h2>Account Access</h2>
+				<button id="auth-close" class="btn btn-ghost">Close</button>
+			</div>
+			<p id="auth-msg" class="hint"></p>
+			<div class="auth-grid">
+				<input id="email-input" type="email" placeholder="Email" autocomplete="email">
+				<input id="pass-input" type="password" placeholder="Password" autocomplete="current-password">
+				<input id="pass-confirm" type="password" placeholder="Confirm password" autocomplete="new-password">
+				<input id="nick-input" type="text" placeholder="Nickname" maxlength="20">
+			</div>
+			<div class="btn-row">
+				<button id="submit-auth" class="btn btn-primary">Sign up</button>
+				<button id="toggle-auth" class="btn btn-ghost">Switch to Login</button>
+			</div>
+			<p class="hint">Log in to save chat, ELO, and stats.</p>
 		</div>
+	</div>
 
 		<!-- Game Modal -->
 		<div id="game-modal" class="game-modal hidden">

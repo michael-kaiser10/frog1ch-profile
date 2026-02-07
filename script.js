@@ -79,6 +79,9 @@ const toggleAuth = document.getElementById('toggle-auth');
 const logoutBtn = document.getElementById('logout-btn');
 const authStatus = document.getElementById('auth-status');
 const authMsg = document.getElementById('auth-msg');
+const authModal = document.getElementById('auth-modal');
+const authOpen = document.getElementById('auth-open');
+const authClose = document.getElementById('auth-close');
 const calcBtn = document.getElementById('calc-btn');
 const paintBtn = document.getElementById('paint-btn');
 const exitCalcBtn = document.getElementById('exit-calc-btn');
@@ -189,8 +192,13 @@ function updateAuthUI() {
 	}
 	if (logoutBtn) logoutBtn.disabled = !loggedIn;
 	if (passConfirm) passConfirm.style.display = authMode === 'signup' ? '' : 'none';
+	if (nickInput) nickInput.style.display = authMode === 'signup' ? '' : 'none';
 	if (submitAuth) submitAuth.textContent = authMode === 'signup' ? 'Sign up' : 'Log in';
 	if (toggleAuth) toggleAuth.textContent = authMode === 'signup' ? 'Switch to Login' : 'Switch to Sign up';
+	if (authModal) {
+		if (loggedIn) authModal.classList.add('hidden');
+		else authModal.classList.remove('hidden');
+	}
 }
 updateAuthUI();
 
@@ -265,6 +273,12 @@ if (toggleAuth) {
 		setAuthMessage('');
 		updateAuthUI();
 	});
+}
+if (authOpen && authModal) {
+	authOpen.addEventListener('click', () => authModal.classList.remove('hidden'));
+}
+if (authClose && authModal) {
+	authClose.addEventListener('click', () => authModal.classList.add('hidden'));
 }
 if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
