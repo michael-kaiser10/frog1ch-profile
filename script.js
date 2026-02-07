@@ -332,6 +332,7 @@ function normalizeEntries(map) {
 			typeof val.chessElo === 'number';
 		if (!hasAny) return;
 		out.push({
+			id: key,
 			key,
 			name: val.name || key,
 			totalTime: val.totalTime || 0,
