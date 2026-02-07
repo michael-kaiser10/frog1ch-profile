@@ -27,6 +27,7 @@
 			</nav>
 			<div class="actions">
 				<button id="lang" class="btn btn-ghost">EN</button>
+				<button id="profile-open" class="btn btn-ghost">Profile</button>
 				<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Telegram</a>
 			</div>
 		</header>
@@ -181,6 +182,35 @@
 					<button id="toggle-auth" class="btn btn-ghost">Switch to Login</button>
 				</div>
 				<p class="hint">Log in to save chat, ELO, and stats.</p>
+			</div>
+		</div>
+
+		<div id="profile-modal" class="profile-modal hidden">
+			<div class="profile-card">
+				<div class="profile-head">
+					<h2>Player Profile</h2>
+					<button id="profile-close" class="btn btn-ghost">Close</button>
+				</div>
+				<div id="profile-body" class="profile-body">
+					<div class="profile-main">
+						<h3 id="profile-name">Player</h3>
+						<p id="profile-meta" class="muted"></p>
+						<div class="profile-stats">
+							<div class="stat">
+								<span class="label">Total Time</span>
+								<span id="profile-total" class="value">0m</span>
+							</div>
+							<div class="stat">
+								<span class="label">Chess ELO</span>
+								<span id="profile-elo" class="value">1000</span>
+							</div>
+						</div>
+					</div>
+					<div class="profile-badges">
+						<h4>Medals</h4>
+						<div id="profile-badges" class="badge-list"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 

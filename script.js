@@ -82,6 +82,14 @@ const authMsg = document.getElementById('auth-msg');
 const authModal = document.getElementById('auth-modal');
 const authOpen = document.getElementById('auth-open');
 const authClose = document.getElementById('auth-close');
+const profileOpen = document.getElementById('profile-open');
+const profileClose = document.getElementById('profile-close');
+const profileModal = document.getElementById('profile-modal');
+const profileName = document.getElementById('profile-name');
+const profileMeta = document.getElementById('profile-meta');
+const profileTotal = document.getElementById('profile-total');
+const profileElo = document.getElementById('profile-elo');
+const profileBadges = document.getElementById('profile-badges');
 const playerCards = document.getElementById('player-cards');
 const userBadges = document.getElementById('user-badges');
 const adminPanel = document.getElementById('admin-panel');
@@ -196,6 +204,11 @@ onAuthStateChanged(auth, (user) => {
 	renderBadgeAdmin();
 	if (currentUser) resumeActiveGame();
 });
+
+if (profileOpen) profileOpen.addEventListener('click', () => {
+	openProfile(currentUser && currentUser.uid);
+});
+if (profileClose && profileModal) profileClose.addEventListener('click', () => profileModal.classList.add('hidden'));
 
 function setAuthMessage(text, isError = false) {
 	if (!authMsg) return;
@@ -369,6 +382,11 @@ async function renderLeaderboards() {
 				rows.forEach(row => {
 					const li = document.createElement('li');
 					li.textContent = formatter(row);
+					const uid = row.id || row.uid;
+					if (uid) {
+						li.style.cursor = 'pointer';
+						li.addEventListener('click', () => openProfile(uid, row));
+					}
 					ol.appendChild(li);
 				});
 				div.appendChild(ol);
@@ -434,6 +452,7 @@ function renderPlayerCards(overall, chess) {
 			<div class="player-meta">ELO: ${elo}</div>
 			<div class="player-meta">Time: ${Math.round(total / 60)}m</div>
 		`;
+		card.addEventListener('click', () => openProfile(row.id || row.uid, row));
 		playerCards.appendChild(card);
 	});
 }
@@ -443,6 +462,46 @@ async function loadBadges() {
 	const badges = [];
 	snap.forEach(docSnap => badges.push({ id: docSnap.id, ...docSnap.data() }));
 	return badges;
+}
+
+async function openProfile(uid, fallback = {}) {
+	if (!profileModal) return;
+	const userId = uid || (currentUser && currentUser.uid);
+	if (!userId) return;
+	profileModal.classList.remove('hidden');
+	let data = fallback;
+	try {
+		const snap = await getDoc(doc(db, 'leaderboards', userId));
+		if (snap.exists()) data = { id: userId, ...snap.data() };
+	} catch {}
+	if (profileName) profileName.textContent = data.name || 'Player';
+	if (profileMeta) profileMeta.textContent = userId ? `UID: ${userId}` : '';
+	if (profileTotal) profileTotal.textContent = `${Math.round((data.totalTime || 0) / 60)}m`;
+	if (profileElo) profileElo.textContent = String(data.chessElo || 1000);
+	await renderBadgesFor(userId, profileBadges);
+}
+
+async function renderBadgesFor(uid, container) {
+	if (!container) return;
+	container.innerHTML = '';
+	const badgeSnap = await getDocs(query(collection(db, 'user_badges'), where('uid', '==', uid)));
+	const badgeIds = [];
+	badgeSnap.forEach(docSnap => badgeIds.push(docSnap.data().badgeId));
+	if (!badgeIds.length) {
+		container.innerHTML = '<span class="muted">No medals yet.</span>';
+		return;
+	}
+	const allBadges = await loadBadges();
+	const map = new Map(allBadges.map(b => [b.id, b]));
+	badgeIds.forEach(id => {
+		const b = map.get(id);
+		if (!b) return;
+		const el = document.createElement('div');
+		el.className = 'badge';
+		const color = b.color || '#f2c46d';
+		el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '🏅'} ${b.name || 'Medal'}`;
+		container.appendChild(el);
+	});
 }
 
 async function renderUserBadges() {
