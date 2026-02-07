@@ -6,80 +6,70 @@
 		<title>made_by_frog1ch</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
-		<div class="backdrop"></div>
-		<header class="topbar">
+		<div class="bg-sheen"></div>
+		<header class="site-header">
 			<div class="brand">
-				<span class="brand-dot"></span>
+				<span class="brand-mark"></span>
 				<div>
 					<div class="brand-title">made_by_frog1ch</div>
-					<div class="brand-sub">Arcade Network</div>
+					<div class="brand-sub">Arcade Society</div>
 				</div>
 			</div>
-			<nav class="nav">
-				<a href="#games">Games</a>
+			<nav class="site-nav">
+				<a href="#arena">Arena</a>
 				<a href="#chat">Chat</a>
 				<a href="#ranking">Ranking</a>
 				<a href="#account">Account</a>
 			</nav>
-			<div class="actions">
+			<div class="site-actions">
 				<button id="lang" class="btn btn-ghost">EN</button>
 				<button id="profile-open" class="btn btn-ghost">Profile</button>
 				<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Telegram</a>
 			</div>
 		</header>
 
-		<section class="ribbon">
-			<div class="ribbon-copy">
-				<h1>Play fast. Chat live. Rank higher.</h1>
-				<p>Quick games, global chat, and a ladder that updates after every match.</p>
-				<div class="ribbon-actions">
+		<section class="hero">
+			<div class="hero-main">
+				<span class="pill">Game Lounge</span>
+				<h1>Elegant play. Clean chat. Ranked ambition.</h1>
+				<p>Fast games, calm interface, and a ladder that updates every match. Built for daily play without the noise.</p>
+				<div class="hero-actions">
 					<button id="play-btn" class="btn btn-primary">Play now</button>
 					<button id="chess-btn" class="btn btn-ghost">Open Chess</button>
 				</div>
 			</div>
-			<div class="ribbon-stats">
-				<div class="stat">
+			<div class="hero-metrics">
+				<div class="metric">
 					<span class="label">Status</span>
 					<span id="t-status" class="value">Online</span>
 				</div>
-				<div class="stat">
+				<div class="metric">
 					<span class="label">Time</span>
 					<span id="time" class="value"></span>
 				</div>
-				<div class="stat">
+				<div class="metric">
 					<span class="label">Quote</span>
 					<span id="t-quote" class="value">Focus. Improve. Repeat.</span>
 				</div>
 			</div>
 		</section>
 
-		<section class="stage">
-			<div class="stack">
-				<section id="games" class="card games">
-					<div class="card-head">
-						<h2>Games Hub</h2>
-						<span class="tag">Play</span>
-					</div>
-					<p class="muted">Pick a game and launch instantly.</p>
-					<div class="game-row">
-						<button id="chess-btn-2" class="btn btn-game">Chess</button>
-						<button class="btn btn-disabled" disabled>More soon</button>
-					</div>
-				</section>
-
-				<section id="drop" class="card drop">
-					<div class="card-head">
-						<h2>Arcade Drop</h2>
-						<span class="tag">Daily</span>
-					</div>
-					<p id="drop-text">Win 3 games in a row today.</p>
-					<button id="drop-btn" class="btn btn-soft">New challenge</button>
-				</section>
-			</div>
+		<main class="layout">
+			<section id="arena" class="card arena">
+				<div class="card-head">
+					<h2>Arena</h2>
+					<span class="tag">Play</span>
+				</div>
+				<p class="muted">Pick a game and launch instantly.</p>
+				<div class="game-row">
+					<button id="chess-btn-2" class="btn btn-game">Chess</button>
+					<button class="btn btn-disabled" disabled>More soon</button>
+				</div>
+			</section>
 
 			<section id="chat" class="card chat">
 				<div class="card-head">
@@ -105,31 +95,30 @@
 				</div>
 				<p class="hint">Chat auto‑resets daily. Images up to 200KB.</p>
 			</section>
-		</section>
 
-		<section id="ranking" class="card ranking">
-			<div class="card-head">
-				<h2>Ranking</h2>
-				<span class="tag">ELO</span>
-			</div>
-			<div id="leaderboard-content" class="ranking-content"></div>
-		</section>
-
-		<section id="cards" class="card cards">
-			<div class="card-head">
-				<h2>Player Cards</h2>
-				<span class="tag">Top</span>
-			</div>
-			<div id="player-cards" class="card-grid"></div>
-		</section>
-
-		<section class="row">
-			<section id="account" class="card account">
-				<div>
-					<h2>Account</h2>
-					<p id="auth-status">Not logged in.</p>
-					<p class="muted">Login to sync chat, stats, and global rankings.</p>
+			<section id="ranking" class="card ranking">
+				<div class="card-head">
+					<h2>Ranking</h2>
+					<span class="tag">ELO</span>
 				</div>
+				<div id="leaderboard-content" class="ranking-content"></div>
+			</section>
+
+			<section id="cards" class="card cards">
+				<div class="card-head">
+					<h2>Player Cards</h2>
+					<span class="tag">Top</span>
+				</div>
+				<div id="player-cards" class="card-grid"></div>
+			</section>
+
+			<section id="account" class="card account">
+				<div class="card-head">
+					<h2>Account</h2>
+					<span class="tag">Sync</span>
+				</div>
+				<p id="auth-status">Not logged in.</p>
+				<p class="muted">Login to sync chat, stats, and global rankings.</p>
 				<div class="btn-row">
 					<button id="auth-open" class="btn btn-primary">Login / Register</button>
 					<button id="logout-btn" class="btn btn-ghost">Log out</button>
@@ -143,7 +132,7 @@
 					<div class="admin-grid">
 						<input id="badge-name" type="text" placeholder="Medal name">
 						<input id="badge-icon" type="text" placeholder="Icon (emoji)">
-						<input id="badge-color" type="text" placeholder="Color (e.g. #ffb347)">
+						<input id="badge-color" type="text" placeholder="Color (e.g. #a6e6b8)">
 						<input id="badge-desc" type="text" placeholder="Short description">
 						<button id="badge-create" class="btn btn-primary">Create Medal</button>
 					</div>
@@ -155,14 +144,25 @@
 					<div id="badge-list" class="badge-list"></div>
 				</div>
 			</section>
-			<section id="feedback" class="card feedback">
-				<div>
-					<h2>Feedback</h2>
-					<p class="muted">Send ideas, bug reports, or new game suggestions.</p>
+
+			<section id="drop" class="card drop">
+				<div class="card-head">
+					<h2>Arcade Drop</h2>
+					<span class="tag">Daily</span>
 				</div>
+				<p id="drop-text">Win 3 games in a row today.</p>
+				<button id="drop-btn" class="btn btn-soft">New challenge</button>
+			</section>
+
+			<section id="feedback" class="card feedback">
+				<div class="card-head">
+					<h2>Feedback</h2>
+					<span class="tag">Contact</span>
+				</div>
+				<p class="muted">Send ideas, bug reports, or new game suggestions.</p>
 				<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
 			</section>
-		</section>
+		</main>
 
 		<div id="auth-modal" class="auth-modal hidden">
 			<div class="auth-card">
