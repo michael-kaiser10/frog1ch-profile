@@ -6,94 +6,98 @@
 		<title>made_by_frog1ch</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
-		<div class="bg-scape"></div>
-		<header class="mast">
+		<div class="backdrop"></div>
+		<header class="topbar">
 			<div class="brand">
-				<span class="brand-orb"></span>
+				<span class="brand-dot"></span>
 				<div>
 					<div class="brand-title">made_by_frog1ch</div>
-					<div class="brand-sub">Arcade Studio</div>
+					<div class="brand-sub">Arcade Network</div>
 				</div>
 			</div>
-			<nav class="mast-nav">
+			<nav class="nav">
 				<a href="#games">Games</a>
 				<a href="#chat">Chat</a>
 				<a href="#ranking">Ranking</a>
 				<a href="#account">Account</a>
 			</nav>
-			<div class="mast-actions">
+			<div class="actions">
 				<button id="lang" class="btn btn-ghost">EN</button>
 				<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Telegram</a>
 			</div>
 		</header>
 
-		<section class="hero">
-			<div class="hero-left">
-				<span class="pill">Arcade Hub</span>
-				<h1>Play, chat, rank — all in one bold space.</h1>
-				<p>Fast sessions, live chat, and a ladder that updates in real time. Built for quick jumps and daily grind.</p>
-				<div class="hero-cta">
+		<section class="ribbon">
+			<div class="ribbon-copy">
+				<h1>Play fast. Chat live. Rank higher.</h1>
+				<p>Quick games, global chat, and a ladder that updates after every match.</p>
+				<div class="ribbon-actions">
 					<button id="play-btn" class="btn btn-primary">Play now</button>
 					<button id="chess-btn" class="btn btn-ghost">Open Chess</button>
 				</div>
-				<div class="hero-metrics">
-					<div class="metric">
-						<span class="label">Status</span>
-						<span id="t-status" class="value">Online</span>
-					</div>
-					<div class="metric">
-						<span class="label">Time</span>
-						<span id="time" class="value"></span>
-					</div>
-					<div class="metric">
-						<span class="label">Quote</span>
-						<span id="t-quote" class="value">Focus. Improve. Repeat.</span>
-					</div>
+			</div>
+			<div class="ribbon-stats">
+				<div class="stat">
+					<span class="label">Status</span>
+					<span id="t-status" class="value">Online</span>
+				</div>
+				<div class="stat">
+					<span class="label">Time</span>
+					<span id="time" class="value"></span>
+				</div>
+				<div class="stat">
+					<span class="label">Quote</span>
+					<span id="t-quote" class="value">Focus. Improve. Repeat.</span>
 				</div>
 			</div>
-			<div class="hero-right">
-				<div id="games" class="game-stack">
-					<div class="stack-head">
-						<h2>Games</h2>
+		</section>
+
+		<section class="stage">
+			<div class="stack">
+				<section id="games" class="card games">
+					<div class="card-head">
+						<h2>Games Hub</h2>
 						<span class="tag">Play</span>
 					</div>
-					<p class="stack-sub">Pick a game and launch instantly.</p>
+					<p class="muted">Pick a game and launch instantly.</p>
 					<div class="game-row">
 						<button id="calc-btn" class="btn btn-game">Calculator</button>
 						<button id="paint-btn" class="btn btn-game">Paint</button>
 						<button id="chess-btn-2" class="btn btn-game">Chess</button>
 						<button class="btn btn-disabled" disabled>More soon</button>
 					</div>
-				</div>
-				<div class="drop-card" id="drop">
-					<h3>Arcade Drop</h3>
+				</section>
+
+				<section id="drop" class="card drop">
+					<div class="card-head">
+						<h2>Arcade Drop</h2>
+						<span class="tag">Daily</span>
+					</div>
 					<p id="drop-text">Win 3 games in a row today.</p>
 					<button id="drop-btn" class="btn btn-soft">New challenge</button>
-				</div>
+				</section>
 			</div>
-		</section>
 
-		<section class="split">
-			<div id="chat" class="panel chat-panel">
-				<div class="panel-head">
+			<section id="chat" class="card chat">
+				<div class="card-head">
 					<h2>Global Chat</h2>
 					<span class="tag">Live</span>
 				</div>
 				<div id="chat-list" class="chat-list"></div>
-				<div class="chat-tools">
+				<div class="chat-actions">
 					<button id="chat-emoji-btn" class="btn btn-ghost" type="button">😊</button>
 					<label class="chat-attach">
 						<input id="chat-image" type="file" accept="image/*">
 						<span>Image</span>
 					</label>
-				</div>
-				<div class="chat-input">
-					<input id="chat-message" type="text" placeholder="Type a message...">
-					<button id="chat-send" class="btn btn-primary">Send</button>
+					<div class="chat-input">
+						<input id="chat-message" type="text" placeholder="Type a message...">
+						<button id="chat-send" class="btn btn-primary">Send</button>
+					</div>
 				</div>
 				<div id="chat-emoji-panel" class="emoji-panel hidden"></div>
 				<div id="chat-preview" class="chat-preview hidden">
@@ -101,37 +105,36 @@
 					<button id="chat-cancel" class="btn btn-ghost">Remove</button>
 				</div>
 				<p class="hint">Chat auto‑resets daily. Images up to 200KB.</p>
-			</div>
-
-			<div id="ranking" class="panel rank-panel">
-				<div class="panel-head">
-					<h2>Ranking</h2>
-					<span class="tag">ELO</span>
-				</div>
-				<div id="leaderboard-content" class="ranking-content"></div>
-			</div>
+			</section>
 		</section>
 
-		<section class="tri">
-			<div id="account" class="card">
-				<h2>Account</h2>
-				<p id="auth-status">Not logged in.</p>
-				<p class="muted">Login to sync chat, stats, and global rankings.</p>
+		<section id="ranking" class="card ranking">
+			<div class="card-head">
+				<h2>Ranking</h2>
+				<span class="tag">ELO</span>
+			</div>
+			<div id="leaderboard-content" class="ranking-content"></div>
+		</section>
+
+		<section class="row">
+			<section id="account" class="card account">
+				<div>
+					<h2>Account</h2>
+					<p id="auth-status">Not logged in.</p>
+					<p class="muted">Login to sync chat, stats, and global rankings.</p>
+				</div>
 				<div class="btn-row">
 					<button id="auth-open" class="btn btn-primary">Login / Register</button>
 					<button id="logout-btn" class="btn btn-ghost">Log out</button>
 				</div>
-			</div>
-			<div id="feedback" class="card">
-				<h2>Feedback</h2>
-				<p class="muted">Send ideas, bug reports, or new game suggestions.</p>
+			</section>
+			<section id="feedback" class="card feedback">
+				<div>
+					<h2>Feedback</h2>
+					<p class="muted">Send ideas, bug reports, or new game suggestions.</p>
+				</div>
 				<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
-			</div>
-			<div class="card">
-				<h2>Today</h2>
-				<p class="muted">Daily progress keeps your ladder alive. Come back for new challenges.</p>
-				<button class="btn btn-soft">See streaks</button>
-			</div>
+			</section>
 		</section>
 
 		<div id="auth-modal" class="auth-modal hidden">
