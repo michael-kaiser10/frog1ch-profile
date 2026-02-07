@@ -195,6 +195,8 @@ function updateAuthUI() {
 	if (nickInput) nickInput.style.display = authMode === 'signup' ? '' : 'none';
 	if (submitAuth) submitAuth.textContent = authMode === 'signup' ? 'Sign up' : 'Log in';
 	if (toggleAuth) toggleAuth.textContent = authMode === 'signup' ? 'Switch to Login' : 'Switch to Sign up';
+	if (authOpen) authOpen.style.display = loggedIn ? 'none' : '';
+	if (authClose) authClose.style.display = loggedIn ? '' : 'none';
 	if (authModal) {
 		if (loggedIn) authModal.classList.add('hidden');
 		else authModal.classList.remove('hidden');
@@ -277,8 +279,11 @@ if (toggleAuth) {
 if (authOpen && authModal) {
 	authOpen.addEventListener('click', () => authModal.classList.remove('hidden'));
 }
+// Auth is required: disable manual closing when not logged in
 if (authClose && authModal) {
-	authClose.addEventListener('click', () => authModal.classList.add('hidden'));
+	authClose.addEventListener('click', () => {
+		if (currentUser) authModal.classList.add('hidden');
+	});
 }
 if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
