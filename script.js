@@ -82,6 +82,18 @@ const authMsg = document.getElementById('auth-msg');
 const authModal = document.getElementById('auth-modal');
 const authOpen = document.getElementById('auth-open');
 const authClose = document.getElementById('auth-close');
+const playerCards = document.getElementById('player-cards');
+const userBadges = document.getElementById('user-badges');
+const adminPanel = document.getElementById('admin-panel');
+const badgeList = document.getElementById('badge-list');
+const badgeName = document.getElementById('badge-name');
+const badgeIcon = document.getElementById('badge-icon');
+const badgeColor = document.getElementById('badge-color');
+const badgeDesc = document.getElementById('badge-desc');
+const badgeCreate = document.getElementById('badge-create');
+const assignUid = document.getElementById('assign-uid');
+const assignBadge = document.getElementById('assign-badge');
+const assignBadgeBtn = document.getElementById('assign-badge-btn');
 const calcBtn = document.getElementById('calc-btn');
 const paintBtn = document.getElementById('paint-btn');
 const exitCalcBtn = document.getElementById('exit-calc-btn');
@@ -131,10 +143,12 @@ const dropBtn = document.getElementById('drop-btn');
 const dropText = document.getElementById('drop-text');
 
 let currentUser = null;
+const ADMIN_UIDS = ['GTWT222m9NRixYoFZBPJ6IfSN3j1'];
+const isAdmin = () => !!currentUser && ADMIN_UIDS.includes(currentUser.uid);
 let authMode = 'signup';
 
-function show(el) { el.classList.remove('hidden'); }
-function hide(el) { el.classList.add('hidden'); }
+function show(el) { if (el) el.classList.remove('hidden'); }
+function hide(el) { if (el) el.classList.add('hidden'); }
 
 function openModal(title, panel) {
 	gameTitle.textContent = title;
@@ -160,11 +174,15 @@ function closeGameModal() {
 	paintState = null;
 }
 
-playBtn.addEventListener('click', () => openModal('Games', calcPanel));
+if (playBtn) {
+	playBtn.addEventListener('click', () => {
+		if (chessPanel) openModal('Chess', chessPanel);
+	});
+}
 closeModal.addEventListener('click', closeGameModal);
 
-calcBtn.addEventListener('click', () => openModal('Calculator', calcPanel));
-paintBtn.addEventListener('click', () => openModal('Paint', paintPanel));
+if (calcBtn) calcBtn.addEventListener('click', () => openModal('Calculator', calcPanel));
+if (paintBtn) paintBtn.addEventListener('click', () => openModal('Paint', paintPanel));
 if (chessBtn) chessBtn.addEventListener('click', () => openModal('Chess', chessPanel));
 if (chessBtn2) chessBtn2.addEventListener('click', () => openModal('Chess', chessPanel));
 
@@ -174,6 +192,8 @@ onAuthStateChanged(auth, (user) => {
 	setChatState();
 	cleanupChatIfNeeded();
 	renderLeaderboards();
+	renderUserBadges();
+	renderBadgeAdmin();
 	if (currentUser) resumeActiveGame();
 });
 
@@ -201,6 +221,7 @@ function updateAuthUI() {
 		if (loggedIn) authModal.classList.add('hidden');
 		else authModal.classList.remove('hidden');
 	}
+	if (adminPanel) adminPanel.classList.toggle('hidden', !isAdmin());
 }
 updateAuthUI();
 
@@ -316,7 +337,7 @@ async function fetchLeaders(field) {
 	const snap = await getDocs(q);
 	const data = {};
 	snap.forEach(docSnap => {
-		data[docSnap.id] = docSnap.data();
+		data[docSnap.id] = { id: docSnap.id, ...docSnap.data() };
 	});
 	return normalizeEntries(data);
 }
@@ -337,8 +358,6 @@ async function renderLeaderboards() {
 		};
 
 		const overall = await fetchLeaders('totalTime');
-		const calc = await fetchLeaders('calcTime');
-		const paint = await fetchLeaders('paintTime');
 		const chess = await fetchLeaders('chessElo');
 
 		function renderSection(title, rows, formatter) {
@@ -362,15 +381,8 @@ async function renderLeaderboards() {
 		}
 
 		renderSection('\u0422\u041e\u041f \u0417\u0430\u0433\u0430\u043b\u044c\u043d\u0438\u0439', overall, (row) => `${row.name} \u2014 ${formatSeconds(row.totalTime)}`);
-		renderSection('\u0422\u041e\u041f Calculator', calc, (row) => {
-			const ops = row.ops || {};
-			return `${row.name} \u2014 ${formatSeconds(row.calcTime)} | +:${ops['+']||0} -:${ops['-']||0} \u00d7:${ops['*']||0} \u00f7:${ops['/']||0}`;
-		});
-		renderSection('\u0422\u041e\u041f Paint', paint, (row) => {
-			const tools = row.tools || {};
-			return `${row.name} \u2014 ${formatSeconds(row.paintTime)} | pencil:${tools.pencil||0} eraser:${tools.eraser||0} fill:${tools.fill||0}`;
-		});
 		renderSection('TOP Chess ELO', chess, (row) => `${row.name} \u2014 ${row.chessElo}`);
+		renderPlayerCards(overall, chess);
 	} catch (e) {
 		console.error(e);
 		leaderboardContent.innerHTML = '<p>\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u0440\u0435\u0439\u0442\u0438\u043d\u0433.</p>';
@@ -399,6 +411,131 @@ async function updateLeaderboard(update) {
 	};
 	await setDoc(ref, next, { merge: true });
 }
+
+function renderPlayerCards(overall, chess) {
+	if (!playerCards) return;
+	playerCards.innerHTML = '';
+	const byId = {};
+	overall.forEach(row => { byId[row.id || row.uid || row.name] = row; });
+	chess.forEach(row => { byId[row.id || row.uid || row.name] = { ...(byId[row.id || row.uid || row.name] || {}), ...row }; });
+	const merged = Object.values(byId).slice(0, 6);
+	if (!merged.length) {
+		playerCards.innerHTML = '<p class="muted">No players yet.</p>';
+		return;
+	}
+	merged.forEach((row) => {
+		const card = document.createElement('div');
+		card.className = 'player-card';
+		const name = row.name || 'Player';
+		const elo = row.chessElo || 1000;
+		const total = row.totalTime || 0;
+		card.innerHTML = `
+			<h4>${name}</h4>
+			<div class="player-meta">ELO: ${elo}</div>
+			<div class="player-meta">Time: ${Math.round(total / 60)}m</div>
+		`;
+		playerCards.appendChild(card);
+	});
+}
+
+async function loadBadges() {
+	const snap = await getDocs(collection(db, 'badges'));
+	const badges = [];
+	snap.forEach(docSnap => badges.push({ id: docSnap.id, ...docSnap.data() }));
+	return badges;
+}
+
+async function renderUserBadges() {
+	if (!userBadges) return;
+	userBadges.innerHTML = '';
+	if (!currentUser) {
+		userBadges.innerHTML = '<span class="muted">Login to see medals.</span>';
+		return;
+	}
+	const badgeSnap = await getDocs(query(collection(db, 'user_badges'), where('uid', '==', currentUser.uid)));
+	const badgeIds = [];
+	badgeSnap.forEach(docSnap => badgeIds.push(docSnap.data().badgeId));
+	if (!badgeIds.length) {
+		userBadges.innerHTML = '<span class="muted">No medals yet.</span>';
+		return;
+	}
+	const allBadges = await loadBadges();
+	const map = new Map(allBadges.map(b => [b.id, b]));
+	badgeIds.forEach(id => {
+		const b = map.get(id);
+		if (!b) return;
+		const el = document.createElement('div');
+		el.className = 'badge';
+		const color = b.color || '#f2c46d';
+		el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '🏅'} ${b.name || 'Medal'}`;
+		userBadges.appendChild(el);
+	});
+}
+
+async function renderBadgeAdmin() {
+	if (!adminPanel || !isAdmin()) return;
+	const badges = await loadBadges();
+	if (badgeList) {
+		badgeList.innerHTML = '';
+		badges.forEach(b => {
+			const el = document.createElement('div');
+			el.className = 'badge';
+			const color = b.color || '#f2c46d';
+			el.innerHTML = `<span class="dot" style="background:${color}"></span>${b.icon || '🏅'} ${b.name || 'Medal'}`;
+			badgeList.appendChild(el);
+		});
+	}
+	if (assignBadge) {
+		assignBadge.innerHTML = '';
+		badges.forEach(b => {
+			const opt = document.createElement('option');
+			opt.value = b.id;
+			opt.textContent = `${b.icon || '🏅'} ${b.name || 'Medal'}`;
+			assignBadge.appendChild(opt);
+		});
+	}
+}
+
+async function createBadge() {
+	if (!isAdmin()) return;
+	const name = (badgeName?.value || '').trim();
+	if (!name) return;
+	const icon = (badgeIcon?.value || '').trim() || '🏅';
+	const color = (badgeColor?.value || '').trim() || '#f2c46d';
+	const desc = (badgeDesc?.value || '').trim();
+	await addDoc(collection(db, 'badges'), {
+		name,
+		icon,
+		color,
+		desc,
+		createdAt: serverTimestamp(),
+		createdBy: currentUser.uid
+	});
+	if (badgeName) badgeName.value = '';
+	if (badgeIcon) badgeIcon.value = '';
+	if (badgeColor) badgeColor.value = '';
+	if (badgeDesc) badgeDesc.value = '';
+	await renderBadgeAdmin();
+}
+
+async function assignBadgeToUser() {
+	if (!isAdmin()) return;
+	const uid = (assignUid?.value || '').trim();
+	const badgeId = assignBadge?.value;
+	if (!uid || !badgeId) return;
+	const existing = await getDocs(query(collection(db, 'user_badges'), where('uid', '==', uid), where('badgeId', '==', badgeId)));
+	if (!existing.empty) return;
+	await addDoc(collection(db, 'user_badges'), {
+		uid,
+		badgeId,
+		givenBy: currentUser.uid,
+		createdAt: serverTimestamp()
+	});
+	if (assignUid) assignUid.value = '';
+}
+
+if (badgeCreate) badgeCreate.addEventListener('click', createBadge);
+if (assignBadgeBtn) assignBadgeBtn.addEventListener('click', assignBadgeToUser);
 
 // --- Chat ---
 function setChatState() {
@@ -1197,8 +1334,10 @@ if (chessBtn) {
 
 // --- Calculator ---
 let calcState = null;
+const calcReady = !!(calcPanel && calcDisplay && calcEq && exitCalcBtn);
 
 function startCalcSession() {
+	if (!calcReady) return;
 	calcState = {
 		expr: '',
 		opsCount: { '+':0, '-':0, '*':0, '/':0 },
@@ -1220,6 +1359,7 @@ async function endCalcSession() {
 }
 
 function updateCalcDisplay() {
+	if (!calcReady) return;
 	calcDisplay.value = calcState.expr || '0';
 }
 
@@ -1260,56 +1400,64 @@ function appendOp(op) {
 	updateCalcDisplay();
 }
 
-calcDisplay.addEventListener('keydown', (e) => e.preventDefault());
+if (calcReady) {
+	calcDisplay.addEventListener('keydown', (e) => e.preventDefault());
 
-document.getElementById('calc-clear').addEventListener('click', () => {
-	if (!calcState) return;
-	calcState.expr = '';
-	updateCalcDisplay();
-});
-
-document.querySelectorAll('#calc-panel .calc-btn').forEach(btn => {
-	btn.addEventListener('click', (e) => {
-		if (!calcState) return;
-		e.stopPropagation();
-		const v = btn.dataset.val;
-		const op = btn.dataset.op;
-		if (v) appendValue(v);
-		if (op) appendOp(op);
-	});
-});
-
-calcEq.addEventListener('click', () => {
-	if (!calcState) return;
-	try {
-		let expr = calcState.expr.replace(/[+\-*/]+$/, '');
-		if (!expr) return;
-		const res = eval(expr);
-		calcState.expr = String(res);
-		updateCalcDisplay();
-	} catch {
-		calcDisplay.value = 'Error';
-		calcState.expr = '';
+	const calcClear = document.getElementById('calc-clear');
+	if (calcClear) {
+		calcClear.addEventListener('click', () => {
+			if (!calcState) return;
+			calcState.expr = '';
+			updateCalcDisplay();
+		});
 	}
-});
 
-exitCalcBtn.addEventListener('click', async () => {
-	await endCalcSession();
-	hide(calcPanel);
-	hide(gameModal);
-});
+	document.querySelectorAll('#calc-panel .calc-btn').forEach(btn => {
+		btn.addEventListener('click', (e) => {
+			if (!calcState) return;
+			e.stopPropagation();
+			const v = btn.dataset.val;
+			const op = btn.dataset.op;
+			if (v) appendValue(v);
+			if (op) appendOp(op);
+		});
+	});
+
+	calcEq.addEventListener('click', () => {
+		if (!calcState) return;
+		try {
+			let expr = calcState.expr.replace(/[+\-*/]+$/, '');
+			if (!expr) return;
+			const res = eval(expr);
+			calcState.expr = String(res);
+			updateCalcDisplay();
+		} catch {
+			calcDisplay.value = 'Error';
+			calcState.expr = '';
+		}
+	});
+
+	exitCalcBtn.addEventListener('click', async () => {
+		await endCalcSession();
+		hide(calcPanel);
+		hide(gameModal);
+	});
+}
 
 // --- Paint ---
 let paintState = null;
 let drawing = false;
+const paintReady = !!(paintPanel && paintCanvas && pencilBtn && eraserBtn && fillBtn && colorPicker && brushSize && brushAlpha && paintClearBtn && exitPaintBtn);
 
 function setActiveTool(tool) {
+	if (!paintReady) return;
 	pencilBtn.classList.toggle('active', tool === 'pencil');
 	eraserBtn.classList.toggle('active', tool === 'eraser');
 	fillBtn.classList.toggle('active', tool === 'fill');
 }
 
 function resizeCanvas() {
+	if (!paintReady) return;
 	const rect = paintCanvas.getBoundingClientRect();
 	const dpr = window.devicePixelRatio || 1;
 	paintCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
@@ -1317,6 +1465,7 @@ function resizeCanvas() {
 }
 
 function startPaintSession() {
+	if (!paintReady) return;
 	const ctx = paintCanvas.getContext('2d');
 	paintState = {
 		tool: 'pencil',
@@ -1346,100 +1495,102 @@ async function endPaintSession() {
 	paintState = null;
 }
 
-pencilBtn.addEventListener('click', () => {
-	if (!paintState) return;
-	paintState.tool = 'pencil';
-	paintState.toolCounts.pencil++;
-	setActiveTool('pencil');
-});
+if (paintReady) {
+	pencilBtn.addEventListener('click', () => {
+		if (!paintState) return;
+		paintState.tool = 'pencil';
+		paintState.toolCounts.pencil++;
+		setActiveTool('pencil');
+	});
 
-eraserBtn.addEventListener('click', () => {
-	if (!paintState) return;
-	paintState.tool = 'eraser';
-	paintState.toolCounts.eraser++;
-	setActiveTool('eraser');
-});
+	eraserBtn.addEventListener('click', () => {
+		if (!paintState) return;
+		paintState.tool = 'eraser';
+		paintState.toolCounts.eraser++;
+		setActiveTool('eraser');
+	});
 
-fillBtn.addEventListener('click', () => {
-	if (!paintState) return;
-	paintState.tool = 'fill';
-	paintState.toolCounts.fill++;
-	setActiveTool('fill');
-});
+	fillBtn.addEventListener('click', () => {
+		if (!paintState) return;
+		paintState.tool = 'fill';
+		paintState.toolCounts.fill++;
+		setActiveTool('fill');
+	});
 
-paintClearBtn.addEventListener('click', () => {
-	if (!paintState) return;
-	paintState.ctx.save();
-	paintState.ctx.globalAlpha = 1;
-	paintState.ctx.fillStyle = '#fff';
-	paintState.ctx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
-	paintState.ctx.restore();
-});
-
-colorPicker.addEventListener('change', (e) => {
-	if (!paintState) return;
-	paintState.ctx.strokeStyle = e.target.value;
-	paintState.ctx.fillStyle = e.target.value;
-});
-
-function getCanvasPoint(e) {
-	const rect = paintCanvas.getBoundingClientRect();
-	const scaleX = paintCanvas.width / rect.width;
-	const scaleY = paintCanvas.height / rect.height;
-	return {
-		x: (e.clientX - rect.left) * scaleX,
-		y: (e.clientY - rect.top) * scaleY
-	};
-}
-
-function paintStart(e) {
-	if (!paintState) return;
-	drawing = true;
-	paintCanvas.setPointerCapture(e.pointerId);
-	const rect = paintCanvas.getBoundingClientRect();
-	const scale = paintCanvas.width / rect.width;
-	const { x, y } = getCanvasPoint(e);
-	paintState.ctx.beginPath();
-	paintState.ctx.moveTo(x, y);
-	if (paintState.tool === 'fill') {
+	paintClearBtn.addEventListener('click', () => {
+		if (!paintState) return;
 		paintState.ctx.save();
-		paintState.ctx.globalAlpha = Number(brushAlpha.value);
-		paintState.ctx.fillStyle = colorPicker.value;
+		paintState.ctx.globalAlpha = 1;
+		paintState.ctx.fillStyle = '#fff';
 		paintState.ctx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
 		paintState.ctx.restore();
-	} else {
-		const baseSize = paintState.tool === 'eraser' ? 20 : Number(brushSize.value);
-		paintState.ctx.lineWidth = baseSize * scale;
-		paintState.ctx.globalAlpha = paintState.tool === 'eraser' ? 1 : Number(brushAlpha.value);
-		paintState.ctx.strokeStyle = paintState.tool === 'eraser' ? '#fff' : colorPicker.value;
+	});
+
+	colorPicker.addEventListener('change', (e) => {
+		if (!paintState) return;
+		paintState.ctx.strokeStyle = e.target.value;
+		paintState.ctx.fillStyle = e.target.value;
+	});
+
+	function getCanvasPoint(e) {
+		const rect = paintCanvas.getBoundingClientRect();
+		const scaleX = paintCanvas.width / rect.width;
+		const scaleY = paintCanvas.height / rect.height;
+		return {
+			x: (e.clientX - rect.left) * scaleX,
+			y: (e.clientY - rect.top) * scaleY
+		};
 	}
+
+	function paintStart(e) {
+		if (!paintState) return;
+		drawing = true;
+		paintCanvas.setPointerCapture(e.pointerId);
+		const rect = paintCanvas.getBoundingClientRect();
+		const scale = paintCanvas.width / rect.width;
+		const { x, y } = getCanvasPoint(e);
+		paintState.ctx.beginPath();
+		paintState.ctx.moveTo(x, y);
+		if (paintState.tool === 'fill') {
+			paintState.ctx.save();
+			paintState.ctx.globalAlpha = Number(brushAlpha.value);
+			paintState.ctx.fillStyle = colorPicker.value;
+			paintState.ctx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+			paintState.ctx.restore();
+		} else {
+			const baseSize = paintState.tool === 'eraser' ? 20 : Number(brushSize.value);
+			paintState.ctx.lineWidth = baseSize * scale;
+			paintState.ctx.globalAlpha = paintState.tool === 'eraser' ? 1 : Number(brushAlpha.value);
+			paintState.ctx.strokeStyle = paintState.tool === 'eraser' ? '#fff' : colorPicker.value;
+		}
+	}
+
+	function paintMove(e) {
+		if (!paintState || !drawing || paintState.tool === 'fill') return;
+		const { x, y } = getCanvasPoint(e);
+		paintState.ctx.lineTo(x, y);
+		paintState.ctx.stroke();
+	}
+
+	function paintEnd() {
+		drawing = false;
+	}
+
+	paintCanvas.addEventListener('pointerdown', paintStart);
+	paintCanvas.addEventListener('pointermove', paintMove);
+	paintCanvas.addEventListener('pointerup', paintEnd);
+	paintCanvas.addEventListener('pointerleave', paintEnd);
+
+	window.addEventListener('resize', () => {
+		if (paintState) resizeCanvas();
+	});
+
+	exitPaintBtn.addEventListener('click', async () => {
+		await endPaintSession();
+		hide(paintPanel);
+		hide(gameModal);
+	});
 }
-
-function paintMove(e) {
-	if (!paintState || !drawing || paintState.tool === 'fill') return;
-	const { x, y } = getCanvasPoint(e);
-	paintState.ctx.lineTo(x, y);
-	paintState.ctx.stroke();
-}
-
-function paintEnd() {
-	drawing = false;
-}
-
-paintCanvas.addEventListener('pointerdown', paintStart);
-paintCanvas.addEventListener('pointermove', paintMove);
-paintCanvas.addEventListener('pointerup', paintEnd);
-paintCanvas.addEventListener('pointerleave', paintEnd);
-
-window.addEventListener('resize', () => {
-	if (paintState) resizeCanvas();
-});
-
-exitPaintBtn.addEventListener('click', async () => {
-	await endPaintSession();
-	hide(paintPanel);
-	hide(gameModal);
-});
 
 if (exitChessBtn) {
 	exitChessBtn.addEventListener('click', () => {

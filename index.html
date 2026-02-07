@@ -65,8 +65,6 @@
 					</div>
 					<p class="muted">Pick a game and launch instantly.</p>
 					<div class="game-row">
-						<button id="calc-btn" class="btn btn-game">Calculator</button>
-						<button id="paint-btn" class="btn btn-game">Paint</button>
 						<button id="chess-btn-2" class="btn btn-game">Chess</button>
 						<button class="btn btn-disabled" disabled>More soon</button>
 					</div>
@@ -116,6 +114,14 @@
 			<div id="leaderboard-content" class="ranking-content"></div>
 		</section>
 
+		<section id="cards" class="card cards">
+			<div class="card-head">
+				<h2>Player Cards</h2>
+				<span class="tag">Top</span>
+			</div>
+			<div id="player-cards" class="card-grid"></div>
+		</section>
+
 		<section class="row">
 			<section id="account" class="card account">
 				<div>
@@ -126,6 +132,26 @@
 				<div class="btn-row">
 					<button id="auth-open" class="btn btn-primary">Login / Register</button>
 					<button id="logout-btn" class="btn btn-ghost">Log out</button>
+				</div>
+				<div class="badge-block">
+					<h3>Your Medals</h3>
+					<div id="user-badges" class="badge-list"></div>
+				</div>
+				<div id="admin-panel" class="admin-panel hidden">
+					<h3>Admin Medals</h3>
+					<div class="admin-grid">
+						<input id="badge-name" type="text" placeholder="Medal name">
+						<input id="badge-icon" type="text" placeholder="Icon (emoji)">
+						<input id="badge-color" type="text" placeholder="Color (e.g. #ffb347)">
+						<input id="badge-desc" type="text" placeholder="Short description">
+						<button id="badge-create" class="btn btn-primary">Create Medal</button>
+					</div>
+					<div class="admin-grid">
+						<input id="assign-uid" type="text" placeholder="User UID">
+						<select id="assign-badge"></select>
+						<button id="assign-badge-btn" class="btn btn-ghost">Assign Medal</button>
+					</div>
+					<div id="badge-list" class="badge-list"></div>
 				</div>
 			</section>
 			<section id="feedback" class="card feedback">
@@ -164,65 +190,6 @@
 				<div class="game-header">
 					<h2 id="game-title">Game</h2>
 					<button id="close-modal" class="btn btn-ghost">Close</button>
-				</div>
-
-				<!-- Calculator -->
-				<div id="calc-panel" class="game-panel hidden">
-					<h3>Calculator</h3>
-					<input id="calc-display" type="text" readonly placeholder="0">
-					<div class="calc-toolbar">
-						<button id="calc-clear" class="btn btn-ghost">Clear</button>
-					</div>
-					<div class="calc-grid">
-						<button class="calc-btn" data-val="7">7</button>
-						<button class="calc-btn" data-val="8">8</button>
-						<button class="calc-btn" data-val="9">9</button>
-						<button class="calc-btn" data-op="/">&divide;</button>
-						<button class="calc-btn" data-val="4">4</button>
-						<button class="calc-btn" data-val="5">5</button>
-						<button class="calc-btn" data-val="6">6</button>
-						<button class="calc-btn" data-op="*">&times;</button>
-						<button class="calc-btn" data-val="1">1</button>
-						<button class="calc-btn" data-val="2">2</button>
-						<button class="calc-btn" data-val="3">3</button>
-						<button class="calc-btn" data-op="-">&minus;</button>
-						<button class="calc-btn" data-val="0">0</button>
-						<button class="calc-btn" data-val=".">.</button>
-						<button class="calc-btn" id="calc-eq">=</button>
-						<button class="calc-btn" data-op="+">+</button>
-					</div>
-					<button id="exit-calc-btn" class="btn btn-primary">Exit</button>
-				</div>
-
-				<!-- Paint -->
-				<div id="paint-panel" class="game-panel hidden">
-					<h3>Paint</h3>
-					<div class="paint-layout">
-						<div class="paint-tools">
-							<button id="pencil-btn" class="tool-btn" data-tool="pencil">Pencil</button>
-							<button id="eraser-btn" class="tool-btn" data-tool="eraser">Eraser</button>
-							<button id="fill-btn" class="tool-btn" data-tool="fill">Fill</button>
-							<button id="paint-clear" class="tool-btn alt">Clear</button>
-						</div>
-						<div class="paint-canvas-wrap">
-							<canvas id="paint-canvas" width="520" height="320"></canvas>
-							<div class="paint-controls">
-								<label class="range">
-									<span>Size</span>
-									<input id="brush-size" type="range" min="1" max="30" value="4">
-								</label>
-								<label class="range">
-									<span>Opacity</span>
-									<input id="brush-alpha" type="range" min="0.1" max="1" step="0.1" value="1">
-								</label>
-								<label class="color">
-									<span>Color</span>
-									<input id="color-picker" type="color" value="#0b0b0b">
-								</label>
-							</div>
-						</div>
-					</div>
-					<button id="exit-paint-btn" class="btn btn-primary">Exit</button>
 				</div>
 
 				<!-- Chess -->
