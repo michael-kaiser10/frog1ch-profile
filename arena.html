@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<title>made_by_frog1ch</title>
+		<title>made_by_frog1ch - Arena</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -56,9 +56,9 @@
 					<div class="stage-main">
 						<section class="panel intro">
 							<div>
-								<span class="pill">Arcade Core</span>
-								<h1>Play. Chat. Climb. A clean arena for daily wins.</h1>
-								<p>Games, rankings, and real-time talk in one tight flow. Lightweight, fast, and built for the grind.</p>
+								<span class="pill">Arena</span>
+								<h1>Launch a game and climb fast.</h1>
+								<p>Quick sessions and ranked battles. Jump in and play.</p>
 							</div>
 							<div class="intro-actions">
 								<button id="play-btn" class="btn btn-primary">Play now</button>
@@ -78,58 +78,6 @@
 							</div>
 						</section>
 
-						<section class="panel ranking">
-							<div class="panel-head">
-								<h2>Ranking</h2>
-								<span class="tag">ELO</span>
-							</div>
-							<div id="leaderboard-content" class="ranking-content"></div>
-						</section>
-
-						<section class="panel cards">
-							<div class="panel-head">
-								<h2>Player Cards</h2>
-								<span class="tag">Top</span>
-							</div>
-							<div id="player-cards" class="card-grid"></div>
-						</section>
-
-						<section class="panel account">
-							<div class="panel-head">
-								<h2>Account</h2>
-								<span class="tag">Sync</span>
-							</div>
-							<p id="auth-status">Not logged in.</p>
-							<p class="muted">Login to sync chat, stats, and global rankings.</p>
-							<div class="btn-row">
-								<button id="auth-open" class="btn btn-primary">Login / Register</button>
-								<button id="logout-btn" class="btn btn-ghost">Log out</button>
-							</div>
-							<div class="badge-block">
-								<h3>Your Medals</h3>
-								<div id="user-badges" class="badge-list"></div>
-							</div>
-							<div id="admin-panel" class="admin-panel hidden">
-								<h3>Admin Medals</h3>
-								<div id="badge-presets" class="badge-presets"></div>
-								<div class="admin-grid">
-									<input id="badge-name" type="text" placeholder="Medal name">
-									<input id="badge-icon" type="text" placeholder="Icon (emoji)">
-									<input id="badge-color" type="text" placeholder="Color (e.g. #a6e6b8)">
-									<input id="badge-desc" type="text" placeholder="Short description">
-									<button id="badge-create" class="btn btn-primary">Create Medal</button>
-								</div>
-								<div class="admin-grid">
-									<input id="assign-uid" type="text" placeholder="User UID">
-									<select id="assign-user"></select>
-									<select id="assign-badge"></select>
-									<button id="assign-badge-btn" class="btn btn-ghost">Assign Medal</button>
-								</div>
-								<p class="muted">Tip: use Firebase Auth Users to copy UID. Medals appear in profiles and Your Medals.</p>
-								<div id="badge-list" class="badge-list"></div>
-							</div>
-						</section>
-
 						<section class="panel drop">
 							<div class="panel-head">
 								<h2>Arcade Drop</h2>
@@ -137,15 +85,6 @@
 							</div>
 							<p id="drop-text">Win 3 games in a row today.</p>
 							<button id="drop-btn" class="btn btn-soft">New challenge</button>
-						</section>
-
-						<section class="panel feedback">
-							<div class="panel-head">
-								<h2>Feedback</h2>
-								<span class="tag">Contact</span>
-							</div>
-							<p class="muted">Send ideas, bug reports, or new game suggestions.</p>
-							<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
 						</section>
 					</div>
 				</div>

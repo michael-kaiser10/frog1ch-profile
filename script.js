@@ -155,7 +155,10 @@ const dropText = document.getElementById('drop-text');
 let currentUser = null;
 const ADMIN_UIDS = ['GTWT222m9NRixYoFZBPJ6IfSN3j1'];
 const isAdmin = () => !!currentUser && ADMIN_UIDS.includes(currentUser.uid);
-let authMode = 'signup';\nlet dmUnsub = null;\nlet dmThreadId = null;\nlet dmPeer = null;
+let authMode = 'signup';
+let dmUnsub = null;
+let dmThreadId = null;
+let dmPeer = null;
 const BADGE_PRESETS = [
 	{ name: 'HLTV Top 1', icon: '\uD83E\uDD47', color: '#f2c46d', desc: 'Season #1' },
 	{ name: 'HLTV Top 2', icon: '\uD83E\uDD48', color: '#c7d1db', desc: 'Season #2' },
@@ -729,7 +732,7 @@ async function cleanupChatIfNeeded() {
 	return;
 }
 
-function startChatListener() {
+function startChatListener() {\n\tif (!chatList) return;
 	const q = query(collection(db, 'chat'), orderBy('createdAt', 'desc'), limit(30));
 	onSnapshot(q, (snap) => {
 		chatList.innerHTML = '';
@@ -858,8 +861,8 @@ async function sendChat() {
 	if (chatPreview) chatPreview.classList.add('hidden');
 }
 
-chatSend.addEventListener('click', sendChat);
-chatInput.addEventListener('keydown', (e) => {
+if (chatSend) chatSend.addEventListener('click', sendChat);
+if (chatInput) chatInput.addEventListener('keydown', (e) => {
 	if (e.key === 'Enter') sendChat();
 });
 
@@ -890,7 +893,7 @@ if (chatCancel) {
 	});
 }
 
-if (chatEmojiBtn && chatEmojiPanel) {
+if (chatEmojiBtn && chatEmojiPanel && chatInput) {
 	const emojis = ['\uD83D\uDE00','\uD83D\uDE05','\uD83D\uDE02','\uD83E\uDD23','\uD83D\uDE0A','\uD83D\uDE0D','\uD83D\uDE0E','\uD83D\uDE24','\uD83D\uDE2D','\uD83D\uDE31','\uD83E\uDD2F','\uD83E\uDD14','\uD83D\uDE34','\uD83D\uDE21','\uD83D\uDC4D','\uD83D\uDD25','\uD83C\uDFAF','\uD83D\uDCAF','\u2728','\u26A1','\uD83C\uDFAE','\uD83D\uDDB1\uFE0F','\uD83C\uDFC6','\uD83D\uDE80','\uD83D\uDCAC','\uD83D\uDCCC','\uD83D\uDCF8','\uD83E\uDDE9','\uD83D\uDEE1\uFE0F','\uD83E\uDDE0'];
 	chatEmojiPanel.innerHTML = '';
 	emojis.forEach(e => {
@@ -1829,6 +1832,9 @@ if (exitChessBtn) {
 		hide(gameModal);
 	});
 }
+
+
+
 
 
 
