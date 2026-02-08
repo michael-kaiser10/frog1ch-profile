@@ -1,102 +1,97 @@
 import { auth, db } from "./firebase.js";
+import { currentUser, onUser } from "./auth.js";
+import { qs, toast } from "./ui.js";
+import { renderUserBadges } from "./badges.js";
 import {
-  doc,
-  getDoc,
-  setDoc
+  doc, getDoc, setDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { onAuthStateChanged, updateProfile } from
-  "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
-const nameEl = document.getElementById("profile-name");
-const emailEl = document.getElementById("profile-email");
-const nickInput = document.getElementById("nick-input");
-const bioInput = document.getElementById("bio-input");
-const saveBtn = document.getElementById("save-profile");
-const msg = document.getElementById("profile-msg");
-
-const statTime = document.getElementById("stat-time");
-const statElo = document.getElementById("stat-elo");
-const badgeList = document.getElementById("badge-list");
-
-let currentUser = null;
-
-function showMsg(text, error = false) {
-  msg.textContent = text;
-  msg.style.color = error ? "#f87171" : "var(--muted)";
+function getUidFromQuery(){
+  const p = new URLSearchParams(location.search);
+  return p.get("uid");
 }
 
-async function loadProfile(uid) {
-  const ref = doc(db, "users", uid);
-  const snap = await getDoc(ref);
-
-  if (snap.exists()) {
-    const data = snap.data();
-    bioInput.value = data.bio || "";
-  }
+function fmtTime(sec){
+  const s = Number(sec || 0);
+  const m = Math.floor(s/60);
+  const h = Math.floor(m/60);
+  const mm = m % 60;
+  if (h > 0) return `${h}h ${mm}m`;
+  return `${m}m`;
 }
 
-async function loadStats(uid) {
-  const ref = doc(db, "leaderboards", uid);
-  const snap = await getDoc(ref);
-
-  if (snap.exists()) {
-    const d = snap.data();
-    statTime.textContent = Math.floor((d.totalTime || 0) / 60) + " min";
-    statElo.textContent = d.chessElo || 1000;
-  }
+async function loadUserDoc(uid){
+  const snap = await getDoc(doc(db,"users", uid));
+  return snap.exists() ? snap.data() : null;
 }
 
-async function loadBadges(uid) {
-  badgeList.innerHTML = "";
-
-  const ref = doc(db, "user_badges", uid);
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) return;
-
-  const badges = snap.data().badges || [];
-  badges.forEach(b => {
-    const div = document.createElement("div");
-    div.className = "badge";
-    div.textContent = b.icon + " " + b.name;
-    badgeList.appendChild(div);
-  });
+async function loadStats(uid){
+  const snap = await getDoc(doc(db,"leaderboards", uid));
+  return snap.exists() ? snap.data() : null;
 }
 
-saveBtn.onclick = async () => {
-  if (!currentUser) return;
+export async function initProfile(){
+  const nameEl = qs("profile-name");
+  const metaEl = qs("profile-meta");
+  const bioEl = qs("bio-input");
+  const nickEl = qs("nick-input");
+  const saveBtn = qs("save-profile");
+  const statTime = qs("stat-time");
+  const statElo = qs("stat-elo");
 
-  const nick = nickInput.value.trim().replace(/[^a-z0-9_]/gi, "");
-  const bio = bioInput.value.trim();
-
-  try {
-    if (nick) {
-      await updateProfile(currentUser, { displayName: nick });
-      nameEl.textContent = nick;
+  const viewUid = getUidFromQuery();
+  onUser(async (u)=>{
+    const uid = viewUid || u?.uid;
+    if (!uid){
+      location.href = "account.html";
+      return;
     }
 
-    await setDoc(doc(db, "users", currentUser.uid), {
-      bio
-    }, { merge: true });
+    // who is viewed
+    const userDoc = await loadUserDoc(uid);
+    const stats = await loadStats(uid);
 
-    showMsg("Profile saved");
-  } catch (e) {
-    showMsg("Save error", true);
-  }
-};
+    const displayName = userDoc?.name || (u && u.uid === uid ? (u.displayName || u.email) : "Player");
+    if (nameEl) nameEl.textContent = displayName;
+    if (metaEl) metaEl.textContent = userDoc?.email ? userDoc.email : (uid === u?.uid ? u?.email || "" : "");
 
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    location.href = "account.html";
-    return;
-  }
+    if (statTime) statTime.textContent = fmtTime(stats?.totalTime || 0);
+    if (statElo) statElo.textContent = String(stats?.chessElo || 1000);
 
-  currentUser = user;
-  nameEl.textContent = user.displayName || "Player";
-  emailEl.textContent = user.email;
-  nickInput.value = user.displayName || "";
+    // badges
+    await renderUserBadges(uid, "badge-list");
 
-  await loadProfile(user.uid);
-  await loadStats(user.uid);
-  await loadBadges(user.uid);
-});
+    // editing only for own profile
+    const canEdit = !!u && u.uid === uid;
+    if (nickEl) nickEl.disabled = !canEdit;
+    if (bioEl) bioEl.disabled = !canEdit;
+    if (saveBtn) saveBtn.disabled = !canEdit;
+
+    if (bioEl) bioEl.value = userDoc?.bio || "";
+    if (nickEl) nickEl.value = canEdit ? (u.displayName || "") : (userDoc?.name || "");
+
+    if (saveBtn && canEdit){
+      saveBtn.onclick = async ()=>{
+        const nick = (nickEl?.value || "").trim().replace(/[^a-z0-9_]/gi,"").slice(0,20);
+        const bio = (bioEl?.value || "").trim().slice(0,160);
+
+        try{
+          if (nick){
+            await updateProfile(auth.currentUser, { displayName: nick });
+          }
+          await setDoc(doc(db,"users", u.uid), {
+            name: nick || (u.displayName || userDoc?.name || "Player"),
+            bio,
+            updatedAt: serverTimestamp()
+          }, { merge:true });
+
+          toast("Профіль", "Збережено", "ok");
+          if (nameEl) nameEl.textContent = nick || nameEl.textContent;
+        }catch(e){
+          toast("Помилка", "Не вдалося зберегти", "danger");
+        }
+      };
+    }
+  });
+}

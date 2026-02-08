@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Profile</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Onest:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div class="bg-sheen"></div>
 
 <div class="app">
@@ -20,6 +22,7 @@
           <div class="brand-sub">Metal Tech Arcade</div>
         </div>
       </div>
+      <button id="auth-open" class="btn btn-ghost btn-block" type="button">Login / Register</button>
     </div>
 
     <nav class="rail-nav">
@@ -28,62 +31,92 @@
       <a href="chat.html">Chat</a>
       <a href="ranking.html">Ranking</a>
       <a href="account.html">Account</a>
-      <a href="profile.html" class="active">Profile</a>
+      <a href="profile.html">Profile</a>
+      <a href="feedback.html">Feedback</a>
     </nav>
+
+    <div class="rail-actions">
+      <button id="logout-btn" class="btn btn-ghost btn-block" disabled>Log out</button>
+      <a class="btn btn-primary btn-block" href="arena.html">Play now</a>
+    </div>
+
+    <div class="rail-status">
+      <div class="rail-metric"><span class="label">Time</span><span id="time" class="value"></span></div>
+    </div>
   </aside>
 
   <main class="stage">
-    <section class="panel intro">
-      <div>
-        <span class="pill">Profile</span>
-        <h1 id="profile-name">Guest</h1>
-        <p id="profile-email" class="muted"></p>
+    <div class="stage-grid">
+      <div class="stage-main">
+        <section class="panel intro">
+          <div>
+            <span class="pill">Profile</span>
+            <h1 id="profile-name">Player</h1>
+            <p id="profile-meta" class="muted"></p>
+          </div>
+          <div class="intro-actions">
+            <a class="btn btn-ghost" href="ranking.html">Back to ranking</a>
+            <a class="btn btn-primary" href="chat.html">Open chat</a>
+          </div>
+        </section>
+
+        <section class="panel" style="grid-column: span 6;">
+          <div class="panel-head"><h2>Settings</h2><span class="tag">Custom</span></div>
+          <label class="field"><span>Nickname</span><input id="nick-input" type="text" maxlength="20"></label>
+          <label class="field"><span>Bio</span><textarea id="bio-input" maxlength="160" placeholder="About you…"></textarea></label>
+          <button id="save-profile" class="btn btn-primary" type="button">Save</button>
+          <p class="muted">Editing enabled only for your own profile.</p>
+        </section>
+
+        <section class="panel" style="grid-column: span 6;">
+          <div class="panel-head"><h2>Stats</h2><span class="tag">Global</span></div>
+          <div class="list">
+            <div class="card"><div class="card-top"><div class="card-title">Total Time</div></div><div class="muted"><strong id="stat-time">0m</strong></div></div>
+            <div class="card"><div class="card-top"><div class="card-title">Chess ELO</div></div><div class="muted"><strong id="stat-elo">1000</strong></div></div>
+          </div>
+        </section>
+
+        <section class="panel" style="grid-column: 1 / -1;">
+          <div class="panel-head"><h2>Medals</h2><span class="tag">Badges</span></div>
+          <div id="badge-list" class="badge-list"></div>
+        </section>
       </div>
-    </section>
-
-    <section class="panel account">
-      <div class="panel-head">
-        <h2>Profile settings</h2>
-        <span class="tag">Custom</span>
-      </div>
-
-      <label class="field">
-        <span>Nickname</span>
-        <input id="nick-input" type="text" maxlength="20">
-      </label>
-
-      <label class="field">
-        <span>Bio</span>
-        <textarea id="bio-input" maxlength="160"></textarea>
-      </label>
-
-      <button id="save-profile" class="btn btn-primary">Save</button>
-      <p id="profile-msg" class="muted"></p>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Stats</h2>
-        <span class="tag">Global</span>
-      </div>
-
-      <ul class="stat-list">
-        <li>Total time: <strong id="stat-time">0</strong></li>
-        <li>Chess ELO: <strong id="stat-elo">1000</strong></li>
-      </ul>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Badges</h2>
-        <span class="tag">Awards</span>
-      </div>
-      <div id="badge-list" class="badge-list"></div>
-    </section>
-
+    </div>
   </main>
 </div>
 
-<script type="module" src="js/profile.js"></script>
+<!-- AUTH MODAL -->
+<div id="auth-modal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>Account Access</h2>
+      <button id="auth-close" class="btn btn-ghost" type="button">Close</button>
+    </div>
+    <div class="hr"></div>
+    <p id="auth-msg" class="hint"></p>
+    <div class="grid-2">
+      <label class="field"><span>Email</span><input id="email-input" type="email" autocomplete="email"></label>
+      <label class="field"><span>Password</span><input id="pass-input" type="password" autocomplete="current-password"></label>
+    </div>
+    <div class="grid-2">
+      <label class="field"><span>Confirm</span><input id="pass-confirm" type="password" autocomplete="new-password"></label>
+      <label class="field"><span>Nickname</span><input id="nick-input" type="text" maxlength="20"></label>
+    </div>
+    <div class="btn-row">
+      <button id="submit-auth" class="btn btn-primary" type="button">Sign up</button>
+      <button id="toggle-auth" class="btn btn-ghost" type="button">Switch to Login</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { setActiveNav, startClock } from "./js/ui.js";
+  setActiveNav(); startClock();
+</script>
+<script type="module" src="./js/auth.js"></script>
+<script type="module">
+  import { initProfile } from "./js/profile.js";
+  initProfile();
+</script>
 </body>
 </html>

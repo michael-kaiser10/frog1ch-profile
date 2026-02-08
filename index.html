@@ -1,311 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<title>made_by_frog1ch</title>
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
-		<link rel="stylesheet" href="style.css">
-	</head>
-	<body>
-		<div class="bg-sheen"></div>
-		<div class="app">
-			<aside class="rail">
-				<div class="rail-top">
-					<div class="brand">
-						<span class="brand-mark"></span>
-						<div>
-							<div class="brand-title">made_by_frog1ch</div>
-							<div class="brand-sub">Metal Tech Arcade</div>
-						</div>
-					</div>
-					<button id="profile-open" class="btn btn-ghost btn-block">Profile</button>
-				</div>
-				<nav class="rail-nav">
-					<a href="index.html">Intro</a>
-					<a href="arena.html">Arena</a>
-					<a href="chat.html">Chat</a>
-					<a href="ranking.html">Ranking</a>
-					<a href="account.html">Account</a>
-					<a href="feedback.html">Feedback</a>
-				</nav>
-				<div class="rail-actions">
-					<button id="lang" class="btn btn-ghost btn-block">EN</button>
-					<a class="btn btn-primary btn-block" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Telegram</a>
-				</div>
-				<div class="rail-status">
-					<div class="rail-metric">
-						<span class="label">Status</span>
-						<span id="t-status" class="value">Online</span>
-					</div>
-					<div class="rail-metric">
-						<span class="label">Time</span>
-						<span id="time" class="value"></span>
-					</div>
-					<div class="rail-metric">
-						<span class="label">Quote</span>
-						<span id="t-quote" class="value">Focus. Improve. Repeat.</span>
-					</div>
-				</div>
-			</aside>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>made_by_frog1ch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Onest:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-sheen"></div>
 
-			<main class="stage">
-				<div class="stage-grid">
-					<div class="stage-main">
-						<section class="panel intro">
-							<div>
-								<span class="pill">Arcade Core</span>
-								<h1>Play. Chat. Climb. A clean arena for daily wins.</h1>
-								<p>Games, rankings, and real-time talk in one tight flow. Lightweight, fast, and built for the grind.</p>
-							</div>
-							<div class="intro-actions">
-								<button id="play-btn" class="btn btn-primary">Play now</button>
-								<button id="chess-btn" class="btn btn-ghost">Open Chess</button>
-							</div>
-						</section>
+<div class="app">
+  <aside class="rail">
+    <div class="rail-top">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <div>
+          <div class="brand-title">made_by_frog1ch</div>
+          <div class="brand-sub">Metal Tech Arcade</div>
+        </div>
+      </div>
+      <a class="btn btn-ghost btn-block" href="profile.html">Profile</a>
+    </div>
 
-					<section class="panel arena">
-						<div class="panel-head">
-							<h2>Arena</h2>
-							<span class="tag">Play</span>
-						</div>
-						<p class="muted">Pick a game and launch instantly.</p>
-						<div class="game-row">
-							<button id="chess-btn-2" class="btn btn-game">Chess</button>
-							<button id="ttt-btn" class="btn btn-game">Tic-Tac-Toe</button>
-							<button id="cards-btn" class="btn btn-game">Card Duel</button>
-							<button id="blackjack-btn" class="btn btn-game">Blackjack</button>
-							<button id="memory-btn" class="btn btn-game">Memory</button>
-						</div>
-					</section>
+    <nav class="rail-nav">
+      <a href="index.html">Intro</a>
+      <a href="arena.html">Arena</a>
+      <a href="chat.html">Chat</a>
+      <a href="ranking.html">Ranking</a>
+      <a href="account.html">Account</a>
+      <a href="profile.html">Profile</a>
+      <a href="feedback.html">Feedback</a>
+    </nav>
 
-						<section class="panel ranking">
-							<div class="panel-head">
-								<h2>Ranking</h2>
-								<span class="tag">ELO</span>
-							</div>
-							<div id="leaderboard-content" class="ranking-content"></div>
-						</section>
+    <div class="rail-actions">
+      <button id="auth-open" class="btn btn-ghost btn-block">Login / Register</button>
+      <button id="logout-btn" class="btn btn-ghost btn-block" disabled>Log out</button>
+      <a class="btn btn-primary btn-block" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Telegram</a>
+      <div id="admin-hint" class="muted"></div>
+    </div>
 
-						<section class="panel cards">
-							<div class="panel-head">
-								<h2>Player Cards</h2>
-								<span class="tag">Top</span>
-							</div>
-							<div id="player-cards" class="card-grid"></div>
-						</section>
+    <div class="rail-status">
+      <div class="rail-metric">
+        <span class="label">Status</span>
+        <span class="value">Online</span>
+      </div>
+      <div class="rail-metric">
+        <span class="label">Time</span>
+        <span id="time" class="value"></span>
+      </div>
+      <div class="rail-metric">
+        <span class="label">Quote</span>
+        <span class="value">Focus. Improve. Repeat.</span>
+      </div>
+    </div>
+  </aside>
 
-						<section class="panel account">
-							<div class="panel-head">
-								<h2>Account</h2>
-								<span class="tag">Sync</span>
-							</div>
-							<p id="auth-status">Not logged in.</p>
-							<p class="muted">Login to sync chat, stats, and global rankings.</p>
-							<div class="btn-row">
-								<button id="auth-open" class="btn btn-primary">Login / Register</button>
-								<button id="logout-btn" class="btn btn-ghost">Log out</button>
-							</div>
-							<div class="badge-block">
-								<h3>Your Medals</h3>
-								<div id="user-badges" class="badge-list"></div>
-							</div>
-							<div id="admin-panel" class="admin-panel hidden">
-								<h3>Admin Medals</h3>
-								<div id="badge-presets" class="badge-presets"></div>
-								<div class="admin-grid">
-									<input id="badge-name" type="text" placeholder="Medal name">
-									<input id="badge-icon" type="text" placeholder="Icon (emoji)">
-									<input id="badge-icon-upload" type="file" accept="image/*">
-									<input id="badge-color" type="text" placeholder="Color (e.g. #a6e6b8)">
-									<input id="badge-desc" type="text" placeholder="Short description">
-									<button id="badge-create" class="btn btn-primary">Create Medal</button>
-								</div>
-								<div class="admin-grid">
-									<input id="assign-uid" type="text" placeholder="User UID">
-									<select id="assign-user"></select>
-									<select id="assign-badge"></select>
-									<button id="assign-badge-btn" class="btn btn-ghost">Assign Medal</button>
-								</div>
-								<p class="muted">Tip: use Firebase Auth Users to copy UID. Medals appear in profiles and Your Medals.</p>
-								<div id="badge-list" class="badge-list"></div>
-							</div>
-						</section>
+  <main class="stage">
+    <div class="stage-grid">
+      <div class="stage-main">
+        <section class="panel intro">
+          <div>
+            <span class="pill">Arcade Core</span>
+            <h1>Play. Chat. Climb.</h1>
+            <p>Lightweight arcade with realtime chat, profiles, badges and rankings.</p>
+            <p id="auth-status" class="muted">Not logged in.</p>
+          </div>
+          <div class="intro-actions">
+            <a class="btn btn-primary" href="arena.html">Play now</a>
+            <a class="btn btn-ghost" href="ranking.html">Open Ranking</a>
+          </div>
+        </section>
 
-						<section class="panel drop">
-							<div class="panel-head">
-								<h2>Arcade Drop</h2>
-								<span class="tag">Daily</span>
-							</div>
-							<p id="drop-text">Win 3 games in a row today.</p>
-							<button id="drop-btn" class="btn btn-soft">New challenge</button>
-						</section>
+        <section class="panel" style="grid-column: span 6;">
+          <div class="panel-head"><h2>Quick Start</h2><span class="tag">Flow</span></div>
+          <div class="list">
+            <div class="card">
+              <div class="card-top"><div class="card-title">1) Login</div></div>
+              <div class="muted">Create account to sync stats and chat.</div>
+            </div>
+            <div class="card">
+              <div class="card-top"><div class="card-title">2) Play in Arena</div></div>
+              <div class="muted">See online players, invites and launch chess.</div>
+            </div>
+            <div class="card">
+              <div class="card-top"><div class="card-title">3) Climb Ranking</div></div>
+              <div class="muted">Open profiles and track progress.</div>
+            </div>
+          </div>
+        </section>
 
-						<section class="panel feedback">
-							<div class="panel-head">
-								<h2>Feedback</h2>
-								<span class="tag">Contact</span>
-							</div>
-							<p class="muted">Send ideas, bug reports, or new game suggestions.</p>
-							<a class="btn btn-primary" href="https://t.me/frog1ch_twink" target="_blank" rel="noopener">Open Telegram</a>
-						</section>
-					</div>
-				</div>
-			</main>
-		</div>
+        <section class="panel" style="grid-column: span 6;">
+          <div class="panel-head"><h2>Profile</h2><span class="tag">Custom</span></div>
+          <div class="muted">Your profile is a separate page: bio, medals, stats.</div>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="profile.html">Open my profile</a>
+            <a class="btn btn-ghost" href="chat.html">Open chat</a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
 
-		<div id="auth-modal" class="auth-modal hidden">
-			<div class="auth-card">
-				<div class="auth-head">
-					<h2>Account Access</h2>
-					<button id="auth-close" class="btn btn-ghost">Close</button>
-				</div>
-				<p id="auth-msg" class="hint"></p>
-				<div class="auth-grid">
-					<input id="email-input" type="email" placeholder="Email" autocomplete="email">
-					<input id="pass-input" type="password" placeholder="Password" autocomplete="current-password">
-					<input id="pass-confirm" type="password" placeholder="Confirm password" autocomplete="new-password">
-					<input id="nick-input" type="text" placeholder="Nickname" maxlength="20">
-				</div>
-				<div class="btn-row">
-					<button id="submit-auth" class="btn btn-primary">Sign up</button>
-					<button id="toggle-auth" class="btn btn-ghost">Switch to Login</button>
-				</div>
-				<p class="hint">Log in to save chat, ELO, and stats.</p>
-			</div>
-		</div>
+<!-- AUTH MODAL -->
+<div id="auth-modal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>Account Access</h2>
+      <button id="auth-close" class="btn btn-ghost" type="button">Close</button>
+    </div>
+    <div class="hr"></div>
+    <p id="auth-msg" class="hint"></p>
+    <div class="grid-2">
+      <label class="field"><span>Email</span><input id="email-input" type="email" autocomplete="email"></label>
+      <label class="field"><span>Password</span><input id="pass-input" type="password" autocomplete="current-password"></label>
+    </div>
+    <div class="grid-2">
+      <label class="field"><span>Confirm</span><input id="pass-confirm" type="password" autocomplete="new-password"></label>
+      <label class="field"><span>Nickname</span><input id="nick-input" type="text" maxlength="20"></label>
+    </div>
+    <div class="btn-row">
+      <button id="submit-auth" class="btn btn-primary" type="button">Sign up</button>
+      <button id="toggle-auth" class="btn btn-ghost" type="button">Switch to Login</button>
+    </div>
+  </div>
+</div>
 
-		<div id="profile-modal" class="profile-modal hidden">
-			<div class="profile-card">
-				<div class="profile-head">
-					<h2>Player Profile</h2>
-					<button id="profile-close" class="btn btn-ghost">Close</button>
-				</div>
-				<div id="profile-body" class="profile-body">
-					<div class="profile-main">
-						<h3 id="profile-name">Player</h3>
-						<p id="profile-meta" class="muted"></p>
-						<div class="profile-stats">
-							<div class="stat">
-								<span class="label">Total Time</span>
-								<span id="profile-total" class="value">0m</span>
-							</div>
-							<div class="stat">
-								<span class="label">Chess ELO</span>
-								<span id="profile-elo" class="value">1000</span>
-							</div>
-						</div>
-					</div>
-					<div class="profile-badges">
-						<h4>Medals</h4>
-						<div id="profile-badges" class="badge-list"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div id="game-modal" class="game-modal hidden">
-			<div class="game-container">
-				<div class="game-header">
-					<h2 id="game-title">Game</h2>
-					<button id="close-modal" class="btn btn-ghost">Close</button>
-				</div>
-				<div id="chess-panel" class="game-panel hidden">
-					<h3>Chess Arena</h3>
-					<p>Play versus bots or invite real players. Ranked ELO for wins/losses.</p>
-					<div class="chess-top">
-						<div class="chess-controls">
-							<label class="field">
-								<span>Mode</span>
-								<select id="chess-mode">
-									<option value="bot-random">Bot: Random</option>
-									<option value="bot-easy">Bot: Easy</option>
-									<option value="bot-medium">Bot: Medium</option>
-									<option value="bot-hard">Bot: Hard</option>
-									<option value="online">Online Player</option>
-								</select>
-							</label>
-							<button id="chess-start" class="btn btn-primary">Start Game</button>
-							<button id="chess-draw" class="btn btn-ghost">Offer Draw</button>
-							<button id="chess-resign" class="btn btn-ghost">Resign</button>
-							<div class="chess-status">
-								<span id="chess-status">Idle</span>
-								<span id="chess-timer">60s</span>
-							</div>
-						</div>
-						<div class="chess-online">
-							<div class="chess-list">
-								<h4>Online Players</h4>
-								<div id="online-list"></div>
-							</div>
-							<div class="chess-list">
-								<h4>Invites</h4>
-								<div id="invite-list"></div>
-							</div>
-						</div>
-					</div>
-					<div id="chess-board" class="chess-board"></div>
-					<p class="hint">If you leave during a game, you lose after 30s unless you return.</p>
-					<button id="exit-chess-btn" class="btn btn-primary">Exit</button>
-				</div>
-				<div id="ttt-panel" class="game-panel hidden">
-					<h3>Tic-Tac-Toe</h3>
-					<p>Play versus a bot or invite a player.</p>
-					<div class="game-row">
-						<button id="ttt-bot" class="btn btn-ghost">Bot Match</button>
-						<button id="ttt-online" class="btn btn-primary">Online Match</button>
-					</div>
-					<div id="ttt-board" class="ttt-board"></div>
-					<p id="ttt-status" class="hint">Ready.</p>
-				</div>
-				<div id="cards-panel" class="game-panel hidden">
-					<h3>Card Duel</h3>
-					<p>Invite a player for a high-card duel.</p>
-					<div class="game-row">
-						<button id="cards-online" class="btn btn-primary">Online Duel</button>
-					</div>
-					<div id="cards-result" class="cards-result muted">Waiting for opponent...</div>
-				</div>
-				<div id="blackjack-panel" class="game-panel hidden">
-					<h3>Blackjack</h3>
-					<p>Solo practice with settings.</p>
-					<div class="admin-grid">
-						<label class="field">
-							<span>Decks</span>
-							<select id="bj-decks">
-								<option value="1">1</option>
-								<option value="2">2</option>
-								<option value="4">4</option>
-								<option value="6">6</option>
-							</select>
-						</label>
-						<label class="field">
-							<span>Dealer Soft 17</span>
-							<select id="bj-soft17">
-								<option value="stand">Stand</option>
-								<option value="hit">Hit</option>
-							</select>
-						</label>
-					</div>
-					<div id="bj-table" class="bj-table"></div>
-					<div class="game-row">
-						<button id="bj-hit" class="btn btn-ghost">Hit</button>
-						<button id="bj-stand" class="btn btn-primary">Stand</button>
-						<button id="bj-new" class="btn btn-ghost">New Round</button>
-					</div>
-					<p id="bj-status" class="hint">Ready.</p>
-				</div>
-				<div id="memory-panel" class="game-panel hidden">
-					<h3>Memory</h3>
-					<p>Find all matching pairs.</p>
-					<div id="memory-board" class="memory-board"></div>
-					<p id="memory-status" class="hint">0 moves.</p>
-				</div>
-			</div>
-		</div>
-
-		<script type="module" src="script.js"></script>
-	</body>
+<script type="module">
+  import { setActiveNav, startClock } from "./js/ui.js";
+  setActiveNav(); startClock();
+</script>
+<script type="module" src="./js/auth.js"></script>
+</body>
 </html>
