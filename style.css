@@ -407,3 +407,24 @@ button,
 a {
   pointer-events: auto;
 }
+/* ===== CLICK SAFETY ===== */
+.bg-sheen{ pointer-events:none !important; z-index:0 !important; }
+.rail, .stage, .panel{ position:relative; z-index:1; }
+
+button, a, input, select, textarea{
+  pointer-events:auto !important;
+  position:relative;
+  z-index:2;
+}
+
+/* ===== DISABLED LOOK (не ламає кліки коли enabled) ===== */
+button:disabled, .btn.disabled{
+  opacity:.45;
+  filter:grayscale(.3);
+  cursor:not-allowed;
+}
+button:not(:disabled), .btn:not(.disabled){
+  opacity:1;
+  filter:none;
+  cursor:pointer;
+}

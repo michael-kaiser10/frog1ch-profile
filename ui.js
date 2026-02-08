@@ -1,15 +1,26 @@
 import { auth } from "./firebase.js";
-import { onAuthStateChanged } from
-  "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
-function qs(id){ return document.getElementById(id); }
+export function qs(id){ return document.getElementById(id); }
 
-const authOpen = qs("auth-open");
-const logoutBtn = qs("logout-btn");
-const playBtns = document.querySelectorAll("#play-btn, #play-btn-2");
-const protectedBtns = document.querySelectorAll(
-  ".btn-game, .btn-primary, .btn-ghost"
-);
+export function setActiveNav(){
+  const here = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+  document.querySelectorAll(".rail-nav a").forEach(a=>{
+    const href = (a.getAttribute("href") || "").toLowerCase();
+    a.classList.toggle("active", href === here);
+  });
+}
+
+export function startClock(){
+  const el = qs("time");
+  if (!el) return;
+  const tick = ()=>{
+    const d = new Date();
+    el.textContent = d.toLocaleTimeString() + " • " + d.toLocaleDateString();
+  };
+  tick();
+  setInterval(tick, 1000);
+}
 
 function setEnabled(el, on){
   if (!el) return;
@@ -17,23 +28,29 @@ function setEnabled(el, on){
   el.classList.toggle("disabled", !on);
 }
 
-onAuthStateChanged(auth, (user)=>{
-  const logged = !!user;
+/**
+ * Автоматично:
+ * - ховає Login/Register коли залогінений
+ * - вмикає Log out коли залогінений
+ * - оновлює auth-status текст
+ */
+export function bindAuthUI(){
+  const authOpen = qs("auth-open");
+  const logoutBtn = qs("logout-btn");
+  const status = qs("auth-status");
 
-  // Login / Logout buttons
-  if (authOpen) authOpen.style.display = logged ? "none" : "";
-  setEnabled(logoutBtn, logged);
+  onAuthStateChanged(auth, (user)=>{
+    const logged = !!user;
 
-  // Play buttons
-  playBtns.forEach(btn => setEnabled(btn, true));
+    if (authOpen) authOpen.style.display = logged ? "none" : "";
+    setEnabled(logoutBtn, logged);
 
-  // Everything that requires auth
-  protectedBtns.forEach(btn => {
-    if (btn.closest(".requires-auth")) {
-      setEnabled(btn, logged);
+    if (status){
+      status.textContent = logged
+        ? `Logged in as ${user.displayName || user.email}`
+        : "Not logged in.";
     }
-  });
 
-  // Debug (можеш видалити)
-  console.log("[UI] Auth state:", logged);
-});
+    console.log("[UI] Auth:", logged, "path:", location.pathname);
+  });
+}
