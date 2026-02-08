@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="bg-sheen"></div>
+
+<div class="app">
+  <aside class="rail">
+    <div class="rail-top">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <div>
+          <div class="brand-title">made_by_frog1ch</div>
+          <div class="brand-sub">Metal Tech Arcade</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="rail-nav">
+      <a href="index.html">Intro</a>
+      <a href="arena.html">Arena</a>
+      <a href="chat.html">Chat</a>
+      <a href="ranking.html">Ranking</a>
+      <a href="account.html">Account</a>
+      <a href="profile.html" class="active">Profile</a>
+    </nav>
+  </aside>
+
+  <main class="stage">
+    <section class="panel intro">
+      <div>
+        <span class="pill">Profile</span>
+        <h1 id="profile-name">Guest</h1>
+        <p id="profile-email" class="muted"></p>
+      </div>
+    </section>
+
+    <section class="panel account">
+      <div class="panel-head">
+        <h2>Profile settings</h2>
+        <span class="tag">Custom</span>
+      </div>
+
+      <label class="field">
+        <span>Nickname</span>
+        <input id="nick-input" type="text" maxlength="20">
+      </label>
+
+      <label class="field">
+        <span>Bio</span>
+        <textarea id="bio-input" maxlength="160"></textarea>
+      </label>
+
+      <button id="save-profile" class="btn btn-primary">Save</button>
+      <p id="profile-msg" class="muted"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Stats</h2>
+        <span class="tag">Global</span>
+      </div>
+
+      <ul class="stat-list">
+        <li>Total time: <strong id="stat-time">0</strong></li>
+        <li>Chess ELO: <strong id="stat-elo">1000</strong></li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Badges</h2>
+        <span class="tag">Awards</span>
+      </div>
+      <div id="badge-list" class="badge-list"></div>
+    </section>
+
+  </main>
+</div>
+
+<script type="module" src="js/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<section class="panel chess span-2">
+					<h3>Chess Arena</h3>
+					<p>Play versus bots or invite real players. Ranked ELO for wins/losses.</p>
+					<div class="chess-top">
+						<div class="chess-controls">
+							<label class="field">
+								<span>Mode</span>
+								<select id="chess-mode">
+									<option value="bot-random">Bot: Random</option>
+									<option value="bot-easy">Bot: Easy</option>
+									<option value="bot-medium">Bot: Medium</option>
+									<option value="bot-hard">Bot: Hard</option>
+									<option value="online">Online Player</option>
+								</select>
+							</label>
+							<button id="chess-start" class="btn btn-primary">Start Game</button>
+							<button id="chess-draw" class="btn btn-ghost">Offer Draw</button>
+							<button id="chess-resign" class="btn btn-ghost">Resign</button>
+							<div class="chess-status">
+								<span id="chess-status">Idle</span>
+								<span id="chess-timer">60s</span>
+							</div>
+						</div>
+						<div class="chess-online">
+							<div class="chess-list">
+								<h4>Online Players</h4>
+								<div id="online-list"></div>
+							</div>
+							<div class="chess-list">
+								<h4>Invites</h4>
+								<div id="invite-list"></div>
+							</div>
+						</div>
+					</div>
+					<div id="chess-board" class="chess-board"></div>
+					<p class="hint">If you leave during a game, you lose after 30s unless you return.</p>
+				</section>
+
+				<section class="panel auth">
+					<h3>Account</h3>
+					<p id="auth-status">Not logged in.</p>
+					<div class="auth-grid">
+						<input id="email-input" type="email" placeholder="Email" autocomplete="email">
+						<input id="pass-input" type="password" placeholder="Password" autocomplete="current-password">
+						<input id="pass-confirm" type="password" placeholder="Confirm password" autocomplete="new-password">
+						<input id="nick-input" type="text" placeholder="Nickname" maxlength="20">
+					</div>
+					<div class="btn-row">
+						<button id="submit-auth" class="btn btn-primary">Sign up</button>
+						<button id="toggle-auth" class="btn btn-ghost">Switch to Login</button>
+						<button id="logout-btn" class="btn btn-ghost">Log out</button>
+					</div>
+					<p id="auth-msg" class="hint"></p>
+					<p class="hint">Firebase Auth handles login and global stats.</p>
+				</section>
+
+				
