@@ -1,79 +1,138 @@
 :root {
-  --bg: #0b0f19;
-  --panel: #121829;
-  --accent: #6ee7ff;
-  --accent2: #ffd27a;
-  --text: #e6edf7;
-  --muted: #9fb0c9;
-  --radius: 16px;
+  --bg: #0e1117;
+  --panel: #151a23;
+  --panel-2: #1b2130;
+  --border: #242b3d;
+  --text: #e6e9ef;
+  --muted: #9aa4bf;
+  --accent: #4f7cff;
+  --accent-hover: #3b66e3;
+  --radius: 14px;
 }
 
 * {
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
-  font-family: Inter, system-ui, sans-serif;
-  background: radial-gradient(900px 600px at 20% 10%, rgba(110,231,255,.12), transparent 60%),
-              radial-gradient(800px 600px at 90% 20%, rgba(255,210,122,.12), transparent 60%),
-              var(--bg);
+  height: 100%;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+  background: var(--bg);
   color: var(--text);
 }
 
-button {
-  cursor: pointer;
-  border: none;
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  font-weight: 600;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-button:disabled {
-  opacity: .5;
-  cursor: not-allowed;
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
 }
 
-.panel {
+/* ===== SIDEBAR ===== */
+.sidebar {
   background: var(--panel);
+  border-right: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav a {
+  padding: 10px 12px;
   border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: 0 20px 40px rgba(0,0,0,.4);
-}
-
-.hidden {
-  display: none !important;
-}
-
-#auth-status {
-  font-size: 14px;
   color: var(--muted);
 }
 
-/* ===== MODAL ===== */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
+.nav a.active,
+.nav a:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+}
+
+/* ===== MAIN ===== */
+.main {
+  padding: 28px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.user {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
 }
 
-.modal-card {
-  background: var(--panel);
-  padding: 20px;
+/* ===== BUTTONS ===== */
+button {
+  background: var(--accent);
+  border: none;
+  color: white;
+  padding: 10px 16px;
   border-radius: var(--radius);
-  width: 320px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: var(--radius);
-  border: 1px solid #2a3152;
-  background: #0e1322;
+button:hover {
+  background: var(--accent-hover);
+}
+
+button.secondary {
+  background: var(--panel-2);
   color: var(--text);
-  margin-bottom: 10px;
+}
+
+button.secondary:hover {
+  background: #222a3d;
+}
+
+/* ===== CARDS ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.card h3 {
+  margin: 0 0 6px;
+}
+
+.card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
 }

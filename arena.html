@@ -7,16 +7,39 @@
 </head>
 <body>
 
-<div class="panel">
-  <h1>🕹 Arena</h1>
-  <p>Choose a game:</p>
+<div class="app">
 
-  <button id="open-chess">♟ Chess (coming soon)</button>
-  <button id="open-cards">🃏 Cards (High Card)</button>
+  <aside class="sidebar">
+    <div class="logo">GameHub</div>
+    <nav class="nav">
+      <a href="index.html">Dashboard</a>
+      <a class="active" href="arena.html">Arena</a>
+      <a href="profile.html">Profile</a>
+    </nav>
+  </aside>
 
-  <div id="arena-content"></div>
+  <main class="main">
+    <h1>Arena</h1>
 
-  <a href="index.html"><button>⬅ Back</button></a>
+    <div class="grid">
+      <div class="card">
+        <h3>Chess</h3>
+        <p>Classic strategy game</p>
+        <br>
+        <button class="secondary">Coming soon</button>
+      </div>
+
+      <div class="card">
+        <h3>Cards</h3>
+        <p>High Card game</p>
+        <br>
+        <button id="open-cards">Play</button>
+      </div>
+    </div>
+
+    <div id="arena-content" style="margin-top:32px;"></div>
+  </main>
+
 </div>
 
 <script type="module" src="./js/firebase.js"></script>

@@ -2,37 +2,69 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <title>Game Hub</title>
   <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
 
-<div class="panel">
-  <h1>🎮 Game Hub</h1>
-  <p id="auth-status">Loading...</p>
+<div class="app">
 
-  <button id="auth-open">Login / Register</button>
-  <button id="logout-btn" disabled>Logout</button>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">GameHub</div>
 
-  <hr>
+    <nav class="nav">
+      <a class="active" href="index.html">Dashboard</a>
+      <a href="arena.html">Arena</a>
+      <a href="profile.html">Profile</a>
+      <a href="ranking.html">Ranking</a>
+      <a href="chat.html">Chat</a>
+      <a href="feedback.html">Feedback</a>
+    </nav>
 
-  <a href="arena.html"><button>🕹 Arena</button></a>
-  <a href="profile.html"><button>👤 Profile</button></a>
-  <a href="ranking.html"><button>🏆 Ranking</button></a>
-  <a href="chat.html"><button>💬 Chat</button></a>
-  <a href="feedback.html"><button>📩 Feedback</button></a>
-</div>
+    <div class="sidebar-footer">
+      <button id="logout-btn" class="secondary" disabled>Logout</button>
+    </div>
+  </aside>
 
-<!-- AUTH MODAL -->
-<div id="auth-modal" class="modal hidden">
-  <div class="modal-card">
-    <h3>Auth</h3>
-    <input id="email-input" placeholder="Email">
-    <input id="pass-input" type="password" placeholder="Password">
-    <input id="nick-input" placeholder="Nickname (optional)">
-    <button id="submit-auth">Submit</button>
-    <button id="auth-close">Close</button>
-  </div>
+  <!-- MAIN -->
+  <main class="main">
+    <div class="header">
+      <h1>Dashboard</h1>
+      <div class="user" id="auth-status">Loading…</div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Arena</h3>
+        <p>Play games and compete</p>
+        <br>
+        <a href="arena.html"><button>Open</button></a>
+      </div>
+
+      <div class="card">
+        <h3>Profile</h3>
+        <p>Your stats and achievements</p>
+        <br>
+        <a href="profile.html"><button>Open</button></a>
+      </div>
+
+      <div class="card">
+        <h3>Ranking</h3>
+        <p>Global leaderboards</p>
+        <br>
+        <a href="ranking.html"><button>Open</button></a>
+      </div>
+
+      <div class="card">
+        <h3>Chat</h3>
+        <p>Global & private chat</p>
+        <br>
+        <a href="chat.html"><button>Open</button></a>
+      </div>
+    </div>
+  </main>
+
 </div>
 
 <script type="module" src="./js/firebase.js"></script>
