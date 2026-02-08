@@ -1,163 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Discord Profile Website</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css" />
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="./css/style.css">
 </head>
-
 <body>
-  <div class="bg-sheen"></div>
 
-  <div class="app">
-    <aside class="rail">
-      <div class="brand">
-        <div class="brand-dot"></div>
-        <div>
-          <div class="brand-title">Discord Profile</div>
-          <div class="brand-sub">Firebase + GitHub Pages</div>
-        </div>
-      </div>
+<div class="panel">
+  <h1>🎮 Game Hub</h1>
+  <p id="auth-status">Loading...</p>
 
-      <nav class="nav">
-        <a class="nav-item active" href="./index.html">Intro</a>
-        <a class="nav-item" href="./arena.html">Arena</a>
-        <a class="nav-item" href="./chat.html">Chat</a>
-        <a class="nav-item" href="./ranking.html">Ranking</a>
-        <a class="nav-item" href="./account.html">Account</a>
-        <a class="nav-item" href="./feedback.html">Feedback</a>
-      </nav>
+  <button id="auth-open">Login / Register</button>
+  <button id="logout-btn" disabled>Logout</button>
 
-      <div class="rail-actions">
-        <button id="auth-open" class="btn btn-primary">Login / Register</button>
-        <button id="logout-btn" class="btn" disabled>Log out</button>
-        <button id="profile-open" class="btn btn-ghost" disabled>Profile</button>
-      </div>
+  <hr>
 
-      <div class="rail-card">
-        <div class="muted">Status</div>
-        <div id="auth-status" class="big">Not logged in.</div>
-        <div class="muted mt8">Time</div>
-        <div id="time" class="mono"></div>
-      </div>
+  <a href="arena.html"><button>🕹 Arena</button></a>
+  <a href="profile.html"><button>👤 Profile</button></a>
+  <a href="ranking.html"><button>🏆 Ranking</button></a>
+  <a href="chat.html"><button>💬 Chat</button></a>
+  <a href="feedback.html"><button>📩 Feedback</button></a>
+</div>
 
-      <div class="rail-foot muted">
-        Порада: після пуша на GitHub Pages зроби <b>Ctrl+F5</b>.
-      </div>
-    </aside>
-
-    <main class="stage">
-      <div class="card">
-        <h1 class="h1">Швидкий старт</h1>
-        <ol class="steps">
-          <li>Натисни <b>Login / Register</b>, створи акаунт або увійди.</li>
-          <li>Перейди в <b>Chat</b> — працює глобальний чат та DM.</li>
-          <li>Перейди в <b>Ranking</b> — рейтинг із Firestore.</li>
-          <li>Перейди в <b>Account</b> — керування профілем.</li>
-        </ol>
-        <div class="muted">
-          Якщо щось не працює: відкрий DevTools → Console (там буде чітка помилка).
-        </div>
-      </div>
-
-      <div class="grid2">
-        <div class="card">
-          <h2 class="h2">Що працює</h2>
-          <ul class="list">
-            <li>Auth (Email/Password)</li>
-            <li>Профіль + автозапис у <code>users/{uid}</code></li>
-            <li>Global chat (<code>chat</code>)</li>
-            <li>DM без індексів (підколекції <code>dm_threads/{thread}/messages</code>)</li>
-            <li>Feedback (<code>feedback</code>)</li>
-            <li>Ranking (<code>leaderboards</code>)</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h2 class="h2">Важливо для GitHub Pages</h2>
-          <ul class="list">
-            <li>Скрипт підключений як <b>module</b></li>
-            <li>Шляхи тільки відносні: <code>./script.js</code>, <code>./style.css</code></li>
-            <li>HTTPS потрібен для Firebase — GitHub Pages дає HTTPS</li>
-          </ul>
-        </div>
-      </div>
-    </main>
+<!-- AUTH MODAL -->
+<div id="auth-modal" class="modal hidden">
+  <div class="modal-card">
+    <h3>Auth</h3>
+    <input id="email-input" placeholder="Email">
+    <input id="pass-input" type="password" placeholder="Password">
+    <input id="nick-input" placeholder="Nickname (optional)">
+    <button id="submit-auth">Submit</button>
+    <button id="auth-close">Close</button>
   </div>
+</div>
 
-  <!-- AUTH MODAL -->
-  <div id="auth-modal" class="modal hidden" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-head">
-        <div class="modal-title" id="auth-title">Login</div>
-        <button id="auth-close" class="icon-btn" aria-label="close">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="row2">
-          <label class="field">
-            <div class="label">Email</div>
-            <input id="email-input" class="input" type="email" autocomplete="email" placeholder="email@example.com">
-          </label>
-
-          <label class="field">
-            <div class="label">Password</div>
-            <input id="pass-input" class="input" type="password" autocomplete="current-password" placeholder="мін. 6 символів">
-          </label>
-        </div>
-
-        <label class="field" id="signup-extra" style="display:none;">
-          <div class="label">Nickname (optional)</div>
-          <input id="nick-input" class="input" type="text" placeholder="YourNick">
-        </label>
-
-        <div id="auth-msg" class="muted"></div>
-
-        <div class="actions">
-          <button id="submit-auth" class="btn btn-primary">Log in</button>
-          <button id="toggle-auth" class="btn btn-ghost">Switch to Sign up</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PROFILE MODAL -->
-  <div id="profile-modal" class="modal hidden" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-head">
-        <div class="modal-title">Profile</div>
-        <button id="profile-close" class="icon-btn" aria-label="close">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <div class="muted">UID</div>
-        <div id="profile-uid" class="mono"></div>
-
-        <div class="row2 mt12">
-          <label class="field">
-            <div class="label">Display name</div>
-            <input id="profile-name" class="input" type="text" placeholder="Player">
-          </label>
-
-          <label class="field">
-            <div class="label">Chess ELO</div>
-            <input id="profile-elo" class="input" type="number" min="0" step="1" placeholder="1000">
-          </label>
-        </div>
-
-        <div class="actions">
-          <button id="profile-save" class="btn btn-primary">Save</button>
-        </div>
-
-        <div id="profile-msg" class="muted"></div>
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="./script.js"></script>
+<script type="module" src="./js/firebase.js"></script>
+<script type="module" src="./js/auth.js"></script>
+<script type="module" src="./js/ui.js"></script>
 </body>
 </html>

@@ -1,123 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Profile</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Onest:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-<div class="bg-sheen"></div>
 
-<div class="app">
-  <aside class="rail">
-    <div class="rail-top">
-      <div class="brand">
-        <span class="brand-mark"></span>
-        <div>
-          <div class="brand-title">made_by_frog1ch</div>
-          <div class="brand-sub">Metal Tech Arcade</div>
-        </div>
-      </div>
-      <button id="auth-open" class="btn btn-ghost btn-block" type="button">Login / Register</button>
-    </div>
+<div class="panel">
+  <h1>👤 Profile</h1>
 
-    <nav class="rail-nav">
-      <a href="index.html">Intro</a>
-      <a href="arena.html">Arena</a>
-      <a href="chat.html">Chat</a>
-      <a href="ranking.html">Ranking</a>
-      <a href="account.html">Account</a>
-      <a href="profile.html">Profile</a>
-      <a href="feedback.html">Feedback</a>
-    </nav>
+  <p id="auth-status">Loading...</p>
 
-    <div class="rail-actions">
-      <button id="logout-btn" class="btn btn-ghost btn-block" disabled>Log out</button>
-      <a class="btn btn-primary btn-block" href="arena.html">Play now</a>
-    </div>
+  <h3>Stats</h3>
+  <ul id="stats"></ul>
 
-    <div class="rail-status">
-      <div class="rail-metric"><span class="label">Time</span><span id="time" class="value"></span></div>
-    </div>
-  </aside>
+  <h3>Badges</h3>
+  <div id="badges"></div>
 
-  <main class="stage">
-    <div class="stage-grid">
-      <div class="stage-main">
-        <section class="panel intro">
-          <div>
-            <span class="pill">Profile</span>
-            <h1 id="profile-name">Player</h1>
-            <p id="profile-meta" class="muted"></p>
-          </div>
-          <div class="intro-actions">
-            <a class="btn btn-ghost" href="ranking.html">Back to ranking</a>
-            <a class="btn btn-primary" href="chat.html">Open chat</a>
-          </div>
-        </section>
-
-        <section class="panel" style="grid-column: span 6;">
-          <div class="panel-head"><h2>Settings</h2><span class="tag">Custom</span></div>
-          <label class="field"><span>Nickname</span><input id="nick-input" type="text" maxlength="20"></label>
-          <label class="field"><span>Bio</span><textarea id="bio-input" maxlength="160" placeholder="About you…"></textarea></label>
-          <button id="save-profile" class="btn btn-primary" type="button">Save</button>
-          <p class="muted">Editing enabled only for your own profile.</p>
-        </section>
-
-        <section class="panel" style="grid-column: span 6;">
-          <div class="panel-head"><h2>Stats</h2><span class="tag">Global</span></div>
-          <div class="list">
-            <div class="card"><div class="card-top"><div class="card-title">Total Time</div></div><div class="muted"><strong id="stat-time">0m</strong></div></div>
-            <div class="card"><div class="card-top"><div class="card-title">Chess ELO</div></div><div class="muted"><strong id="stat-elo">1000</strong></div></div>
-          </div>
-        </section>
-
-        <section class="panel" style="grid-column: 1 / -1;">
-          <div class="panel-head"><h2>Medals</h2><span class="tag">Badges</span></div>
-          <div id="badge-list" class="badge-list"></div>
-        </section>
-      </div>
-    </div>
-  </main>
-</div>
-
-<!-- AUTH MODAL -->
-<div id="auth-modal" class="modal hidden">
-  <div class="modal-card">
-    <div class="modal-head">
-      <h2>Account Access</h2>
-      <button id="auth-close" class="btn btn-ghost" type="button">Close</button>
-    </div>
-    <div class="hr"></div>
-    <p id="auth-msg" class="hint"></p>
-    <div class="grid-2">
-      <label class="field"><span>Email</span><input id="email-input" type="email" autocomplete="email"></label>
-      <label class="field"><span>Password</span><input id="pass-input" type="password" autocomplete="current-password"></label>
-    </div>
-    <div class="grid-2">
-      <label class="field"><span>Confirm</span><input id="pass-confirm" type="password" autocomplete="new-password"></label>
-      <label class="field"><span>Nickname</span><input id="nick-input" type="text" maxlength="20"></label>
-    </div>
-    <div class="btn-row">
-      <button id="submit-auth" class="btn btn-primary" type="button">Sign up</button>
-      <button id="toggle-auth" class="btn btn-ghost" type="button">Switch to Login</button>
-    </div>
-  </div>
+  <a href="index.html"><button>⬅ Back</button></a>
 </div>
 
 <script type="module">
-  import { setActiveNav, startClock } from "./js/ui.js";
-  setActiveNav(); startClock();
+import { currentUser } from "./js/auth.js";
+import { db } from "./js/firebase.js";
+import {
+  doc, getDoc
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+const stats = document.getElementById("stats");
+
+if (!currentUser) {
+  stats.innerHTML = "<li>Login first</li>";
+} else {
+  const snap = await getDoc(doc(db,"users",currentUser.uid));
+  const d = snap.data();
+
+  stats.innerHTML = `
+    <li>Chess ELO: ${d.chessElo}</li>
+    <li>Card games: ${d.cardGames || 0}</li>
+    <li>Card wins: ${d.cardWins || 0}</li>
+  `;
+}
 </script>
-<script type="module" src="./js/ui.js"></script>
-<script type="module" src="./js/auth.js"></script>
-<script type="module">
-  import { initProfile } from "./js/profile.js";
-  initProfile();
-</script>
+
 </body>
 </html>
