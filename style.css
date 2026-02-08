@@ -387,3 +387,23 @@ input:focus,select:focus,textarea:focus{border-color:rgba(231,193,111,.45)}
   .intro{grid-template-columns:1fr}
   .intro-actions{justify-content:flex-start}
 }
+/* ===== BUTTON FIX ===== */
+button:disabled,
+.btn.disabled {
+  opacity: 0.45;
+  filter: grayscale(0.3);
+  cursor: not-allowed;
+}
+
+button:not(:disabled),
+.btn:not(.disabled) {
+  opacity: 1;
+  filter: none;
+  cursor: pointer;
+}
+
+/* never block clicks */
+button,
+a {
+  pointer-events: auto;
+}

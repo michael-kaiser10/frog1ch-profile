@@ -1,46 +1,39 @@
-export function qs(id){ return document.getElementById(id); }
+import { auth } from "./firebase.js";
+import { onAuthStateChanged } from
+  "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
-export function setActiveNav(){
-  const links = document.querySelectorAll(".rail-nav a");
-  const here = location.pathname.split("/").pop() || "index.html";
-  links.forEach(a=>{
-    const p = a.getAttribute("href");
-    if (p === here) a.classList.add("active");
-  });
-}
+function qs(id){ return document.getElementById(id); }
 
-export function startClock(){
-  const el = qs("time");
+const authOpen = qs("auth-open");
+const logoutBtn = qs("logout-btn");
+const playBtns = document.querySelectorAll("#play-btn, #play-btn-2");
+const protectedBtns = document.querySelectorAll(
+  ".btn-game, .btn-primary, .btn-ghost"
+);
+
+function setEnabled(el, on){
   if (!el) return;
-  setInterval(()=>{
-    const d = new Date();
-    el.textContent = d.toLocaleTimeString() + " • " + d.toLocaleDateString();
-  }, 1000);
+  el.disabled = !on;
+  el.classList.toggle("disabled", !on);
 }
 
-export function mountToasts(){
-  if (document.getElementById("toast-wrap")) return;
-  const wrap = document.createElement("div");
-  wrap.id = "toast-wrap";
-  wrap.className = "toast-wrap";
-  document.body.appendChild(wrap);
-}
+onAuthStateChanged(auth, (user)=>{
+  const logged = !!user;
 
-export function toast(title, message="", type="ok", ms=2600){
-  mountToasts();
-  const wrap = document.getElementById("toast-wrap");
-  const t = document.createElement("div");
-  t.className = `toast ${type}`;
-  t.innerHTML = `<div>
-    <strong>${escapeHtml(title)}</strong>
-    ${message ? `<p>${escapeHtml(message)}</p>` : ``}
-  </div>`;
-  wrap.appendChild(t);
-  setTimeout(()=>{ t.remove(); }, ms);
-}
+  // Login / Logout buttons
+  if (authOpen) authOpen.style.display = logged ? "none" : "";
+  setEnabled(logoutBtn, logged);
 
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[m]));
-}
+  // Play buttons
+  playBtns.forEach(btn => setEnabled(btn, true));
+
+  // Everything that requires auth
+  protectedBtns.forEach(btn => {
+    if (btn.closest(".requires-auth")) {
+      setEnabled(btn, logged);
+    }
+  });
+
+  // Debug (можеш видалити)
+  console.log("[UI] Auth state:", logged);
+});

@@ -13,23 +13,20 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 export let currentUser = null;
-
 function qs(id){ return document.getElementById(id); }
 
-async function ensureUserDoc(user){
-  await setDoc(doc(db,"users", user.uid), {
-    uid: user.uid,
-    name: user.displayName || user.email || "Player",
-    email: user.email || "",
-    updatedAt: serverTimestamp(),
-    createdAt: serverTimestamp()
-  }, { merge:true });
+async function ensureUser(user){
+  await setDoc(doc(db,"users",user.uid),{
+    uid:user.uid,
+    name:user.displayName || user.email || "Player",
+    email:user.email || "",
+    updatedAt: serverTimestamp()
+  },{merge:true});
 }
 
-/* ===== AUTH STATE ===== */
 onAuthStateChanged(auth, async (user)=>{
   currentUser = user;
-  if (user) await ensureUserDoc(user);
+  if (user) await ensureUser(user);
 
   const status = qs("auth-status");
   if (status){
@@ -39,8 +36,8 @@ onAuthStateChanged(auth, async (user)=>{
   }
 });
 
-/* ===== MODAL OPEN / CLOSE (НА 100% ПРАЦЮЄ) ===== */
-document.addEventListener("click", (e)=>{
+/* ===== MODAL ===== */
+document.addEventListener("click",(e)=>{
   const modal = qs("auth-modal");
   if (!modal) return;
 
@@ -60,14 +57,12 @@ document.addEventListener("click", async (e)=>{
 
     try{
       if (confirm !== null && confirm !== ""){
-        // SIGN UP
         if (pass !== confirm) return alert("Passwords do not match");
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        const cred = await createUserWithEmailAndPassword(auth,email,pass);
         const nick = nickRaw?.replace(/[^a-z0-9_]/gi,"").slice(0,20);
-        if (nick) await updateProfile(cred.user,{ displayName:nick });
-      } else {
-        // LOGIN
-        await signInWithEmailAndPassword(auth, email, pass);
+        if (nick) await updateProfile(cred.user,{displayName:nick});
+      }else{
+        await signInWithEmailAndPassword(auth,email,pass);
       }
       qs("auth-modal")?.classList.add("hidden");
     }catch(err){
@@ -76,12 +71,12 @@ document.addEventListener("click", async (e)=>{
   }
 
   if (e.target.id === "toggle-auth"){
-    const confirm = qs("pass-confirm");
-    const nick = qs("nick-input");
-    if (confirm && nick){
-      const show = confirm.style.display === "none";
-      confirm.style.display = show ? "" : "none";
-      nick.style.display = show ? "" : "none";
+    const c = qs("pass-confirm");
+    const n = qs("nick-input");
+    if (c && n){
+      const show = c.style.display === "none";
+      c.style.display = show ? "" : "none";
+      n.style.display = show ? "" : "none";
     }
   }
 
