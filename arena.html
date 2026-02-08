@@ -1,143 +1,139 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Chat</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Feedback</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Onest:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
 </head>
-<body>
-<div class="bg-sheen"></div>
 
-<div class="app">
-  <aside class="rail">
-    <div class="rail-top">
+<body>
+  <div class="bg-sheen"></div>
+
+  <div class="app">
+    <aside class="rail">
       <div class="brand">
-        <span class="brand-mark"></span>
+        <div class="brand-dot"></div>
         <div>
-          <div class="brand-title">made_by_frog1ch</div>
-          <div class="brand-sub">Metal Tech Arcade</div>
+          <div class="brand-title">Discord Profile</div>
+          <div class="brand-sub">Feedback</div>
         </div>
       </div>
-      <button id="auth-open" class="btn btn-ghost btn-block" type="button">Login / Register</button>
-    </div>
 
-    <nav class="rail-nav">
-      <a href="index.html">Intro</a>
-      <a href="arena.html">Arena</a>
-      <a href="chat.html">Chat</a>
-      <a href="ranking.html">Ranking</a>
-      <a href="account.html">Account</a>
-      <a href="profile.html">Profile</a>
-      <a href="feedback.html">Feedback</a>
-    </nav>
+      <nav class="nav">
+        <a class="nav-item" href="./index.html">Intro</a>
+        <a class="nav-item" href="./arena.html">Arena</a>
+        <a class="nav-item" href="./chat.html">Chat</a>
+        <a class="nav-item" href="./ranking.html">Ranking</a>
+        <a class="nav-item" href="./account.html">Account</a>
+        <a class="nav-item active" href="./feedback.html">Feedback</a>
+      </nav>
 
-    <div class="rail-actions">
-      <button id="logout-btn" class="btn btn-ghost btn-block" disabled>Log out</button>
-      <a class="btn btn-primary btn-block" href="arena.html">Play now</a>
-    </div>
+      <div class="rail-actions">
+        <button id="auth-open" class="btn btn-primary">Login / Register</button>
+        <button id="logout-btn" class="btn" disabled>Log out</button>
+        <button id="profile-open" class="btn btn-ghost" disabled>Profile</button>
+      </div>
 
-    <div class="rail-status">
-      <div class="rail-metric"><span class="label">Time</span><span id="time" class="value"></span></div>
-      <div class="rail-metric"><span class="label">Account</span><span id="auth-status" class="value">Not logged in.</span></div>
-    </div>
-  </aside>
+      <div class="rail-card">
+        <div class="muted">Status</div>
+        <div id="auth-status" class="big">Not logged in.</div>
+        <div class="muted mt8">Time</div>
+        <div id="time" class="mono"></div>
+      </div>
+    </aside>
 
-  <main class="stage">
-    <div class="stage-grid">
-      <div class="stage-main" style="grid-template-columns:repeat(12,minmax(0,1fr));">
-        <section class="panel intro">
-          <div>
-            <span class="pill">Chat Lounge</span>
-            <h1>Global + Direct Messages</h1>
-            <p class="muted">Enter to send. Images up to 200KB.</p>
-          </div>
-          <div class="intro-actions">
-            <a class="btn btn-primary" href="ranking.html">Ranking</a>
-            <a class="btn btn-ghost" href="profile.html">Profile</a>
-          </div>
-        </section>
+    <main class="stage">
+      <div class="card">
+        <h1 class="h1">Feedback</h1>
+        <div class="muted">Надішли пропозицію або баг-репорт. Писати можна без логіну, але з логіном буде UID.</div>
 
-        <section class="panel" style="grid-column: span 7;">
-          <div class="panel-head"><h2>Global Chat</h2><span class="tag">Live</span></div>
-          <div id="chat-list" class="chat-list"></div>
+        <label class="field mt12">
+          <div class="label">Message</div>
+          <textarea id="fb-text" class="input" rows="6" placeholder="Опиши проблему або ідею…"></textarea>
+        </label>
 
-          <div class="chat-actions">
-            <div class="btn-row">
-              <button id="chat-emoji-btn" class="btn btn-ghost" type="button">Emoji</button>
-              <label class="chat-attach">
-                <input id="chat-image" type="file" accept="image/*">
-                <span>Image</span>
-              </label>
-            </div>
-            <div id="chat-emoji-panel" class="emoji-panel hidden"></div>
-            <div class="chat-input">
-              <input id="chat-message" type="text" placeholder="Type a message...">
-              <button id="chat-send" class="btn btn-primary" type="button">Send</button>
-            </div>
-          </div>
-        </section>
+        <div class="actions">
+          <button id="fb-send" class="btn btn-primary">Send</button>
+        </div>
 
-        <section class="panel" style="grid-column: span 5;">
-          <div class="panel-head"><h2>Direct Messages</h2><span class="tag">DM</span></div>
+        <div id="fb-msg" class="muted"></div>
+      </div>
+    </main>
+  </div>
 
-          <div class="grid-2">
-            <label class="field"><span>User UID</span><input id="dm-uid" type="text" placeholder="UID"></label>
-            <label class="field"><span>Pick user</span><select id="dm-user"></select></label>
-          </div>
-          <div class="btn-row">
-            <button id="dm-load" class="btn btn-soft" type="button">Open</button>
-            <a class="btn btn-ghost" href="ranking.html">Find users in ranking</a>
-          </div>
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-title" id="auth-title">Login</div>
+        <button id="auth-close" class="icon-btn" aria-label="close">✕</button>
+      </div>
 
-          <div id="dm-list" class="chat-list" style="height:260px;"></div>
-          <div class="chat-input">
-            <input id="dm-message" type="text" placeholder="DM message...">
-            <button id="dm-send" class="btn btn-primary" type="button">Send</button>
-          </div>
+      <div class="modal-body">
+        <div class="row2">
+          <label class="field">
+            <div class="label">Email</div>
+            <input id="email-input" class="input" type="email" autocomplete="email" placeholder="email@example.com">
+          </label>
 
-          <p class="hint">DM storage is in <code>dm_messages</code> with threadId.</p>
-        </section>
+          <label class="field">
+            <div class="label">Password</div>
+            <input id="pass-input" class="input" type="password" autocomplete="current-password" placeholder="мін. 6 символів">
+          </label>
+        </div>
+
+        <label class="field" id="signup-extra" style="display:none;">
+          <div class="label">Nickname (optional)</div>
+          <input id="nick-input" class="input" type="text" placeholder="YourNick">
+        </label>
+
+        <div id="auth-msg" class="muted"></div>
+
+        <div class="actions">
+          <button id="submit-auth" class="btn btn-primary">Log in</button>
+          <button id="toggle-auth" class="btn btn-ghost">Switch to Sign up</button>
+        </div>
       </div>
     </div>
-  </main>
-</div>
+  </div>
 
-<!-- AUTH MODAL -->
-<div id="auth-modal" class="modal hidden">
-  <div class="modal-card">
-    <div class="modal-head">
-      <h2>Account Access</h2>
-      <button id="auth-close" class="btn btn-ghost" type="button">Close</button>
-    </div>
-    <div class="hr"></div>
-    <p id="auth-msg" class="hint"></p>
-    <div class="grid-2">
-      <label class="field"><span>Email</span><input id="email-input" type="email" autocomplete="email"></label>
-      <label class="field"><span>Password</span><input id="pass-input" type="password" autocomplete="current-password"></label>
-    </div>
-    <div class="grid-2">
-      <label class="field"><span>Confirm</span><input id="pass-confirm" type="password" autocomplete="new-password"></label>
-      <label class="field"><span>Nickname</span><input id="nick-input" type="text" maxlength="20"></label>
-    </div>
-    <div class="btn-row">
-      <button id="submit-auth" class="btn btn-primary" type="button">Sign up</button>
-      <button id="toggle-auth" class="btn btn-ghost" type="button">Switch to Login</button>
+  <!-- PROFILE MODAL -->
+  <div id="profile-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-title">Profile</div>
+        <button id="profile-close" class="icon-btn" aria-label="close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="muted">UID</div>
+        <div id="profile-uid" class="mono"></div>
+
+        <div class="row2 mt12">
+          <label class="field">
+            <div class="label">Display name</div>
+            <input id="profile-name" class="input" type="text" placeholder="Player">
+          </label>
+
+          <label class="field">
+            <div class="label">Chess ELO</div>
+            <input id="profile-elo" class="input" type="number" min="0" step="1" placeholder="1000">
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="profile-save" class="btn btn-primary">Save</button>
+        </div>
+
+        <div id="profile-msg" class="muted"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<script type="module">
-  import { setActiveNav, startClock } from "./js/ui.js";
-  setActiveNav(); startClock();
-</script>
-<script type="module" src="./js/auth.js"></script>
-<script type="module">
-  import { initChat } from "./js/chat.js";
-  initChat();
-</script>
+  <script type="module" src="./script.js"></script>
 </body>
 </html>
