@@ -31,14 +31,15 @@ body{
 }
 
 .bg-sheen{
-  position:fixed; inset:0;
+  position:fixed;
+  inset:0;
   background:
     repeating-linear-gradient(90deg, rgba(255,255,255,.03) 0 1px, transparent 1px 64px),
     repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 64px);
-  pointer-events:none;
-  z-index:-1;
-  opacity:.5;
+  z-index:0;
+  pointer-events:none; /* ⬅️ КРИТИЧНО */
 }
+
 
 a{color:inherit}
 .hidden{display:none !important}
